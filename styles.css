@@ -1,188 +1,416 @@
+/* ============================================================
+   LIQUID GLASS — iOS 26 inspired
+   Translucent layered panels, dynamic ambient light, soft highlights.
+   ============================================================ */
+
 :root{
-  --bg-0:#06121a;
-  --bg-1:#0b1e2a;
-  --bg-2:#11283a;
-  --bg-3:#173a52;
-  --line:#234a66;
-  --line-2:#2c5d80;
-  --ink:#e9f5ff;
-  --ink-dim:#9bb6c8;
-  --accent:#3dd6c5;     /* aqua */
-  --accent-2:#7ad9ff;   /* light blue */
-  --warn:#f5a25a;
-  --good:#7ee08a;
-  --bad:#ff7174;
-  --shadow: 0 10px 30px rgba(0,0,0,.45);
-  --radius: 16px;
+  /* Underlying ambience (saturated, lush — the "wet" feel) */
+  --bg-0:#040a14;
+  --bg-1:#0a1626;
+  --bg-2:#0f2238;
+
+  /* Glass tokens */
+  --glass-fill:        rgba(255,255,255,.05);
+  --glass-fill-strong: rgba(255,255,255,.09);
+  --glass-stroke:      rgba(255,255,255,.14);
+  --glass-stroke-soft: rgba(255,255,255,.08);
+  --glass-highlight:   rgba(255,255,255,.35);
+  --glass-shadow:      0 18px 50px rgba(0,0,0,.55), 0 1px 0 rgba(255,255,255,.05) inset;
+  --glass-shadow-sm:   0 8px 24px rgba(0,0,0,.40), 0 1px 0 rgba(255,255,255,.06) inset;
+
+  /* Ink */
+  --ink:#f3faff;
+  --ink-dim:#a9c0d3;
+  --ink-soft:#7d96a8;
+
+  /* Accents */
+  --accent:#62e8d6;       /* aqua mint */
+  --accent-2:#7cc7ff;     /* electric blue */
+  --accent-3:#c39bff;     /* iris (for pops) */
+  --warn:#ffb37a;
+  --good:#7ff0a4;
+  --bad:#ff8a92;
+
+  --radius:22px;
+  --radius-sm:14px;
 }
 
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;background:var(--bg-0);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Inter,system-ui,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
 body{
   min-height:100vh;
   background:
-    radial-gradient(1100px 600px at 80% -10%, rgba(61,214,197,.10), transparent 60%),
-    radial-gradient(900px 500px at -10% 100%, rgba(122,217,255,.08), transparent 55%),
-    linear-gradient(180deg, #06121a 0%, #04090d 100%);
+    radial-gradient(60% 50% at 80% 0%,  rgba(98,232,214,.22), transparent 70%),
+    radial-gradient(55% 45% at 10% 100%, rgba(124,199,255,.18), transparent 70%),
+    radial-gradient(45% 60% at 50% 50%, rgba(195,155,255,.10), transparent 70%),
+    linear-gradient(180deg, var(--bg-0) 0%, #02060c 100%);
+  background-attachment: fixed;
+  overflow-x:hidden;
 }
-#app{max-width:780px;margin:0 auto;padding:max(12px,env(safe-area-inset-top)) 14px 96px;}
 
-/* topbar */
+/* Animated ambient light blobs behind everything */
+body::before, body::after{
+  content:"";position:fixed;inset:auto;pointer-events:none;z-index:-1;
+  border-radius:50%;
+  filter:blur(80px);
+  opacity:.55;
+  animation: drift 22s ease-in-out infinite alternate;
+}
+body::before{
+  width:520px;height:520px;
+  top:-120px;right:-100px;
+  background:radial-gradient(circle, rgba(98,232,214,.55), transparent 60%);
+}
+body::after{
+  width:600px;height:600px;
+  bottom:-200px;left:-150px;
+  background:radial-gradient(circle, rgba(124,199,255,.50), transparent 60%);
+  animation-delay:-8s;
+}
+@keyframes drift{
+  0%   {transform:translate(0,0)         scale(1)}
+  50%  {transform:translate(40px,-30px)  scale(1.08)}
+  100% {transform:translate(-30px,40px)  scale(.95)}
+}
+@media (prefers-reduced-motion: reduce){
+  body::before, body::after { animation: none }
+}
+
+#app{max-width:780px;margin:0 auto;padding:max(12px,env(safe-area-inset-top)) 14px 110px;}
+
+/* ============================================================
+   GLASS PRIMITIVE (mix-in via class)
+   ============================================================ */
+.glass{
+  position:relative;
+  background:var(--glass-fill);
+  border:1px solid var(--glass-stroke);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+          backdrop-filter: blur(28px) saturate(180%);
+  border-radius:var(--radius);
+  box-shadow:var(--glass-shadow);
+  overflow:hidden;
+}
+.glass::before{
+  /* top highlight sheen */
+  content:"";position:absolute;left:0;right:0;top:0;height:1px;
+  background:linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+  pointer-events:none;
+}
+.glass::after{
+  /* soft inner light from upper left */
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:
+    radial-gradient(120% 60% at 0% 0%, rgba(255,255,255,.08), transparent 55%),
+    radial-gradient(80% 50% at 100% 100%, rgba(0,0,0,.18), transparent 60%);
+}
+
+/* ============================================================
+   TOP BAR (sticky liquid header)
+   ============================================================ */
 .topbar{
-  display:flex;align-items:center;gap:6px;
-  padding:6px 4px 14px;
-  position:sticky;top:0;background:linear-gradient(180deg, rgba(6,18,26,.96), rgba(6,18,26,.6));
-  backdrop-filter:saturate(1.4) blur(12px);
-  z-index:5;
+  display:flex;align-items:center;gap:8px;
+  padding:10px 12px;
+  margin:-4px -4px 14px;
+  position:sticky;top:max(4px,env(safe-area-inset-top));
+  z-index:30;
+  background:rgba(10,22,38,.55);
+  border:1px solid var(--glass-stroke);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+          backdrop-filter: blur(32px) saturate(200%);
+  border-radius:24px;
+  box-shadow:var(--glass-shadow-sm);
+}
+.topbar::before{
+  content:"";position:absolute;left:12px;right:12px;top:0;height:1px;
+  background:linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+  pointer-events:none;
 }
 .topbar h1{
-  font-family:Fraunces,Georgia,serif;font-weight:900;letter-spacing:.2px;
-  font-size:22px;margin:0;
+  font-family:"SF Pro Display","SF Pro Text",-apple-system,Inter,system-ui,sans-serif;
+  font-weight:700;letter-spacing:-.5px;
+  font-size:20px;margin:0;
   flex:1;text-align:center;
   min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  background:linear-gradient(180deg, #ffffff 0%, #d6ecf8 100%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
 }
 .ghost-btn{
-  appearance:none;border:1px solid var(--line);background:rgba(255,255,255,.03);
-  color:var(--ink);width:38px;height:38px;border-radius:12px;font-size:18px;font-weight:700;
-  cursor:pointer;transition:.15s ease;
+  appearance:none;
+  border:1px solid var(--glass-stroke);
+  background:var(--glass-fill);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+          backdrop-filter:blur(20px) saturate(180%);
+  color:var(--ink);
+  width:40px;height:40px;border-radius:14px;
+  font-size:18px;font-weight:600;
+  cursor:pointer;transition: transform .15s cubic-bezier(.2,.8,.2,1), background .2s ease, border-color .2s ease;
+  box-shadow:var(--glass-shadow-sm);
+  display:flex;align-items:center;justify-content:center;
 }
-.ghost-btn:hover{border-color:var(--accent);color:var(--accent)}
+.ghost-btn:hover{background:var(--glass-fill-strong);border-color:rgba(255,255,255,.22)}
+.ghost-btn:active{transform:scale(.92)}
 .ghost-btn[hidden]{visibility:hidden}
 
-.footer{position:fixed;left:0;right:0;bottom:0;text-align:center;padding:10px 14px env(safe-area-inset-bottom);
-  background:linear-gradient(0deg, rgba(6,18,26,.95), rgba(6,18,26,.4));
-  color:var(--ink-dim);font-size:11px;border-top:1px solid rgba(255,255,255,.04);
-  backdrop-filter:blur(8px);
+/* ============================================================
+   FOOTER (floating liquid bar)
+   ============================================================ */
+.footer{
+  position:fixed;left:14px;right:14px;bottom:max(10px,env(safe-area-inset-bottom));
+  text-align:center;padding:10px 14px;
+  background:rgba(10,22,38,.55);
+  border:1px solid var(--glass-stroke);
+  -webkit-backdrop-filter:blur(28px) saturate(180%);
+          backdrop-filter:blur(28px) saturate(180%);
+  border-radius:20px;
+  color:var(--ink-dim);font-size:11.5px;font-weight:500;
+  box-shadow:var(--glass-shadow-sm);
+  max-width:760px;margin:0 auto;
 }
 
-/* tank grid */
-.grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:6px}
+/* ============================================================
+   TANK GRID — large glass cards
+   ============================================================ */
+.grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:8px}
 @media(min-width:560px){.grid{grid-template-columns:1fr 1fr}}
 
 .tank-card{
   position:relative;
   border-radius:var(--radius);
-  background:linear-gradient(160deg, var(--bg-1), var(--bg-2));
-  border:1px solid var(--line);
-  padding:16px 16px 14px;
-  box-shadow:var(--shadow);
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--glass-stroke);
+  -webkit-backdrop-filter:blur(28px) saturate(180%);
+          backdrop-filter:blur(28px) saturate(180%);
+  padding:18px 18px 16px;
+  box-shadow:var(--glass-shadow);
   cursor:pointer;
-  transition:.18s ease;
+  text-align:left;
+  color:var(--ink);
+  transition: transform .25s cubic-bezier(.2,.8,.2,1), background .25s ease, border-color .25s ease;
   overflow:hidden;
+  appearance:none;
 }
-.tank-card:hover{border-color:var(--accent);transform:translateY(-1px)}
 .tank-card::before{
-  content:"";position:absolute;right:-30%;top:-40%;width:80%;height:80%;
-  background:radial-gradient(closest-side, rgba(61,214,197,.10), transparent 70%);
+  content:"";position:absolute;left:0;right:0;top:0;height:1px;
+  background:linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
   pointer-events:none;
 }
-.tank-card{text-align:left;color:var(--ink)}
-.tank-card h3{position:relative;margin:0 0 4px;font-family:Fraunces,Georgia,serif;font-size:20px;font-weight:700;color:var(--ink)}
-.tank-card .meta{position:relative;color:var(--ink-dim);font-size:13px}
-.tank-card .pill-row{position:relative}
-.tank-card .pill-row{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px}
+.tank-card::after{
+  /* big iridescent blob inside the card */
+  content:"";position:absolute;right:-30%;top:-40%;width:90%;height:90%;
+  background:radial-gradient(closest-side, rgba(98,232,214,.22), transparent 70%);
+  pointer-events:none;
+  filter:blur(8px);
+}
+.tank-card:hover{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.24);transform:translateY(-2px)}
+.tank-card:active{transform:scale(.985)}
+.tank-card h3{position:relative;margin:0 0 4px;font-family:"SF Pro Display",-apple-system,Inter,sans-serif;font-size:22px;font-weight:700;letter-spacing:-.4px;color:var(--ink)}
+.tank-card .meta{position:relative;color:var(--ink-dim);font-size:13.5px;font-weight:500}
+.tank-card .pill-row{position:relative;margin-top:14px;display:flex;flex-wrap:wrap;gap:6px}
+
 .pill{
   display:inline-flex;align-items:center;gap:6px;
-  padding:4px 10px;border-radius:999px;
-  background:rgba(61,214,197,.08);border:1px solid rgba(61,214,197,.25);
-  color:var(--accent);font-size:12px;font-weight:600;
+  padding:5px 11px;border-radius:999px;
+  background:rgba(98,232,214,.14);
+  border:1px solid rgba(98,232,214,.35);
+  color:#a9f4e6;
+  font-size:12px;font-weight:600;
+  -webkit-backdrop-filter:blur(8px);
+          backdrop-filter:blur(8px);
 }
-.pill.alt{background:rgba(122,217,255,.06);border-color:rgba(122,217,255,.25);color:var(--accent-2)}
-.pill.gray{background:rgba(255,255,255,.04);border-color:var(--line);color:var(--ink-dim)}
+.pill.alt{background:rgba(124,199,255,.12);border-color:rgba(124,199,255,.32);color:#c4e3ff}
+.pill.gray{background:rgba(255,255,255,.06);border-color:var(--glass-stroke);color:var(--ink-dim)}
 
-/* tabs */
+/* ============================================================
+   TABS — segmented liquid control
+   ============================================================ */
 .tabs{
-  display:flex;gap:6px;margin:12px 0 16px;padding:4px;
-  border-radius:14px;background:rgba(255,255,255,.03);border:1px solid var(--line);
+  display:flex;gap:4px;margin:16px 0 18px;padding:4px;
+  border-radius:16px;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--glass-stroke);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+          backdrop-filter:blur(20px) saturate(180%);
   overflow-x:auto;
+  box-shadow:var(--glass-shadow-sm);
+  scrollbar-width:none;
 }
+.tabs::-webkit-scrollbar{display:none}
 .tab{
   flex:1;min-width:max-content;
   appearance:none;background:transparent;border:0;color:var(--ink-dim);
-  padding:10px 14px;font-weight:600;border-radius:10px;cursor:pointer;font-size:14px;
-  transition:.15s;
+  padding:10px 16px;font-weight:600;border-radius:12px;cursor:pointer;font-size:14px;
+  transition:.2s cubic-bezier(.2,.8,.2,1);
   white-space:nowrap;
+  font-family:inherit;
 }
-.tab.active{background:linear-gradient(180deg, rgba(61,214,197,.22), rgba(61,214,197,.10));color:var(--ink);border:1px solid rgba(61,214,197,.4)}
+.tab.active{
+  background:linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.08));
+  color:var(--ink);
+  border:1px solid var(--glass-stroke);
+  box-shadow:0 1px 0 rgba(255,255,255,.15) inset, 0 4px 12px rgba(0,0,0,.30);
+}
+.tab:active{transform:scale(.96)}
 
-/* sections / cards */
+/* ============================================================
+   SECTIONS — frosted cards
+   ============================================================ */
 .section{
-  background:linear-gradient(180deg, var(--bg-1), var(--bg-2));
-  border:1px solid var(--line);
+  position:relative;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--glass-stroke);
+  -webkit-backdrop-filter:blur(28px) saturate(180%);
+          backdrop-filter:blur(28px) saturate(180%);
   border-radius:var(--radius);
-  padding:16px;
-  margin-bottom:12px;
-  box-shadow:var(--shadow);
+  padding:18px;
+  margin-bottom:14px;
+  box-shadow:var(--glass-shadow);
+  overflow:hidden;
 }
-.section h2{margin:0 0 10px;font-family:Fraunces,Georgia,serif;font-size:18px;font-weight:700}
-.section h3{margin:14px 0 8px;font-size:14px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.7px;font-weight:700}
+.section::before{
+  content:"";position:absolute;left:0;right:0;top:0;height:1px;
+  background:linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+  pointer-events:none;
+}
+.section h2{
+  margin:0 0 12px;font-family:"SF Pro Display",-apple-system,Inter,sans-serif;
+  font-size:19px;font-weight:700;letter-spacing:-.3px;color:var(--ink);
+}
+.section h3{
+  margin:16px 0 10px;font-size:11px;color:var(--ink-soft);
+  text-transform:uppercase;letter-spacing:1px;font-weight:700;
+}
 
-.kv{display:grid;grid-template-columns:130px 1fr;gap:6px 12px;font-size:14px}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:8px 14px;font-size:14.5px}
 .kv b{color:var(--ink-dim);font-weight:500}
 
-/* fish list */
+/* ============================================================
+   FISH LIST — liquid rows
+   ============================================================ */
 .fish-list{display:flex;flex-direction:column;gap:8px}
 .fish-row{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 12px;border-radius:12px;
-  background:rgba(255,255,255,.03);border:1px solid var(--line);
+  display:flex;align-items:center;gap:12px;
+  padding:12px 14px;border-radius:14px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--glass-stroke-soft);
+  -webkit-backdrop-filter:blur(12px);
+          backdrop-filter:blur(12px);
+  transition:.15s ease;
 }
+.fish-row:hover{background:rgba(255,255,255,.06)}
 .fish-row .count{
-  min-width:34px;height:34px;border-radius:10px;
+  min-width:38px;height:38px;border-radius:12px;
   display:flex;align-items:center;justify-content:center;
-  background:rgba(61,214,197,.12);border:1px solid rgba(61,214,197,.35);
-  color:var(--accent);font-weight:800;
+  background:linear-gradient(180deg, rgba(98,232,214,.25), rgba(98,232,214,.10));
+  border:1px solid rgba(98,232,214,.45);
+  color:#b8f7ec;font-weight:800;font-size:14px;
+  box-shadow:0 1px 0 rgba(255,255,255,.15) inset;
 }
-.fish-row .species{font-weight:600}
-.fish-row .pet-name{color:var(--ink-dim);font-size:13px;margin-left:6px}
+.fish-row .species{font-weight:600;color:var(--ink)}
+.fish-row .pet-name{color:var(--ink-dim);font-size:13px;margin-left:6px;font-weight:500}
 .fish-row .spacer{flex:1}
 .fish-row .row-actions{display:flex;gap:6px}
 
-/* inputs */
+/* ============================================================
+   INPUTS — frosted fields
+   ============================================================ */
 .input, .select{
   width:100%;
-  background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--ink);
-  padding:11px 12px;border-radius:12px;font-size:15px;font-family:inherit;
-  outline:none;transition:.15s;
+  background:rgba(255,255,255,.06);
+  border:1px solid var(--glass-stroke);
+  color:var(--ink);
+  padding:12px 14px;border-radius:14px;font-size:15px;font-family:inherit;
+  outline:none;transition:.18s ease;
+  -webkit-backdrop-filter:blur(12px);
+          backdrop-filter:blur(12px);
+  box-shadow:0 1px 0 rgba(255,255,255,.06) inset;
 }
-.input:focus, .select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(61,214,197,.15)}
-label.field{display:block;margin-bottom:10px}
-label.field span{display:block;font-size:12px;color:var(--ink-dim);margin-bottom:5px;text-transform:uppercase;letter-spacing:.6px;font-weight:700}
+.input:focus, .select:focus{
+  border-color:rgba(98,232,214,.6);
+  background:rgba(255,255,255,.09);
+  box-shadow:0 0 0 4px rgba(98,232,214,.18), 0 1px 0 rgba(255,255,255,.08) inset;
+}
+.input::placeholder{color:var(--ink-soft)}
+label.field{display:block;margin-bottom:12px}
+label.field span{display:block;font-size:11px;color:var(--ink-soft);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;font-weight:700}
 
 .row{display:flex;gap:10px;flex-wrap:wrap}
 .row > *{flex:1;min-width:140px}
 
+/* ============================================================
+   BUTTONS — accent / secondary / danger (all glassy)
+   ============================================================ */
 .btn{
-  appearance:none;border:0;cursor:pointer;
-  padding:11px 14px;border-radius:12px;font-weight:700;font-size:14px;font-family:inherit;
-  background:linear-gradient(180deg, rgba(61,214,197,.30), rgba(61,214,197,.15));
-  color:#03161b;border:1px solid rgba(61,214,197,.55);
-  transition:.15s ease;
+  position:relative;
+  appearance:none;border:0;cursor:pointer;font-family:inherit;
+  padding:12px 16px;border-radius:14px;font-weight:700;font-size:14.5px;
+  background:linear-gradient(180deg, rgba(98,232,214,.50), rgba(98,232,214,.25));
+  color:#03161b;
+  border:1px solid rgba(98,232,214,.65);
+  box-shadow:0 1px 0 rgba(255,255,255,.30) inset, 0 8px 22px rgba(98,232,214,.20);
+  transition:.18s cubic-bezier(.2,.8,.2,1);
+  letter-spacing:-.1px;
 }
-.btn:hover{filter:brightness(1.1)}
-.btn.secondary{background:rgba(255,255,255,.04);border:1px solid var(--line);color:var(--ink)}
-.btn.danger{background:rgba(255,113,116,.12);border:1px solid rgba(255,113,116,.45);color:#ffd0d2}
-.btn.small{padding:6px 10px;font-size:13px;border-radius:9px}
+.btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.btn:active{transform:scale(.97)}
+.btn.secondary{
+  background:rgba(255,255,255,.07);
+  border:1px solid var(--glass-stroke);
+  color:var(--ink);
+  -webkit-backdrop-filter:blur(12px);
+          backdrop-filter:blur(12px);
+  box-shadow:var(--glass-shadow-sm);
+}
+.btn.danger{
+  background:linear-gradient(180deg, rgba(255,138,146,.30), rgba(255,138,146,.15));
+  border:1px solid rgba(255,138,146,.55);
+  color:#ffd0d4;
+  box-shadow:0 1px 0 rgba(255,255,255,.10) inset;
+}
+.btn.small{padding:7px 12px;font-size:13px;border-radius:11px}
 .btn.block{width:100%}
 
-/* dosing result */
-.dose-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:6px}
+/* ============================================================
+   DOSING CARDS — liquid jewels
+   ============================================================ */
+.dose-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-top:6px}
 @media(min-width:520px){.dose-grid{grid-template-columns:1fr 1fr 1fr}}
 .dose-card{
-  border:1px solid var(--line);
-  background:linear-gradient(160deg, rgba(61,214,197,.06), rgba(122,217,255,.04));
-  border-radius:14px;padding:14px;
+  position:relative;
+  border:1px solid var(--glass-stroke);
+  background:linear-gradient(160deg, rgba(98,232,214,.12), rgba(124,199,255,.06));
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+          backdrop-filter:blur(20px) saturate(180%);
+  border-radius:18px;padding:16px;
+  box-shadow:var(--glass-shadow-sm);
+  overflow:hidden;
 }
-.dose-card .label{font-size:12px;text-transform:uppercase;letter-spacing:.7px;color:var(--ink-dim);font-weight:700}
-.dose-card .big{font-family:Fraunces,Georgia,serif;font-size:30px;font-weight:900;margin-top:4px;color:var(--ink)}
-.dose-card .big .unit{font-size:14px;font-weight:600;color:var(--ink-dim);margin-left:4px}
-.dose-card .sub{margin-top:4px;font-size:12px;color:var(--ink-dim)}
+.dose-card::before{
+  content:"";position:absolute;left:0;right:0;top:0;height:1px;
+  background:linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+  pointer-events:none;
+}
+.dose-card .label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-soft);font-weight:700}
+.dose-card .big{
+  font-family:"SF Pro Display",-apple-system,Inter,sans-serif;
+  font-size:34px;font-weight:800;margin-top:4px;color:var(--ink);
+  letter-spacing:-1px;
+  background:linear-gradient(180deg, #ffffff 0%, #c8e8f5 100%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.dose-card .big .unit{font-size:14px;font-weight:600;color:var(--ink-dim);margin-left:4px;-webkit-text-fill-color:var(--ink-dim)}
+.dose-card .sub{margin-top:4px;font-size:12.5px;color:var(--ink-dim)}
 
-/* history */
+/* ============================================================
+   HISTORY rows
+   ============================================================ */
 .history-row{
   display:flex;justify-content:space-between;gap:10px;
-  padding:10px 12px;border-radius:12px;
-  background:rgba(255,255,255,.03);border:1px solid var(--line);
+  padding:12px 14px;border-radius:14px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--glass-stroke-soft);
   font-size:13px;
 }
 .history-row .when{color:var(--ink-dim)}
@@ -193,104 +421,151 @@ label.field span{display:block;font-size:12px;color:var(--ink-dim);margin-bottom
 .center{text-align:center}
 .spacer-12{height:12px}
 .danger-text{color:var(--bad);font-weight:600}
-.hr{height:1px;background:var(--line);margin:14px 0}
+.hr{height:1px;background:linear-gradient(90deg, transparent, var(--glass-stroke), transparent);margin:16px 0}
 
-/* modal */
+/* ============================================================
+   MODAL — liquid sheet (iOS bottom sheet)
+   ============================================================ */
 .modal-backdrop{
-  position:fixed;inset:0;background:rgba(2,8,12,.7);
+  position:fixed;inset:0;
+  background:rgba(2,8,14,.55);
+  -webkit-backdrop-filter:blur(20px);
+          backdrop-filter:blur(20px);
   display:flex;align-items:flex-end;justify-content:center;z-index:50;
   padding:0;
-  backdrop-filter:blur(4px);
+  animation: fade-in .25s ease;
 }
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
 @media(min-width:560px){.modal-backdrop{align-items:center;padding:20px}}
 .modal{
-  background:linear-gradient(180deg, var(--bg-2), var(--bg-1));
-  border:1px solid var(--line);
-  border-radius:18px 18px 0 0;
+  background:rgba(20,32,48,.75);
+  border:1px solid var(--glass-stroke);
+  -webkit-backdrop-filter:blur(40px) saturate(200%);
+          backdrop-filter:blur(40px) saturate(200%);
+  border-radius:28px 28px 0 0;
   width:100%;max-width:560px;max-height:90vh;overflow:auto;
-  padding:18px 16px env(safe-area-inset-bottom);
-  box-shadow:var(--shadow);
+  padding:24px 18px env(safe-area-inset-bottom);
+  box-shadow:0 -20px 60px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.10) inset;
+  position:relative;
+  animation: sheet-up .3s cubic-bezier(.2,.9,.25,1);
 }
-@media(min-width:560px){.modal{border-radius:18px}}
-.modal h3{margin:0 0 12px;font-family:Fraunces,Georgia,serif;font-size:20px}
+@keyframes sheet-up{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+@media(min-width:560px){.modal{border-radius:28px}}
+.modal::before{
+  content:"";position:absolute;top:8px;left:50%;transform:translateX(-50%);
+  width:38px;height:5px;border-radius:3px;
+  background:rgba(255,255,255,.20);
+}
+.modal h3{margin:6px 0 14px;font-family:"SF Pro Display",-apple-system,Inter,sans-serif;font-size:22px;font-weight:700;letter-spacing:-.4px}
 
-/* reading color chips inside KV and inline rows */
-.reading{font-weight:700;padding:2px 8px;border-radius:999px;border:1px solid transparent}
-.reading-good{color:var(--good);background:rgba(126,224,138,.10);border-color:rgba(126,224,138,.35)}
-.reading-warn{color:var(--warn);background:rgba(245,162,90,.10);border-color:rgba(245,162,90,.35)}
-.reading-bad {color:var(--bad); background:rgba(255,113,116,.10);border-color:rgba(255,113,116,.40)}
-.reading-unknown{color:var(--ink-dim);background:rgba(255,255,255,.04);border-color:var(--line)}
+/* ============================================================
+   READING CHIPS (water test results)
+   ============================================================ */
+.reading{font-weight:700;padding:3px 10px;border-radius:999px;border:1px solid transparent;font-size:13px}
+.reading-good   {color:var(--good);background:rgba(127,240,164,.14);border-color:rgba(127,240,164,.40)}
+.reading-warn   {color:var(--warn);background:rgba(255,179,122,.14);border-color:rgba(255,179,122,.40)}
+.reading-bad    {color:var(--bad); background:rgba(255,138,146,.14);border-color:rgba(255,138,146,.45)}
+.reading-unknown{color:var(--ink-dim);background:rgba(255,255,255,.05);border-color:var(--glass-stroke)}
 
 /* filter chip row (history) */
 .filter-row{display:flex;flex-wrap:wrap;gap:6px}
 .chip{
   appearance:none;cursor:pointer;font-family:inherit;
-  background:rgba(255,255,255,.03);border:1px solid var(--line);color:var(--ink-dim);
-  padding:6px 12px;border-radius:999px;font-size:12px;font-weight:600;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--glass-stroke);
+  color:var(--ink-dim);
+  padding:7px 14px;border-radius:999px;font-size:12.5px;font-weight:600;
+  transition:.15s;
+  -webkit-backdrop-filter:blur(8px);
+          backdrop-filter:blur(8px);
+}
+.chip:hover{border-color:rgba(255,255,255,.25);color:var(--ink)}
+.chip.active{
+  background:linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.08));
+  color:var(--ink);
+  border-color:var(--glass-stroke);
+  box-shadow:0 1px 0 rgba(255,255,255,.15) inset;
+}
+
+/* ============================================================
+   EVENT TIMELINE
+   ============================================================ */
+.event-row{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:12px 14px;border-radius:14px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--glass-stroke-soft);
+  -webkit-backdrop-filter:blur(12px);
+          backdrop-filter:blur(12px);
   transition:.15s;
 }
-.chip:hover{border-color:var(--accent);color:var(--ink)}
-.chip.active{background:linear-gradient(180deg, rgba(61,214,197,.22), rgba(61,214,197,.10));color:var(--ink);border-color:rgba(61,214,197,.55)}
-
-/* event timeline rows */
-.event-row{
-  display:flex;align-items:flex-start;gap:10px;
-  padding:10px 12px;border-radius:12px;
-  background:rgba(255,255,255,.03);border:1px solid var(--line);
-}
+.event-row:hover{background:rgba(255,255,255,.06)}
 .event-icon{
   flex:0 0 auto;
-  width:34px;height:34px;border-radius:10px;
+  width:38px;height:38px;border-radius:12px;
   display:flex;align-items:center;justify-content:center;
-  background:rgba(122,217,255,.10);border:1px solid rgba(122,217,255,.30);
-  font-size:16px;
+  background:rgba(124,199,255,.14);
+  border:1px solid rgba(124,199,255,.35);
+  box-shadow:0 1px 0 rgba(255,255,255,.10) inset;
+  font-size:17px;
 }
-.event-icon.water_change{background:rgba(122,217,255,.12);border-color:rgba(122,217,255,.40)}
-.event-icon.water_test{background:rgba(61,214,197,.14);border-color:rgba(61,214,197,.40)}
-.event-icon.fish_add{background:rgba(126,224,138,.14);border-color:rgba(126,224,138,.40)}
-.event-icon.fish_remove{background:rgba(255,113,116,.10);border-color:rgba(255,113,116,.35)}
-.event-icon.fish_edit{background:rgba(255,255,255,.05);border-color:var(--line)}
-.event-icon.tank_edit{background:rgba(255,255,255,.05);border-color:var(--line)}
+.event-icon.water_change{background:rgba(124,199,255,.16);border-color:rgba(124,199,255,.45)}
+.event-icon.water_test  {background:rgba(98,232,214,.16);border-color:rgba(98,232,214,.45)}
+.event-icon.fish_add    {background:rgba(127,240,164,.16);border-color:rgba(127,240,164,.45)}
+.event-icon.fish_remove {background:rgba(255,138,146,.14);border-color:rgba(255,138,146,.40)}
+.event-icon.fish_edit   {background:rgba(255,255,255,.06);border-color:var(--glass-stroke)}
+.event-icon.tank_edit   {background:rgba(195,155,255,.14);border-color:rgba(195,155,255,.40)}
 .event-body{flex:1;min-width:0}
-.event-title{font-weight:700;font-size:14px;color:var(--ink)}
-.event-when{font-size:12px;color:var(--ink-dim);margin-top:2px}
-.event-detail{font-size:12.5px;color:var(--ink-dim);margin-top:6px;line-height:1.5;word-break:break-word}
+.event-title{font-weight:700;font-size:14.5px;color:var(--ink);letter-spacing:-.2px}
+.event-when{font-size:12px;color:var(--ink-dim);margin-top:2px;font-weight:500}
+.event-detail{font-size:13px;color:var(--ink-dim);margin-top:6px;line-height:1.55;word-break:break-word}
 .event-detail b{color:var(--ink);font-weight:600}
 
-/* storage warning banner */
+/* ============================================================
+   STORAGE BANNER (cloud sync status)
+   ============================================================ */
 #storage-banner{
-  margin:6px 0 12px;
-  padding:12px 14px;
-  border-radius:14px;
-  background:linear-gradient(160deg, rgba(255,113,116,.18), rgba(245,162,90,.10));
-  border:1px solid rgba(255,113,116,.5);
+  margin:6px 0 14px;
+  padding:13px 16px;
+  border-radius:16px;
+  background:linear-gradient(160deg, rgba(255,138,146,.20), rgba(255,179,122,.10));
+  border:1px solid rgba(255,138,146,.45);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+          backdrop-filter:blur(20px) saturate(180%);
   color:#ffd9da;font-size:13.5px;line-height:1.5;
+  box-shadow:var(--glass-shadow-sm);
 }
 #storage-banner b{color:#fff}
 #storage-banner .row{margin-top:8px;gap:6px}
 #storage-banner.ok{
-  background:linear-gradient(160deg, rgba(102,255,178,.12), rgba(102,200,255,.08));
-  border:1px solid rgba(102,255,178,.35);
-  color:#c8ffe2;
+  background:linear-gradient(160deg, rgba(98,232,214,.18), rgba(124,199,255,.10));
+  border:1px solid rgba(98,232,214,.40);
+  color:#c8fff0;
 }
 #storage-banner.warn{
-  background:linear-gradient(160deg, rgba(255,200,90,.18), rgba(245,162,90,.10));
-  border:1px solid rgba(255,200,90,.5);
+  background:linear-gradient(160deg, rgba(255,179,122,.18), rgba(255,138,146,.10));
+  border:1px solid rgba(255,179,122,.50);
   color:#ffe7b8;
 }
 #storage-banner .row .btn{flex:0 0 auto}
 
-/* backup modal blocks */
+/* ============================================================
+   BACKUP MODAL BLOCKS
+   ============================================================ */
 .backup-block{
-  border:1px solid var(--line);
-  background:rgba(255,255,255,.03);
-  border-radius:12px;padding:12px;margin-bottom:10px;
+  border:1px solid var(--glass-stroke);
+  background:rgba(255,255,255,.04);
+  border-radius:14px;padding:14px;margin-bottom:10px;
+  -webkit-backdrop-filter:blur(12px);
+          backdrop-filter:blur(12px);
 }
-.backup-block h4{margin:0 0 6px;font-size:14px;color:var(--ink);font-weight:700}
+.backup-block h4{margin:0 0 6px;font-size:14.5px;color:var(--ink);font-weight:700;letter-spacing:-.2px}
 .backup-block p{margin:0 0 10px;font-size:13px;color:var(--ink-dim);line-height:1.5}
 .backup-status{font-size:12.5px;margin-top:8px}
 .backup-status.ok{color:var(--good)}
 .backup-status.bad{color:var(--bad)}
 
-/* tweaks */
-button:focus-visible, .tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* focus rings */
+button:focus-visible, .tab:focus-visible, .chip:focus-visible{
+  outline:2px solid var(--accent);outline-offset:2px;
+}
