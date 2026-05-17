@@ -568,3 +568,73 @@ label.field span{display:block;font-size:11px;color:var(--sakura);margin-bottom:
 button:focus-visible, .tab:focus-visible, .chip:focus-visible{
   outline:2px solid var(--sakura);outline-offset:2px;
 }
+
+/* ============================================================
+   ADVISOR BANNER — sits above tabs on tank detail screen
+   ============================================================ */
+.advisor-banner{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  padding:14px 16px;
+  margin:0 0 12px;
+  border-radius:14px;
+  background:var(--glass-fill-strong);
+  border:1px solid var(--glass-stroke);
+  box-shadow:var(--glass-shadow-sm);
+  position:relative;
+  overflow:hidden;
+}
+.advisor-banner::before{
+  content:"";
+  position:absolute;
+  left:0; top:0; bottom:0;
+  width:4px;
+  background:var(--sakura);
+}
+.advisor-banner.urgent::before{ background:var(--bad) }
+.advisor-banner.urgent{ border-color:rgba(255,122,138,.35) }
+.advisor-banner.soon::before{ background:var(--warn) }
+.advisor-banner.soon{ border-color:rgba(245,181,107,.30) }
+.advisor-banner.fyi::before{ background:var(--sakura) }
+.advisor-banner.fyi{ border-color:rgba(255,155,190,.25) }
+.adv-icon{
+  font-size:22px;
+  line-height:1;
+  flex-shrink:0;
+  padding-top:1px;
+}
+.adv-body{ flex:1; min-width:0 }
+.adv-title{
+  font-weight:700;
+  font-size:14.5px;
+  color:var(--ink);
+  margin-bottom:4px;
+  letter-spacing:.1px;
+}
+.advisor-banner.urgent .adv-title{ color:var(--bad) }
+.advisor-banner.soon .adv-title{ color:var(--warn) }
+.advisor-banner.fyi .adv-title{ color:var(--sakura) }
+.adv-text{
+  font-size:13px;
+  color:var(--ink-dim);
+  line-height:1.5;
+}
+.adv-dismiss{
+  background:transparent;
+  border:none;
+  color:var(--ink-dim);
+  font-size:16px;
+  cursor:pointer;
+  padding:2px 6px;
+  border-radius:6px;
+  flex-shrink:0;
+  line-height:1;
+}
+.adv-dismiss:hover{ background:rgba(255,200,215,.10); color:var(--ink) }
+
+/* history row advisor severity colors */
+.event-icon.advisor{ background:rgba(255,155,190,.16) }
+.sev-urgent{ color:var(--bad) }
+.sev-soon{ color:var(--warn) }
+.sev-fyi{ color:var(--sakura) }

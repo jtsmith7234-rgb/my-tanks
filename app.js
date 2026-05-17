@@ -73,6 +73,7 @@ function restoreFromText(text){
   tanks  = data.tanks;
   events = data.events  || {};
   logs   = data.legacyLogs || {};
+  window.events = events;
   saveTanks(tanks);
   saveEvents(events);
   saveLogs(logs);
@@ -106,6 +107,7 @@ let tanks  = loadTanks();
 let logs   = loadLogs();   // legacy
 let events = loadEvents(); // { [tankId]: [event, ...] }  newest first
 let view   = { screen: "home", tankId: null, tab: "details" };
+window.events = events; // expose for advisor.js
 
 /* One-time migration: pull legacy water-change logs into events */
 function migrateLogs(){
@@ -145,11 +147,13 @@ function logEvent(tankId, type, data){
   events[tankId] = events[tankId] || [];
   events[tankId].unshift({ id: uid(), ts: Date.now(), type, data: data || {} });
   saveEvents(events);
+  window.events = events;
 }
 function deleteEvent(tankId, eventId){
   if(!events[tankId]) return;
   events[tankId] = events[tankId].filter(e => e.id !== eventId);
   saveEvents(events);
+  window.events = events;
 }
 function tankEvents(tankId){ return events[tankId] || []; }
 function lastEventOfType(tankId, type){
@@ -257,10 +261,35 @@ function renderHome(){
     tanks  = loadTanks();
     logs   = {};
     events = {};
+    window.events = events;
     saveTanks(tanks);
     toast("Reset complete");
     render();
   });
+}
+
+function renderAdvisorBanner(t){
+  // Get top recommendation and log if new (history persistence)
+  if (!window.ADVISOR) return "";
+  let adv = null;
+  try {
+    adv = window.ADVISOR.computeAdvice(t);
+    if (adv) window.ADVISOR.logAdviceIfNew(t, adv);
+  } catch (err) { console.warn("advisor error", err); return ""; }
+  if (!adv) return "";
+  // Suppress if user dismissed this exact signature this session
+  const sig = (adv.title + " | " + adv.rule);
+  if (window._advisorDismissed && window._advisorDismissed[t.id] === sig) return "";
+  return `
+    <div class="advisor-banner ${adv.sev}" data-sig="${escapeHTML(sig)}">
+      <div class="adv-icon">${adv.sev === "urgent" ? "\u26a0\ufe0f" : adv.sev === "soon" ? "\ud83d\udd14" : "\ud83c\udf38"}</div>
+      <div class="adv-body">
+        <div class="adv-title">${escapeHTML(adv.title)}</div>
+        <div class="adv-text">${escapeHTML(adv.body)}</div>
+      </div>
+      <button class="adv-dismiss" id="adv-dismiss" aria-label="Dismiss">\u2715</button>
+    </div>
+  `;
 }
 
 function renderTank(){
@@ -269,6 +298,7 @@ function renderTank(){
 
   const main = $("#main");
   main.innerHTML = `
+    ${renderAdvisorBanner(t)}
     <div class="tabs" role="tablist">
       <button class="tab ${view.tab==='details'?'active':''}" data-tab="details">Details</button>
       <button class="tab ${view.tab==='fish'?'active':''}" data-tab="fish">Fish</button>
@@ -294,6 +324,19 @@ function renderTank(){
   if(view.tab === "clean")   bindClean(t);
   if(view.tab === "tests")   bindTests(t);
   if(view.tab === "history") bindHistory(t);
+
+  // Wire up advisor dismiss button
+  const dismiss = $("#adv-dismiss");
+  if (dismiss){
+    dismiss.addEventListener("click", () => {
+      const banner = dismiss.closest(".advisor-banner");
+      if (!banner) return;
+      const sig = banner.getAttribute("data-sig") || "";
+      window._advisorDismissed = window._advisorDismissed || {};
+      window._advisorDismissed[t.id] = sig;
+      banner.remove();
+    });
+  }
 }
 
 /* ============================================================
@@ -672,7 +715,8 @@ const HISTORY_FILTERS = [
   { id: "water_change", label: "Water changes" },
   { id: "water_test",   label: "Water tests"   },
   { id: "fish",         label: "Fish"          },
-  { id: "tank_edit",    label: "Tank edits"    }
+  { id: "tank_edit",    label: "Tank edits"    },
+  { id: "advisor",      label: "Advisor"       }
 ];
 let historyFilter = "all";
 
@@ -729,6 +773,7 @@ function eventIcon(type){
   if (type === "fish_remove")  return "✖";
   if (type === "fish_edit")    return "✏️";
   if (type === "tank_edit")    return "🔧";
+  if (type === "advisor")      return "🌸";
   return "•";
 }
 function eventTitle(e){
@@ -739,6 +784,7 @@ function eventTitle(e){
   if (e.type === "fish_remove")  return `Removed ${d.count}× ${escapeHTML(d.species)}${d.name?` (“${escapeHTML(d.name)}”)`:""}`;
   if (e.type === "fish_edit")    return `Edited ${escapeHTML(d.species)}${d.name?` (“${escapeHTML(d.name)}”)`:""}`;
   if (e.type === "tank_edit")    return `Tank details updated`;
+  if (e.type === "advisor")      return escapeHTML(d.title || "Advisor");
   return e.type;
 }
 function eventDetail(e){
@@ -758,6 +804,10 @@ function eventDetail(e){
   if (e.type === "fish_edit" || e.type === "tank_edit") {
     const changes = d.changes || {};
     return Object.keys(changes).map(k => `<b>${escapeHTML(k)}</b>: ${escapeHTML(String(changes[k].from ?? "—"))} → ${escapeHTML(String(changes[k].to ?? "—"))}`).join(" · ");
+  }
+  if (e.type === "advisor") {
+    const sevLabel = d.sev === "urgent" ? "Urgent" : d.sev === "soon" ? "Soon" : "FYI";
+    return `<b class="sev-${escapeHTML(d.sev || "fyi")}">${sevLabel}</b> · ${escapeHTML(d.body || "")}<br><span class="muted">Triggered by: ${escapeHTML(d.rule || "")}</span>`;
   }
   return "";
 }
@@ -860,7 +910,7 @@ async function hydrateFromCloud(){
     const all = await window.CLOUD.loadAll();
     // Cloud wins over local on boot. Only adopt cloud values that exist.
     if (all[KEY_TANKS])  { _mem[KEY_TANKS]  = JSON.stringify(all[KEY_TANKS]);  tanks  = all[KEY_TANKS]; }
-    if (all[KEY_EVENTS]) { _mem[KEY_EVENTS] = JSON.stringify(all[KEY_EVENTS]); events = all[KEY_EVENTS]; }
+    if (all[KEY_EVENTS]) { _mem[KEY_EVENTS] = JSON.stringify(all[KEY_EVENTS]); events = all[KEY_EVENTS]; window.events = events; }
     if (all[KEY_LOGS])   { _mem[KEY_LOGS]   = JSON.stringify(all[KEY_LOGS]);   logs   = all[KEY_LOGS]; }
     // Mirror to localStorage too if it works
     try {
