@@ -1,10 +1,20 @@
 /* ============================================================
-   KOI POND — Japanese sumi-e theme
-   Midnight pond background with koi + cherry blossoms, sakura pink
-   accents, washi-paper glass panels, ink-wash textures.
+   THEMES
+   Two themes ship with the app, toggled via data-theme on <html>:
+     data-theme="koi"      — Original Japanese sumi-e / koi pond look
+     data-theme="aquarium" — Modern clean aquarium (default)
+   Switch in JS by setting document.documentElement.dataset.theme
    ============================================================ */
 
 :root{
+  /* Shared layout tokens (theme-agnostic) */
+  --radius:22px;
+  --radius-sm:14px;
+  --font-body: -apple-system, "SF Pro Text", system-ui, "Inter", "Segoe UI", Roboto, sans-serif;
+}
+
+/* ---------- THEME: JAPANESE KOI (original, preserved) ---------- */
+html[data-theme="koi"]{
   /* Base / pond */
   --pond-0: #050810;
   --pond-1: #0a0f1a;
@@ -20,66 +30,117 @@
   --glass-shadow-sm:   0 8px 24px rgba(0,0,0,.45), 0 1px 0 rgba(255,255,255,.06) inset;
 
   /* Ink */
-  --ink:#fbeef0;          /* warm white */
-  --ink-dim:#d4b8c0;      /* dusty rose */
-  --ink-soft:#9a8088;     /* muted plum */
+  --ink:#fbeef0;
+  --ink-dim:#d4b8c0;
+  --ink-soft:#9a8088;
 
   /* Accents */
-  --sakura:      #ff9bbe; /* cherry blossom pink */
+  --sakura:      #ff9bbe;
   --sakura-soft: #ffc6d8;
   --sakura-deep: #d65f8a;
-  --koi:         #ff7a4a; /* koi orange-red */
+  --koi:         #ff7a4a;
   --koi-soft:    #ffae87;
-  --gold:        #e8c878; /* lantern gold accent */
-  --jade:        #7fc9a8; /* good readings */
-  --warn:        #f5b56b; /* warm amber */
-  --bad:         #ff7a8a; /* warning red-pink */
+  --gold:        #e8c878;
+  --jade:        #7fc9a8;
+  --warn:        #f5b56b;
+  --bad:         #ff7a8a;
 
-  --radius:22px;
-  --radius-sm:14px;
-
-  /* Calligraphy fonts */
+  /* Display font: Japanese calligraphy */
   --font-display: "Noto Serif JP", "Hiragino Mincho ProN", "YuMincho", "Yu Mincho", "Georgia", serif;
-  --font-body:    -apple-system, "SF Pro Text", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
 }
-
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;padding:0;color:var(--ink);font-family:var(--font-body);-webkit-font-smoothing:antialiased}
-
-/* The koi pond background — fixed, full-bleed, with a darker overlay so text stays readable */
-body{
+html[data-theme="koi"] body{
   min-height:100vh;
   background:
-    /* Vignette + readability overlay on top of the image */
     linear-gradient(180deg, rgba(5,8,16,.55) 0%, rgba(5,8,16,.35) 35%, rgba(5,8,16,.55) 75%, rgba(5,8,16,.85) 100%),
     url("bg-koi.png") center top / cover no-repeat fixed,
-    /* Fallback if image is slow to load */
     linear-gradient(180deg, var(--pond-0) 0%, #02040a 100%);
   background-attachment: fixed, fixed, fixed;
-  overflow-x:hidden;
 }
-
-/* Drifting petals layer — small CSS-only animation across the screen */
-.petals{
-  position:fixed;inset:0;pointer-events:none;z-index:-1;overflow:hidden;
-}
-.petal{
-  position:absolute;top:-10vh;
+html[data-theme="koi"] .petal{
   width:14px;height:14px;
   background: radial-gradient(ellipse at 50% 40%, #ffd6e2 0%, #ff9bbe 70%, rgba(255,155,190,.4) 100%);
   border-radius: 60% 0% 60% 0%;
   opacity:.75;
   filter: drop-shadow(0 0 4px rgba(255,155,190,.4));
   animation: petal-fall linear infinite;
-  transform: rotate(0deg);
 }
-.petal.p2{ width:11px;height:11px;opacity:.6 }
-.petal.p3{ width:18px;height:18px;opacity:.85 }
+html[data-theme="koi"] .petal.p2{ width:11px;height:11px;opacity:.6 }
+html[data-theme="koi"] .petal.p3{ width:18px;height:18px;opacity:.85 }
 @keyframes petal-fall{
   0%   { transform: translate(0, -10vh) rotate(0deg); opacity:0 }
   10%  { opacity:.8 }
   100% { transform: translate(15vw, 110vh) rotate(540deg); opacity:.2 }
 }
+
+/* ---------- THEME: CLEAN AQUARIUM (new default) ---------- */
+html[data-theme="aquarium"]{
+  /* Base / water */
+  --pond-0: #e9f7fb;   /* soft sky */
+  --pond-1: #b6e3ee;   /* mid water */
+  --pond-2: #2b6f8a;   /* deep teal */
+
+  /* Glass (bright frosted) */
+  --glass-fill:        rgba(255,255,255,.42);
+  --glass-fill-strong: rgba(255,255,255,.60);
+  --glass-stroke:      rgba(255,255,255,.55);
+  --glass-stroke-soft: rgba(255,255,255,.28);
+  --glass-highlight:   rgba(255,255,255,.85);
+  --glass-shadow:      0 16px 40px rgba(20, 60, 90, .18), 0 1px 0 rgba(255,255,255,.85) inset;
+  --glass-shadow-sm:   0 6px 18px rgba(20, 60, 90, .14), 0 1px 0 rgba(255,255,255,.85) inset;
+
+  /* Ink (dark text on bright bg) */
+  --ink:      #0d2a3a;   /* deep teal text */
+  --ink-dim:  #2f5566;
+  --ink-soft: #6b8896;
+
+  /* Accents — keep orange as brand action color, add teal-aqua family */
+  --sakura:      #19a2c2;   /* aqua / informational */
+  --sakura-soft: #66cee0;
+  --sakura-deep: #0d7a93;
+  --koi:         #ff7a4a;   /* orange stays */
+  --koi-soft:    #ffae87;
+  --gold:        #f4b740;
+  --jade:        #2bb673;
+  --warn:        #e89422;
+  --bad:         #e0455c;
+
+  /* Display font: clean modern sans (system) */
+  --font-display: -apple-system, "SF Pro Display", system-ui, "Inter", "Segoe UI", Roboto, sans-serif;
+}
+html[data-theme="aquarium"] body{
+  min-height:100vh;
+  background:
+    /* surface light beam from top */
+    radial-gradient(ellipse 90% 55% at 50% -10%, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 60%),
+    /* depth gradient */
+    linear-gradient(180deg, #d6f0f6 0%, #9cd6e3 35%, #4ea4be 75%, #1e5d76 100%);
+  background-attachment: fixed, fixed;
+  overflow-x:hidden;
+}
+/* Bubbles (replaces petals) */
+html[data-theme="aquarium"] .petal{
+  width:14px;height:14px;top:auto;bottom:-10vh;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.95) 0%, rgba(255,255,255,.45) 40%, rgba(255,255,255,.05) 75%);
+  border-radius: 50%;
+  opacity:.7;
+  filter: drop-shadow(0 0 4px rgba(255,255,255,.5));
+  animation: bubble-rise linear infinite;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.45);
+}
+html[data-theme="aquarium"] .petal.p2{ width:9px;height:9px;opacity:.55 }
+html[data-theme="aquarium"] .petal.p3{ width:18px;height:18px;opacity:.85 }
+@keyframes bubble-rise{
+  0%   { transform: translate(0, 0) scale(.95); opacity:0 }
+  10%  { opacity:.7 }
+  100% { transform: translate(2vw, -120vh) scale(1.05); opacity:0 }
+}
+
+/* Shared rules — apply to ALL themes */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;color:var(--ink);font-family:var(--font-body);-webkit-font-smoothing:antialiased}
+body{ overflow-x:hidden; }
+.petals{ position:fixed;inset:0;pointer-events:none;z-index:-1;overflow:hidden; }
+.petal{ position:absolute; }
 @media (prefers-reduced-motion: reduce){
   .petal{ animation: none; display:none }
 }
@@ -95,7 +156,7 @@ body{
   margin:-4px -4px 14px;
   position:sticky;top:max(4px,env(safe-area-inset-top));
   z-index:30;
-  background:rgba(15,10,20,.55);
+  background:var(--glass-fill);
   border:1px solid var(--glass-stroke);
   -webkit-backdrop-filter: blur(30px) saturate(160%);
           backdrop-filter: blur(30px) saturate(160%);
@@ -109,10 +170,14 @@ body{
 }
 .topbar h1{
   font-family: var(--font-display);
-  font-weight:700;letter-spacing:.5px;
+  font-weight:700;letter-spacing:.3px;
   font-size:22px;margin:0;
   flex:1;text-align:center;
   min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  color: var(--ink);
+}
+/* Koi keeps its dramatic pink gradient title; aquarium uses flat dark teal */
+html[data-theme="koi"] .topbar h1{
   background:linear-gradient(180deg, #fff5f7 0%, #ffc6d8 100%);
   -webkit-background-clip:text;background-clip:text;
   -webkit-text-fill-color:transparent;
@@ -132,7 +197,7 @@ body{
   box-shadow:var(--glass-shadow-sm);
   display:flex;align-items:center;justify-content:center;
 }
-.ghost-btn:hover{background:rgba(255,200,215,.10);border-color:var(--sakura)}
+.ghost-btn:hover{background:var(--glass-fill-strong);border-color:var(--sakura)}
 .ghost-btn:active{transform:scale(.92)}
 .ghost-btn[hidden]{visibility:hidden}
 
@@ -142,7 +207,7 @@ body{
 .footer{
   position:fixed;left:14px;right:14px;bottom:max(10px,env(safe-area-inset-bottom));
   text-align:center;padding:10px 14px;
-  background:rgba(15,10,20,.60);
+  background:var(--glass-fill-strong);
   border:1px solid var(--glass-stroke);
   -webkit-backdrop-filter:blur(28px) saturate(160%);
           backdrop-filter:blur(28px) saturate(160%);
@@ -161,7 +226,7 @@ body{
 .tank-card{
   position:relative;
   border-radius:var(--radius);
-  background: rgba(20,15,25,.50);
+  background: var(--glass-fill);
   border:1px solid var(--glass-stroke);
   -webkit-backdrop-filter:blur(26px) saturate(160%);
           backdrop-filter:blur(26px) saturate(160%);
@@ -181,13 +246,14 @@ body{
   pointer-events:none;
 }
 .tank-card::after{
-  /* soft sakura glow in corner */
+  /* soft accent glow in corner */
   content:"";position:absolute;right:-30%;top:-40%;width:90%;height:90%;
-  background:radial-gradient(closest-side, rgba(255,155,190,.18), transparent 70%);
+  background:radial-gradient(closest-side, var(--sakura-soft), transparent 70%);
+  opacity:.22;
   pointer-events:none;
   filter:blur(8px);
 }
-.tank-card:hover{background:rgba(28,22,36,.62);border-color:rgba(255,200,215,.32);transform:translateY(-2px)}
+.tank-card:hover{background:var(--glass-fill-strong);border-color:var(--glass-stroke);transform:translateY(-2px)}
 .tank-card:active{transform:scale(.985)}
 .tank-card h3{
   position:relative;margin:0 0 4px;
@@ -224,7 +290,7 @@ body{
 .tabs{
   display:flex;gap:4px;margin:16px 0 18px;padding:4px;
   border-radius:16px;
-  background:rgba(20,15,25,.55);
+  background:var(--glass-fill);
   border:1px solid var(--glass-stroke);
   -webkit-backdrop-filter:blur(22px) saturate(160%);
           backdrop-filter:blur(22px) saturate(160%);
@@ -247,6 +313,12 @@ body{
   border:1px solid rgba(255,155,190,.45);
   box-shadow:0 1px 0 rgba(255,255,255,.15) inset, 0 4px 14px rgba(255,155,190,.25);
 }
+html[data-theme="aquarium"] .tab.active{
+  background:linear-gradient(180deg, rgba(25,162,194,.20), rgba(25,162,194,.08));
+  color:#0d2a3a;
+  border:1px solid rgba(25,162,194,.45);
+  box-shadow:0 1px 0 rgba(255,255,255,.55) inset, 0 4px 14px rgba(25,162,194,.18);
+}
 .tab:active{transform:scale(.96)}
 
 /* ============================================================
@@ -254,7 +326,7 @@ body{
    ============================================================ */
 .section{
   position:relative;
-  background:rgba(20,15,25,.55);
+  background:var(--glass-fill);
   border:1px solid var(--glass-stroke);
   -webkit-backdrop-filter:blur(26px) saturate(160%);
           backdrop-filter:blur(26px) saturate(160%);
@@ -447,6 +519,18 @@ label.field span{display:block;font-size:11px;color:var(--sakura);margin-bottom:
   box-shadow:0 -20px 60px rgba(0,0,0,.65), 0 1px 0 rgba(255,255,255,.10) inset;
   position:relative;
   animation: sheet-up .3s cubic-bezier(.2,.9,.25,1);
+  color:var(--ink);
+}
+html[data-theme="aquarium"] .modal{
+  background:linear-gradient(180deg, rgba(255,255,255,.78) 0%, rgba(225,240,247,.78) 100%);
+  border:1px solid rgba(255,255,255,.65);
+  box-shadow:0 -20px 60px rgba(20,60,90,.35), 0 1px 0 rgba(255,255,255,.85) inset;
+}
+html[data-theme="aquarium"] .modal::before{
+  background:rgba(13,42,58,.30);
+}
+html[data-theme="aquarium"] .modal-backdrop{
+  background:rgba(15,60,90,.45);
 }
 @keyframes sheet-up{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
 @media(min-width:560px){.modal{border-radius:28px}}
@@ -485,6 +569,13 @@ label.field span{display:block;font-size:11px;color:var(--sakura);margin-bottom:
   border-color:rgba(255,155,190,.50);
   box-shadow:0 1px 0 rgba(255,255,255,.15) inset;
 }
+html[data-theme="aquarium"] .chip.active{
+  background:linear-gradient(180deg, rgba(25,162,194,.22), rgba(25,162,194,.08));
+  color:#0d2a3a;
+  border-color:rgba(25,162,194,.50);
+  box-shadow:0 1px 0 rgba(255,255,255,.55) inset;
+}
+html[data-theme="aquarium"] .chip:hover{border-color:rgba(25,162,194,.55);color:#0d2a3a}
 
 /* ============================================================
    EVENT TIMELINE
@@ -527,25 +618,51 @@ label.field span{display:block;font-size:11px;color:var(--sakura);margin-bottom:
   margin:6px 0 14px;
   padding:13px 16px;
   border-radius:16px;
-  background:linear-gradient(160deg, rgba(255,122,138,.22), rgba(245,181,107,.10));
-  border:1px solid rgba(255,122,138,.45);
+  border:1px solid var(--glass-stroke);
   -webkit-backdrop-filter:blur(20px) saturate(160%);
           backdrop-filter:blur(20px) saturate(160%);
-  color:#ffd9da;font-size:13.5px;line-height:1.5;
+  color:var(--ink);font-size:13.5px;line-height:1.5;
   box-shadow:var(--glass-shadow-sm);
+  background:var(--glass-fill);
 }
-#storage-banner b{color:#fff}
+#storage-banner b{color:var(--ink);font-weight:700}
 #storage-banner .row{margin-top:8px;gap:6px}
-#storage-banner.ok{
+
+/* Koi theme: warm rose/sakura tint */
+html[data-theme="koi"] #storage-banner{
+  background:linear-gradient(160deg, rgba(255,122,138,.22), rgba(245,181,107,.10));
+  border:1px solid rgba(255,122,138,.45);
+  color:#ffd9da;
+}
+html[data-theme="koi"] #storage-banner b{color:#fff}
+html[data-theme="koi"] #storage-banner.ok{
   background:linear-gradient(160deg, rgba(255,155,190,.22), rgba(255,122,74,.10));
   border:1px solid rgba(255,155,190,.40);
   color:#ffe2ec;
 }
-#storage-banner.warn{
+html[data-theme="koi"] #storage-banner.warn{
   background:linear-gradient(160deg, rgba(245,181,107,.20), rgba(255,122,138,.10));
   border:1px solid rgba(245,181,107,.50);
   color:#ffe7c8;
 }
+
+/* Aquarium theme: clean aqua tint with dark readable ink */
+html[data-theme="aquarium"] #storage-banner{
+  background:linear-gradient(160deg, rgba(255,255,255,.62), rgba(25,162,194,.10));
+  border:1px solid rgba(25,162,194,.35);
+  color:#0d2a3a;
+}
+html[data-theme="aquarium"] #storage-banner.ok{
+  background:linear-gradient(160deg, rgba(255,255,255,.65), rgba(43,182,115,.12));
+  border:1px solid rgba(43,182,115,.40);
+  color:#0d2a3a;
+}
+html[data-theme="aquarium"] #storage-banner.warn{
+  background:linear-gradient(160deg, rgba(255,240,210,.70), rgba(245,181,107,.18));
+  border:1px solid rgba(220,150,60,.50);
+  color:#3d2a0d;
+}
+
 #storage-banner .row .btn{flex:0 0 auto}
 
 /* ============================================================
@@ -557,6 +674,10 @@ label.field span{display:block;font-size:11px;color:var(--sakura);margin-bottom:
   border-radius:14px;padding:14px;margin-bottom:10px;
   -webkit-backdrop-filter:blur(12px);
           backdrop-filter:blur(12px);
+}
+html[data-theme="aquarium"] .backup-block{
+  background:rgba(255,255,255,.45);
+  border:1px solid rgba(255,255,255,.65);
 }
 .backup-block h4{margin:0 0 6px;font-size:14.5px;color:var(--ink);font-weight:700;letter-spacing:.1px}
 .backup-block p{margin:0 0 10px;font-size:13px;color:var(--ink-dim);line-height:1.5}
@@ -1157,7 +1278,7 @@ input[type=time].input{ font-family:inherit }
   -webkit-tap-highlight-color: transparent;
 }
 /* Kill the hover/active lift inside swipe rows — it fights the swipe transform on iOS */
-.swipe-row .tank-card:hover  { transform: translateX(0); background: rgba(20,15,25,.50); border-color: var(--glass-stroke); }
+.swipe-row .tank-card:hover  { transform: translateX(0); background: var(--glass-fill); border-color: var(--glass-stroke); }
 .swipe-row .tank-card:active { transform: translateX(0); }
 .swipe-actions-left,
 .swipe-actions-right {
@@ -1199,3 +1320,43 @@ input[type=time].input{ font-family:inherit }
 /* tiny hint glow when actively swiping */
 .swipe-row.swiping-left  { box-shadow: 0 0 0 2px rgba(230,69,69,.45) inset; }
 .swipe-row.swiping-right { box-shadow: 0 0 0 2px rgba(255,122,74,.45) inset; }
+
+/* ============================================================
+   THEME PICKER (in Backup modal)
+   ============================================================ */
+.theme-picker { display:flex; flex-direction:column; gap:10px; margin-top:10px; }
+.theme-card {
+  display:flex; align-items:center; gap:14px;
+  width:100%; padding:10px; border-radius:14px;
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-stroke);
+  color: var(--ink);
+  text-align:left; cursor:pointer;
+  transition: transform .12s ease, border-color .2s ease, background .2s ease;
+}
+.theme-card:hover { background: var(--glass-fill-strong); }
+.theme-card.selected { border-color: var(--koi); box-shadow: 0 0 0 2px rgba(255,122,74,.30) inset; }
+.theme-preview {
+  flex:none; width:56px; height:56px; border-radius:12px;
+  border: 1px solid rgba(255,255,255,.4);
+  box-shadow: 0 4px 10px rgba(0,0,0,.18);
+}
+.theme-preview-aquarium {
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -10%, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 60%),
+    linear-gradient(180deg, #d6f0f6 0%, #9cd6e3 35%, #4ea4be 75%, #1e5d76 100%);
+}
+.theme-preview-koi {
+  background:
+    linear-gradient(180deg, rgba(5,8,16,.45), rgba(5,8,16,.85)),
+    linear-gradient(180deg, #2a1a2c, #050810);
+}
+.theme-meta { flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }
+.theme-meta strong { font-size:15px; }
+.theme-check {
+  flex:none; width:28px; height:28px; border-radius:50%;
+  background: var(--koi); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700; opacity:0; transition: opacity .15s ease;
+}
+.theme-card.selected .theme-check { opacity:1; }

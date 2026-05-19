@@ -39,6 +39,21 @@ let STORAGE_REASON = "";
 const KEY_TANKS  = "tm.tanks.v1";
 const KEY_LOGS   = "tm.logs.v1";    // legacy water-change-only log (migrated on boot)
 const KEY_EVENTS = "tm.events.v1";  // unified timeline
+const KEY_THEME  = "tm.theme.v1";
+const THEMES = {
+  aquarium: { id:"aquarium", label:"Clean Aquarium", desc:"Bright modern frosted glass on aqua water (default)" },
+  koi:      { id:"koi",      label:"Japanese Koi",   desc:"Original sumi-e koi pond with cherry blossoms" }
+};
+function getTheme(){
+  try { return store.get(KEY_THEME) || "aquarium"; } catch(_) { return "aquarium"; }
+}
+function applyTheme(id){
+  const t = THEMES[id] ? id : "aquarium";
+  document.documentElement.dataset.theme = t;
+  try { store.set(KEY_THEME, t); } catch(_){}
+}
+// apply immediately so there is no flash of unstyled background
+applyTheme(getTheme());
 
 /* ============================================================
    BACKUP / RESTORE — export/import the whole app to a JSON file
@@ -1784,12 +1799,46 @@ function openBackupModal(){
       </div>
     </div>
 
+    <div class="backup-block">
+      <h4>🎨 Theme</h4>
+      <p>Switch the look of the app. Your data isn't affected.</p>
+      <div class="theme-picker">
+        ${Object.values(THEMES).map(t => `
+          <button class="theme-card" data-theme-id="${t.id}">
+            <div class="theme-preview theme-preview-${t.id}"></div>
+            <div class="theme-meta">
+              <strong>${t.label}</strong>
+              <span class="muted small">${t.desc}</span>
+            </div>
+            <span class="theme-check">✓</span>
+          </button>
+        `).join("")}
+      </div>
+    </div>
+
     <div class="row" style="margin-top:8px">
       <button class="btn secondary block" id="close-backup">Close</button>
     </div>
   `, () => {
     const ta = $("#backup-text");
     ta.value = JSON.stringify(snapshot());
+
+    // Theme picker
+    const refreshThemeChecks = () => {
+      const cur = getTheme();
+      $$(".theme-card").forEach(c => {
+        c.classList.toggle("selected", c.dataset.themeId === cur);
+      });
+    };
+    refreshThemeChecks();
+    $$(".theme-card").forEach(c => {
+      c.addEventListener("click", () => {
+        applyTheme(c.dataset.themeId);
+        refreshThemeChecks();
+        toast(`Theme: ${THEMES[c.dataset.themeId].label}`);
+      });
+    });
+
     $("#do-export").addEventListener("click", downloadBackup);
     $("#do-import").addEventListener("click", () => $("#import-file").click());
     $("#copy-backup").addEventListener("click", async () => {

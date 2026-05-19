@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="aquarium">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -16,7 +16,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700;900&family=Inter:wght@400;500;600;700&display=swap" />
-  <link rel="stylesheet" href="styles.css?v=20260519e" />
+  <link rel="stylesheet" href="styles.css?v=20260519f" />
+  <script>
+    /* Apply saved theme as early as possible so the very first paint is correct. */
+    try {
+      var t = localStorage.getItem("tm.theme.v1");
+      if (t === "koi" || t === "aquarium") {
+        document.documentElement.dataset.theme = t;
+      }
+    } catch(e){}
+  </script>
 </head>
 <body>
   <div class="petals" aria-hidden="true">
@@ -48,14 +57,14 @@
     </footer>
   </div>
 
-  <script src="data.js?v=20260519e"></script>
-  <script src="cloud.js?v=20260519e"></script>
-  <script src="advisor.js?v=20260519e"></script>
-  <script src="reminders.js?v=20260519e"></script>
-  <script src="graphs.js?v=20260519e"></script>
-  <script src="fishdb.js?v=20260519e"></script>
-  <script src="chemicals.js?v=20260519e"></script>
-  <script src="firsttank.js?v=20260519e"></script>
-  <script src="app.js?v=20260519e"></script>
+  <script src="data.js?v=20260519f"></script>
+  <script src="cloud.js?v=20260519f"></script>
+  <script src="advisor.js?v=20260519f"></script>
+  <script src="reminders.js?v=20260519f"></script>
+  <script src="graphs.js?v=20260519f"></script>
+  <script src="fishdb.js?v=20260519f"></script>
+  <script src="chemicals.js?v=20260519f"></script>
+  <script src="firsttank.js?v=20260519f"></script>
+  <script src="app.js?v=20260519f"></script>
 </body>
 </html>
