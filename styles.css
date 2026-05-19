@@ -638,3 +638,73 @@ button:focus-visible, .tab:focus-visible, .chip:focus-visible{
 .sev-urgent{ color:var(--bad) }
 .sev-soon{ color:var(--warn) }
 .sev-fyi{ color:var(--sakura) }
+
+/* ============================================================
+   REMINDERS — settings UI in tank Details tab
+   ============================================================ */
+.rem-perm-banner{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:10px;
+  background:rgba(255,155,190,.10);
+  border:1px solid rgba(255,155,190,.25);
+  margin:0 0 12px;
+  font-size:13px;
+  color:var(--ink);
+}
+.rem-perm-banner.muted{
+  background:rgba(255,255,255,.04);
+  border-color:rgba(255,255,255,.10);
+  color:var(--ink-dim);
+}
+.rem-perm-banner.ok{
+  background:rgba(120,200,140,.10);
+  border-color:rgba(120,200,140,.25);
+  color:var(--ink);
+}
+.rem-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:8px 0;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  flex-wrap:wrap;
+}
+.rem-row:last-of-type{ border-bottom:none }
+.rem-row .toggle{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  cursor:pointer;
+  font-size:14px;
+  color:var(--ink);
+}
+.rem-row .toggle input[type=checkbox]{
+  width:18px;
+  height:18px;
+  accent-color:var(--koi);
+  cursor:pointer;
+}
+.rem-interval{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-size:13px;
+  color:var(--ink-dim);
+}
+.input.tiny{
+  width:70px;
+  padding:6px 8px;
+  font-size:13px;
+  text-align:center;
+}
+input[type=time].input{ font-family:inherit }
+.btn.small{
+  padding:6px 12px;
+  font-size:13px;
+}
+.muted.small{ font-size:12px }

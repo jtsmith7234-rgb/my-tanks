@@ -148,6 +148,10 @@ function logEvent(tankId, type, data){
   events[tankId].unshift({ id: uid(), ts: Date.now(), type, data: data || {} });
   saveEvents(events);
   window.events = events;
+  // Re-schedule reminders since lastEventTs changed
+  if (window.REMINDERS && type !== "reminder_fired" && type !== "advisor"){
+    try { window.REMINDERS.scheduleAllReminders(); } catch(e){}
+  }
 }
 function deleteEvent(tankId, eventId){
   if(!events[tankId]) return;
@@ -274,7 +278,13 @@ function renderAdvisorBanner(t){
   let adv = null;
   try {
     adv = window.ADVISOR.computeAdvice(t);
-    if (adv) window.ADVISOR.logAdviceIfNew(t, adv);
+    if (adv) {
+      window.ADVISOR.logAdviceIfNew(t, adv);
+      // Fire OS notification for urgent issues (if user opted in)
+      if (window.REMINDERS) {
+        try { window.REMINDERS.fireUrgentAdvisorNotif(t, adv); } catch(e){}
+      }
+    }
   } catch (err) { console.warn("advisor error", err); return ""; }
   if (!adv) return "";
   // Suppress if user dismissed this exact signature this session
@@ -356,6 +366,8 @@ function renderDetails(t){
       ${t.notes ? `<div class="hr"></div><p class="muted" style="margin:0">${escapeHTML(t.notes)}</p>` : ""}
     </div>
 
+    ${renderRemindersSection(t)}
+
     <div class="section">
       <h2>Edit tank info</h2>
       <label class="field"><span>Name</span><input class="input" id="d-name" value="${escapeHTML(t.name)}" /></label>
@@ -375,7 +387,97 @@ function renderDetails(t){
     </div>
   `;
 }
+function renderRemindersSection(t){
+  if (!window.REMINDERS) return "";
+  const rem = window.REMINDERS.getTankReminders(t.id);
+  const perm = window.REMINDERS.notifPermission();
+  const supported = window.REMINDERS.notifSupported();
+  const wcInterval = rem.water_change.intervalDays || t.idealDays || 7;
+  const wtInterval = rem.water_test.intervalDays || 7;
+  const dailyTime = String(rem.daily.hour).padStart(2,"0") + ":" + String(rem.daily.minute).padStart(2,"0");
+
+  let permBanner = "";
+  if (!supported){
+    permBanner = `<div class="rem-perm-banner muted">Notifications aren\u2019t supported in this browser. They\u2019ll work once the app is installed from the App Store.</div>`;
+  } else if (perm === "default"){
+    permBanner = `<div class="rem-perm-banner"><span>Turn on notifications to get reminders.</span><button class="btn small" id="rem-enable">Enable</button></div>`;
+  } else if (perm === "denied"){
+    permBanner = `<div class="rem-perm-banner muted">Notifications are blocked. Enable them in your browser/iOS settings to get reminders.</div>`;
+  } else {
+    permBanner = `<div class="rem-perm-banner ok">\u2713 Notifications are on for this device.</div>`;
+  }
+
+  return `
+    <div class="section">
+      <h2>Reminders</h2>
+      ${permBanner}
+      <div class="rem-row">
+        <label class="toggle"><input type="checkbox" id="rem-wc-on" ${rem.water_change.enabled?"checked":""}/><span>Water change reminder</span></label>
+        <label class="rem-interval"><span>every</span><input class="input tiny" id="rem-wc-days" type="number" min="1" max="60" value="${wcInterval}" /><span>days</span></label>
+      </div>
+      <div class="rem-row">
+        <label class="toggle"><input type="checkbox" id="rem-wt-on" ${rem.water_test.enabled?"checked":""}/><span>Water test reminder</span></label>
+        <label class="rem-interval"><span>every</span><input class="input tiny" id="rem-wt-days" type="number" min="1" max="60" value="${wtInterval}" /><span>days</span></label>
+      </div>
+      <div class="rem-row">
+        <label class="toggle"><input type="checkbox" id="rem-daily-on" ${rem.daily.enabled?"checked":""}/><span>Daily check-in</span></label>
+        <label class="rem-interval"><span>at</span><input class="input tiny" id="rem-daily-time" type="time" value="${dailyTime}" /></label>
+      </div>
+      <div class="rem-row">
+        <label class="toggle"><input type="checkbox" id="rem-urgent-on" ${rem.advisor_urgent.enabled?"checked":""}/><span>Urgent advisor alerts</span></label>
+        <span class="muted small">Fires immediately if ammonia, nitrite, nitrate, or pH go unsafe.</span>
+      </div>
+      <button class="btn" id="rem-save">Save reminders</button>
+    </div>
+  `;
+}
+
+function bindReminders(t){
+  if (!window.REMINDERS) return;
+  const enableBtn = document.getElementById("rem-enable");
+  if (enableBtn){
+    enableBtn.addEventListener("click", async () => {
+      const result = await window.REMINDERS.requestNotifPermission();
+      if (result === "granted"){
+        window.REMINDERS.scheduleAllReminders();
+        toast("Notifications on");
+      } else if (result === "denied"){
+        toast("Permission denied");
+      }
+      render();
+    });
+  }
+  const saveBtn = document.getElementById("rem-save");
+  if (saveBtn){
+    saveBtn.addEventListener("click", () => {
+      const timeStr = (document.getElementById("rem-daily-time").value || "09:00").split(":");
+      const rem = {
+        water_change: {
+          enabled: document.getElementById("rem-wc-on").checked,
+          intervalDays: Math.max(1, parseInt(document.getElementById("rem-wc-days").value) || 7)
+        },
+        water_test: {
+          enabled: document.getElementById("rem-wt-on").checked,
+          intervalDays: Math.max(1, parseInt(document.getElementById("rem-wt-days").value) || 7)
+        },
+        daily: {
+          enabled: document.getElementById("rem-daily-on").checked,
+          hour: parseInt(timeStr[0]) || 9,
+          minute: parseInt(timeStr[1]) || 0
+        },
+        advisor_urgent: {
+          enabled: document.getElementById("rem-urgent-on").checked
+        }
+      };
+      window.REMINDERS.setTankReminders(t.id, rem);
+      window.REMINDERS.scheduleAllReminders();
+      toast("Reminders saved");
+    });
+  }
+}
+
 function bindDetails(t){
+  bindReminders(t);
   $("#save-details").addEventListener("click", () => {
     const before = { name:t.name, gallons:t.gallons, type:t.type, substrate:t.substrate, decor:t.decor, notes:t.notes };
     t.name      = $("#d-name").value.trim() || t.name;
@@ -716,7 +818,8 @@ const HISTORY_FILTERS = [
   { id: "water_test",   label: "Water tests"   },
   { id: "fish",         label: "Fish"          },
   { id: "tank_edit",    label: "Tank edits"    },
-  { id: "advisor",      label: "Advisor"       }
+  { id: "advisor",      label: "Advisor"       },
+  { id: "reminder_fired", label: "Reminders"   }
 ];
 let historyFilter = "all";
 
@@ -774,6 +877,7 @@ function eventIcon(type){
   if (type === "fish_edit")    return "✏️";
   if (type === "tank_edit")    return "🔧";
   if (type === "advisor")      return "🌸";
+  if (type === "reminder_fired") return "🔔";
   return "•";
 }
 function eventTitle(e){
@@ -785,6 +889,7 @@ function eventTitle(e){
   if (e.type === "fish_edit")    return `Edited ${escapeHTML(d.species)}${d.name?` (“${escapeHTML(d.name)}”)`:""}`;
   if (e.type === "tank_edit")    return `Tank details updated`;
   if (e.type === "advisor")      return escapeHTML(d.title || "Advisor");
+  if (e.type === "reminder_fired") return escapeHTML(d.title || "Reminder");
   return e.type;
 }
 function eventDetail(e){
@@ -808,6 +913,9 @@ function eventDetail(e){
   if (e.type === "advisor") {
     const sevLabel = d.sev === "urgent" ? "Urgent" : d.sev === "soon" ? "Soon" : "FYI";
     return `<b class="sev-${escapeHTML(d.sev || "fyi")}">${sevLabel}</b> · ${escapeHTML(d.body || "")}<br><span class="muted">Triggered by: ${escapeHTML(d.rule || "")}</span>`;
+  }
+  if (e.type === "reminder_fired") {
+    return escapeHTML(d.body || "");
   }
   return "";
 }
@@ -957,6 +1065,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   migrateLogs();
   renderStorageBanner();
   render();
+
+  // Schedule reminders once the app has its data
+  if (window.REMINDERS) {
+    try { window.REMINDERS.scheduleAllReminders(); } catch(e){ console.warn("reminder schedule failed", e); }
+  }
 });
 
 /* ============================================================
