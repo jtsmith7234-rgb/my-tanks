@@ -296,15 +296,27 @@ function renderHome(){
   main.innerHTML = `
     <div class="grid">
       ${tanks.map(t => `
-        <button class="tank-card" data-tank="${t.id}">
-          <h3>${escapeHTML(t.name)}</h3>
-          <div class="meta">${t.gallons} gal &middot; ${escapeHTML(t.type||"Freshwater")}</div>
-          <div class="pill-row">
-            <span class="pill">${totalFish(t)} animals</span>
-            <span class="pill alt">${(t.fish||[]).length} species</span>
-            ${t.substrate ? `<span class="pill gray">${escapeHTML(t.substrate)}</span>` : ""}
+        <div class="swipe-row" data-row="${t.id}">
+          <div class="swipe-actions-left">
+            <button class="swipe-act edit" data-act="edit" data-tank="${t.id}">
+              <span class="swipe-ico">✏️</span><span class="swipe-lbl">Edit</span>
+            </button>
           </div>
-        </button>
+          <div class="swipe-actions-right">
+            <button class="swipe-act delete" data-act="delete" data-tank="${t.id}">
+              <span class="swipe-ico">🗑️</span><span class="swipe-lbl">Delete</span>
+            </button>
+          </div>
+          <button class="tank-card" data-tank="${t.id}">
+            <h3>${escapeHTML(t.name)}</h3>
+            <div class="meta">${t.gallons} gal &middot; ${escapeHTML(t.type||"Freshwater")}</div>
+            <div class="pill-row">
+              <span class="pill">${totalFish(t)} animals</span>
+              <span class="pill alt">${(t.fish||[]).length} species</span>
+              ${t.substrate ? `<span class="pill gray">${escapeHTML(t.substrate)}</span>` : ""}
+            </div>
+          </button>
+        </div>
       `).join("")}
     </div>
     <div class="spacer-12"></div>
@@ -313,62 +325,173 @@ function renderHome(){
       <button class="btn small secondary" id="reset-defaults">Reset to default tanks</button>
     </div>
   `;
-  $$("[data-tank]").forEach(card => {
-    let pressTimer = null;
-    let longFired   = false;
-    let startX = 0, startY = 0;
-    const MOVE_TOLERANCE = 10; // px before we cancel
-    const PRESS_MS = 450;
+  // ---- Swipe-to-reveal on tank rows (iOS-style) ----
+  const REVEAL = 96;       // px the card slides to expose the action button
+  const COMMIT = 180;      // drag past this on either side = auto-commit
+  const SWIPE_MIN = 8;     // px before we consider it a horizontal swipe
+  let openRow = null;      // currently revealed row (only one at a time)
 
-    const fire = () => {
-      longFired = true;
-      card.classList.remove("pressing");
-      card.classList.add("long-pressed");
-      setTimeout(() => card.classList.remove("long-pressed"), 250);
-      if (navigator.vibrate) { try { navigator.vibrate(20); } catch(_){} }
-      openTankActions(card.dataset.tank);
+  const closeOpenRow = (except) => {
+    if (openRow && openRow !== except) {
+      openRow.classList.remove("revealed-left","revealed-right");
+      const c = openRow.querySelector(".tank-card");
+      if (c) c.style.transform = "";
+      openRow = null;
+    }
+  };
+
+  $$(".swipe-row").forEach(row => {
+    const card = row.querySelector(".tank-card");
+    const tankId = row.dataset.row;
+    let startX = 0, startY = 0, dx = 0, dy = 0;
+    let tracking = false, locked = false, axis = null;
+    let didSwipe = false;
+
+    const onStart = (x, y) => {
+      startX = x; startY = y; dx = 0; dy = 0;
+      tracking = true; locked = false; axis = null; didSwipe = false;
+      card.style.transition = "none";
     };
-    const startPress = (x, y) => {
-      longFired = false;
-      startX = x; startY = y;
-      clearTimeout(pressTimer);
-      card.classList.add("pressing");
-      pressTimer = setTimeout(fire, PRESS_MS);
+    const onMove = (x, y) => {
+      if (!tracking) return;
+      dx = x - startX;
+      dy = y - startY;
+      if (!locked) {
+        if (Math.abs(dx) < SWIPE_MIN && Math.abs(dy) < SWIPE_MIN) return;
+        // lock to the dominant axis
+        axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+        locked = true;
+        if (axis === "x") {
+          didSwipe = true;
+          closeOpenRow(row);
+        }
+      }
+      if (axis !== "x") return;
+      // rubber-band beyond COMMIT
+      let t = dx;
+      if (Math.abs(t) > COMMIT) {
+        const over = Math.abs(t) - COMMIT;
+        t = (t > 0 ? 1 : -1) * (COMMIT + over * 0.35);
+      }
+      card.style.transform = `translateX(${t}px)`;
+      row.classList.toggle("swiping-left",  t < 0);
+      row.classList.toggle("swiping-right", t > 0);
     };
-    const cancelPress = () => {
-      clearTimeout(pressTimer);
-      card.classList.remove("pressing");
+    const onEnd = () => {
+      if (!tracking) return;
+      tracking = false;
+      card.style.transition = "";
+      if (axis !== "x") return;
+
+      if (dx <= -COMMIT) {
+        // auto-commit delete
+        card.style.transform = `translateX(-100%)`;
+        setTimeout(() => doDelete(tankId), 180);
+        return;
+      }
+      if (dx >= COMMIT) {
+        // auto-commit edit
+        card.style.transform = "";
+        row.classList.remove("revealed-left","revealed-right");
+        openRow = null;
+        goToTank(tankId, "details");
+        return;
+      }
+      if (dx <= -REVEAL/2) {
+        card.style.transform = `translateX(-${REVEAL}px)`;
+        row.classList.add("revealed-right");
+        row.classList.remove("revealed-left");
+        openRow = row;
+        return;
+      }
+      if (dx >= REVEAL/2) {
+        card.style.transform = `translateX(${REVEAL}px)`;
+        row.classList.add("revealed-left");
+        row.classList.remove("revealed-right");
+        openRow = row;
+        return;
+      }
+      // snap back
+      card.style.transform = "";
+      row.classList.remove("revealed-left","revealed-right");
+      if (openRow === row) openRow = null;
     };
 
     card.addEventListener("touchstart", (e) => {
-      const t = e.touches[0];
-      startPress(t.clientX, t.clientY);
+      const t = e.touches[0]; onStart(t.clientX, t.clientY);
     }, { passive: true });
     card.addEventListener("touchmove", (e) => {
-      const t = e.touches[0];
-      if (Math.abs(t.clientX - startX) > MOVE_TOLERANCE ||
-          Math.abs(t.clientY - startY) > MOVE_TOLERANCE) {
-        cancelPress();
-      }
+      const t = e.touches[0]; onMove(t.clientX, t.clientY);
     }, { passive: true });
-    card.addEventListener("touchend",    cancelPress);
-    card.addEventListener("touchcancel", cancelPress);
+    card.addEventListener("touchend",    onEnd);
+    card.addEventListener("touchcancel", onEnd);
 
-    card.addEventListener("mousedown",  (e) => startPress(e.clientX, e.clientY));
-    card.addEventListener("mouseup",    cancelPress);
-    card.addEventListener("mouseleave", cancelPress);
-    card.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
-      cancelPress();
-      if (!longFired) { longFired = true; openTankActions(card.dataset.tank); }
-    });
+    // Pointer fallback for desktop testing
+    let mouseDown = false;
+    card.addEventListener("mousedown", (e) => { mouseDown = true; onStart(e.clientX, e.clientY); });
+    window.addEventListener("mousemove", (e) => { if (mouseDown) onMove(e.clientX, e.clientY); });
+    window.addEventListener("mouseup",   () => { if (mouseDown) { mouseDown = false; onEnd(); } });
+
     card.addEventListener("click", (e) => {
-      if (longFired) { e.preventDefault(); e.stopPropagation(); return; }
-      view = { screen:"tank", tankId: card.dataset.tank, tab: "details" };
-      render();
-      window.scrollTo({top:0});
+      if (didSwipe) { e.preventDefault(); e.stopPropagation(); didSwipe = false; return; }
+      if (openRow) {
+        // tapping the card while another row is open just closes it
+        if (openRow !== row) { closeOpenRow(); e.preventDefault(); return; }
+        // tapping a revealed card snaps it shut
+        if (row.classList.contains("revealed-left") || row.classList.contains("revealed-right")) {
+          card.style.transform = "";
+          row.classList.remove("revealed-left","revealed-right");
+          openRow = null;
+          e.preventDefault();
+          return;
+        }
+      }
+      goToTank(tankId, "details");
     });
   });
+
+  function goToTank(id, tab){
+    view = { screen:"tank", tankId: id, tab };
+    render();
+    window.scrollTo({top:0});
+  }
+  function doDelete(id){
+    const t = tanks.find(x => x.id === id);
+    if (!t) return;
+    if (!confirm(`Delete "${t.name}"? This can't be undone.`)) {
+      // user bailed — snap card back
+      const row = $(`.swipe-row[data-row="${id}"]`);
+      const card = row && row.querySelector(".tank-card");
+      if (card) card.style.transform = "";
+      if (row) row.classList.remove("revealed-left","revealed-right");
+      openRow = null;
+      return;
+    }
+    tanks = tanks.filter(x => x.id !== id);
+    delete logs[id];
+    delete events[id];
+    saveTanks(tanks); saveLogs(logs); saveEvents(events);
+    openRow = null;
+    render();
+    toast("Tank deleted");
+  }
+
+  // Edit / Delete buttons (when revealed and tapped)
+  $$(".swipe-act").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.tank;
+      const act = btn.dataset.act;
+      if (act === "edit")   { closeOpenRow(); goToTank(id, "details"); }
+      if (act === "delete") { doDelete(id); }
+    });
+  });
+
+  // Tap outside to close any revealed row
+  document.addEventListener("click", (e) => {
+    if (!openRow) return;
+    if (!e.target.closest(".swipe-row")) closeOpenRow();
+  }, { capture: true });
   const resetBtn = $("#reset-defaults");
   if (resetBtn) resetBtn.addEventListener("click", () => {
     if(!confirm("Reset all tanks to defaults? This wipes any tank edits, fish lists, water changes, and tests. This can't be undone.")) return;

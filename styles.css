@@ -1135,25 +1135,63 @@ input[type=time].input{ font-family:inherit }
 .action-ico { font-size:22px; line-height:1; flex:none; width:28px; text-align:center; }
 .action-label { flex:1; }
 
-/* long-press feedback on tank cards */
-.tank-card,
-.tank-card * {
+/* ============================================================
+   SWIPE-TO-REVEAL on tank cards (iOS-style)
+   ============================================================ */
+.swipe-row {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
+}
+.swipe-row .tank-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  transition: transform .22s cubic-bezier(.2,.8,.2,1);
+  will-change: transform;
+  touch-action: pan-y;
   -webkit-tap-highlight-color: transparent;
 }
-.tank-card { transition: transform .25s ease, box-shadow .25s ease, background .25s ease; }
-.tank-card.pressing {
-  transform: scale(.97);
-  background: rgba(255,122,74,.10);
-  box-shadow: 0 0 0 2px rgba(255,122,74,.35) inset;
+.swipe-actions-left,
+.swipe-actions-right {
+  position: absolute;
+  top: 0; bottom: 0;
+  display: flex;
+  align-items: stretch;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s ease;
 }
-.tank-card.long-pressed {
-  animation: cardPulse .22s ease;
+.swipe-actions-left  { left: 0;  }
+.swipe-actions-right { right: 0; }
+.swipe-row.swiping-left  .swipe-actions-right,
+.swipe-row.swiping-right .swipe-actions-left,
+.swipe-row.revealed-left  .swipe-actions-left,
+.swipe-row.revealed-right .swipe-actions-right { opacity: 1; }
+.swipe-row.revealed-left  .swipe-actions-left,
+.swipe-row.revealed-right .swipe-actions-right { pointer-events: auto; }
+
+.swipe-act {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 4px;
+  width: 96px; min-height: 100%;
+  border: none; cursor: pointer;
+  font-weight: 700; font-size: 13px;
+  color: #fff;
 }
-@keyframes cardPulse {
-  0%   { transform: scale(.97); box-shadow: 0 0 0 2px rgba(255,122,74,.45) inset; }
-  60%  { transform: scale(1.02); box-shadow: 0 0 0 3px rgba(255,122,74,.65) inset; }
-  100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(255,122,74,0)    inset; }
+.swipe-act.delete {
+  background: linear-gradient(180deg, #e64545 0%, #c62b2b 100%);
 }
+.swipe-act.edit {
+  background: linear-gradient(180deg, #ff9156 0%, #ff7a4a 100%);
+}
+.swipe-ico { font-size: 22px; line-height: 1; }
+.swipe-lbl { font-size: 12px; letter-spacing: .2px; }
+
+/* tiny hint glow when actively swiping */
+.swipe-row.swiping-left  { box-shadow: 0 0 0 2px rgba(230,69,69,.45) inset; }
+.swipe-row.swiping-right { box-shadow: 0 0 0 2px rgba(255,122,74,.45) inset; }
