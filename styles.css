@@ -1135,5 +1135,25 @@ input[type=time].input{ font-family:inherit }
 .action-ico { font-size:22px; line-height:1; flex:none; width:28px; text-align:center; }
 .action-label { flex:1; }
 
-/* subtle long-press feedback */
-.tank-card { -webkit-touch-callout: none; user-select: none; }
+/* long-press feedback on tank cards */
+.tank-card,
+.tank-card * {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.tank-card { transition: transform .25s ease, box-shadow .25s ease, background .25s ease; }
+.tank-card.pressing {
+  transform: scale(.97);
+  background: rgba(255,122,74,.10);
+  box-shadow: 0 0 0 2px rgba(255,122,74,.35) inset;
+}
+.tank-card.long-pressed {
+  animation: cardPulse .22s ease;
+}
+@keyframes cardPulse {
+  0%   { transform: scale(.97); box-shadow: 0 0 0 2px rgba(255,122,74,.45) inset; }
+  60%  { transform: scale(1.02); box-shadow: 0 0 0 3px rgba(255,122,74,.65) inset; }
+  100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(255,122,74,0)    inset; }
+}

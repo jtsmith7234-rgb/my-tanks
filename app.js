@@ -316,27 +316,51 @@ function renderHome(){
   $$("[data-tank]").forEach(card => {
     let pressTimer = null;
     let longFired   = false;
-    const startPress = () => {
-      longFired = false;
-      clearTimeout(pressTimer);
-      pressTimer = setTimeout(() => {
-        longFired = true;
-        if (navigator.vibrate) { try { navigator.vibrate(15); } catch(_){} }
-        openTankActions(card.dataset.tank);
-      }, 500);
+    let startX = 0, startY = 0;
+    const MOVE_TOLERANCE = 10; // px before we cancel
+    const PRESS_MS = 450;
+
+    const fire = () => {
+      longFired = true;
+      card.classList.remove("pressing");
+      card.classList.add("long-pressed");
+      setTimeout(() => card.classList.remove("long-pressed"), 250);
+      if (navigator.vibrate) { try { navigator.vibrate(20); } catch(_){} }
+      openTankActions(card.dataset.tank);
     };
-    const cancelPress = () => { clearTimeout(pressTimer); };
-    card.addEventListener("touchstart", startPress, { passive: true });
-    card.addEventListener("touchend",   cancelPress);
-    card.addEventListener("touchmove",  cancelPress);
-    card.addEventListener("touchcancel",cancelPress);
-    card.addEventListener("mousedown",  startPress);
+    const startPress = (x, y) => {
+      longFired = false;
+      startX = x; startY = y;
+      clearTimeout(pressTimer);
+      card.classList.add("pressing");
+      pressTimer = setTimeout(fire, PRESS_MS);
+    };
+    const cancelPress = () => {
+      clearTimeout(pressTimer);
+      card.classList.remove("pressing");
+    };
+
+    card.addEventListener("touchstart", (e) => {
+      const t = e.touches[0];
+      startPress(t.clientX, t.clientY);
+    }, { passive: true });
+    card.addEventListener("touchmove", (e) => {
+      const t = e.touches[0];
+      if (Math.abs(t.clientX - startX) > MOVE_TOLERANCE ||
+          Math.abs(t.clientY - startY) > MOVE_TOLERANCE) {
+        cancelPress();
+      }
+    }, { passive: true });
+    card.addEventListener("touchend",    cancelPress);
+    card.addEventListener("touchcancel", cancelPress);
+
+    card.addEventListener("mousedown",  (e) => startPress(e.clientX, e.clientY));
     card.addEventListener("mouseup",    cancelPress);
     card.addEventListener("mouseleave", cancelPress);
     card.addEventListener("contextmenu", (e) => {
       e.preventDefault();
       cancelPress();
-      openTankActions(card.dataset.tank);
+      if (!longFired) { longFired = true; openTankActions(card.dataset.tank); }
     });
     card.addEventListener("click", (e) => {
       if (longFired) { e.preventDefault(); e.stopPropagation(); return; }
