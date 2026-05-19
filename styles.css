@@ -1150,11 +1150,15 @@ input[type=time].input{ font-family:inherit }
   position: relative;
   z-index: 2;
   width: 100%;
+  transform: translateX(0); /* explicit rest state so nothing else can drift it */
   transition: transform .22s cubic-bezier(.2,.8,.2,1);
   will-change: transform;
   touch-action: pan-y;
   -webkit-tap-highlight-color: transparent;
 }
+/* Kill the hover/active lift inside swipe rows — it fights the swipe transform on iOS */
+.swipe-row .tank-card:hover  { transform: translateX(0); background: rgba(20,15,25,.50); border-color: var(--glass-stroke); }
+.swipe-row .tank-card:active { transform: translateX(0); }
 .swipe-actions-left,
 .swipe-actions-right {
   position: absolute;

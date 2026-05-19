@@ -381,6 +381,8 @@ function renderHome(){
       if (!tracking) return;
       tracking = false;
       card.style.transition = "";
+      // always drop the active-swipe glow classes when the finger lifts
+      row.classList.remove("swiping-left","swiping-right");
       if (axis !== "x") return;
 
       if (dx <= -COMMIT) {
