@@ -1111,3 +1111,29 @@ input[type=time].input{ font-family:inherit }
   margin-bottom:10px;
 }
 .ft-tip b{ color: var(--warn, #ffa550) }
+
+/* ============================================================
+   ACTION SHEET (long-press on tank card)
+   ============================================================ */
+.action-sheet { display:flex; flex-direction:column; gap:6px; padding:4px 2px 2px; }
+.action-sheet-head { padding:4px 6px 14px; border-bottom:1px solid var(--glass-stroke); margin-bottom:8px; }
+.action-row {
+  display:flex; align-items:center; gap:14px;
+  width:100%; padding:14px 14px; border-radius:14px;
+  background:var(--glass-fill-strong); border:1px solid var(--glass-stroke);
+  color:var(--ink); font-size:16px; font-weight:600;
+  text-align:left; cursor:pointer; transition:background .15s ease, transform .05s ease;
+}
+.action-row:hover { background:rgba(255,255,255,.06); }
+.action-row:active { transform:scale(.98); }
+.action-row.danger { color:var(--bad); }
+.action-row.danger:hover { background:rgba(255,80,80,.10); }
+.action-row.cancel {
+  justify-content:center; margin-top:6px; color:var(--ink-dim);
+  background:transparent; border:1px solid var(--glass-stroke); font-weight:500;
+}
+.action-ico { font-size:22px; line-height:1; flex:none; width:28px; text-align:center; }
+.action-label { flex:1; }
+
+/* subtle long-press feedback */
+.tank-card { -webkit-touch-callout: none; user-select: none; }

@@ -221,6 +221,64 @@ function render(){
   }
 }
 
+function openTankActions(tankId){
+  const t = tanks.find(x => x.id === tankId);
+  if (!t) return;
+  const html = `
+    <div class="action-sheet">
+      <div class="action-sheet-head">
+        <h3 style="margin:0 0 4px">${escapeHTML(t.name)}</h3>
+        <p class="muted small" style="margin:0">${t.gallons} gal &middot; ${escapeHTML(t.type||"Freshwater")}</p>
+      </div>
+      <button class="action-row" id="act-open">
+        <span class="action-ico">📂</span>
+        <span class="action-label">Open tank</span>
+      </button>
+      <button class="action-row" id="act-edit">
+        <span class="action-ico">✏️</span>
+        <span class="action-label">Edit tank info</span>
+      </button>
+      <button class="action-row" id="act-clean">
+        <span class="action-ico">🧹</span>
+        <span class="action-label">Log water change</span>
+      </button>
+      <button class="action-row" id="act-test">
+        <span class="action-ico">🧪</span>
+        <span class="action-label">Log water test</span>
+      </button>
+      <button class="action-row danger" id="act-delete">
+        <span class="action-ico">🗑️</span>
+        <span class="action-label">Delete tank</span>
+      </button>
+      <button class="action-row cancel" id="act-cancel">Cancel</button>
+    </div>
+  `;
+  openModal(html, () => {
+    const go = (tab) => {
+      closeModal();
+      view = { screen:"tank", tankId: t.id, tab };
+      render();
+      window.scrollTo({top:0});
+    };
+    $("#act-open").addEventListener("click",  () => go("details"));
+    $("#act-edit").addEventListener("click",  () => go("details"));
+    $("#act-clean").addEventListener("click", () => go("clean"));
+    $("#act-test").addEventListener("click",  () => go("tests"));
+    $("#act-cancel").addEventListener("click",() => closeModal());
+    $("#act-delete").addEventListener("click", () => {
+      if(!confirm(`Delete "${t.name}"? This can't be undone.`)) return;
+      tanks = tanks.filter(x => x.id !== t.id);
+      delete logs[t.id];
+      delete events[t.id];
+      saveTanks(tanks); saveLogs(logs); saveEvents(events);
+      closeModal();
+      view = { screen:"home", tankId:null, tab:"details" };
+      render();
+      toast("Tank deleted");
+    });
+  });
+}
+
 function renderHome(){
   const main = $("#main");
   if(!tanks.length){
@@ -256,7 +314,32 @@ function renderHome(){
     </div>
   `;
   $$("[data-tank]").forEach(card => {
-    card.addEventListener("click", () => {
+    let pressTimer = null;
+    let longFired   = false;
+    const startPress = () => {
+      longFired = false;
+      clearTimeout(pressTimer);
+      pressTimer = setTimeout(() => {
+        longFired = true;
+        if (navigator.vibrate) { try { navigator.vibrate(15); } catch(_){} }
+        openTankActions(card.dataset.tank);
+      }, 500);
+    };
+    const cancelPress = () => { clearTimeout(pressTimer); };
+    card.addEventListener("touchstart", startPress, { passive: true });
+    card.addEventListener("touchend",   cancelPress);
+    card.addEventListener("touchmove",  cancelPress);
+    card.addEventListener("touchcancel",cancelPress);
+    card.addEventListener("mousedown",  startPress);
+    card.addEventListener("mouseup",    cancelPress);
+    card.addEventListener("mouseleave", cancelPress);
+    card.addEventListener("contextmenu", (e) => {
+      e.preventDefault();
+      cancelPress();
+      openTankActions(card.dataset.tank);
+    });
+    card.addEventListener("click", (e) => {
+      if (longFired) { e.preventDefault(); e.stopPropagation(); return; }
       view = { screen:"tank", tankId: card.dataset.tank, tab: "details" };
       render();
       window.scrollTo({top:0});
