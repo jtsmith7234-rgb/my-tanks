@@ -1592,6 +1592,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   $("#add-tank-btn").addEventListener("click", openAddTank);
   $("#backup-btn").addEventListener("click", openBackupModal);
+  $("#share-btn").addEventListener("click", openShareModal);
   $("#import-file").addEventListener("change", handleImportFile);
 
   // Wire cloud status to the storage banner so user sees "Syncing… / Synced"
@@ -1685,6 +1686,73 @@ function handleImportFile(ev){
   reader.onerror = () => alert("Couldn't read that file.");
   reader.readAsText(file);
   ev.target.value = ""; // allow re-importing same filename later
+}
+
+function openShareModal(){
+  const url = "https://jtsmith7234-rgb.github.io/my-tanks/";
+  const msg = `Hey — check out the aquarium app I'm beta testing. Track your tanks, water tests, dosing, and a guided cycle walkthrough for new tanks. Open in Safari then Share → Add to Home Screen.\n\n${url}`;
+
+  const html = `
+    <div style="max-width:520px">
+      <h2 style="margin:0 0 8px">Share My Tanks</h2>
+      <p class="muted" style="margin:0 0 14px">Send this to a friend so they can try it on their own phone. Their tanks stay on their device, not yours.</p>
+
+      <label class="label" style="display:block;margin-bottom:6px">Message</label>
+      <textarea id="share-msg" rows="6" style="width:100%;font-family:inherit;font-size:14px;padding:10px;border-radius:12px;background:var(--glass-fill-strong);border:1px solid var(--glass-stroke);color:var(--ink);resize:vertical">${escapeHTML(msg)}</textarea>
+
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <button class="btn" id="share-native">📲 Share…</button>
+        <button class="btn secondary" id="share-copy">📋 Copy message</button>
+        <button class="btn secondary" id="share-copy-link">🔗 Copy link only</button>
+      </div>
+      <p class="muted small" style="margin:14px 0 0">Tip: tell them to open it in Safari, then tap Share → Add to Home Screen so it acts like a real app.</p>
+      <div style="display:flex;justify-content:flex-end;margin-top:14px">
+        <button class="btn secondary" id="share-close">Close</button>
+      </div>
+    </div>
+  `;
+  openModal(html, () => {
+    const ta = $("#share-msg");
+    const flash = (btn, label) => {
+      const old = btn.textContent;
+      btn.textContent = label;
+      setTimeout(() => { btn.textContent = old; }, 1400);
+    };
+    const copy = async (text, btn, label) => {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          ta.select(); document.execCommand("copy");
+        }
+        flash(btn, label);
+      } catch (_){
+        ta.select();
+        try { document.execCommand("copy"); flash(btn, label); }
+        catch(__){ toast("Couldn't copy — select the text and copy manually"); }
+      }
+    };
+
+    // Native iOS / Android share sheet when available
+    const nativeBtn = $("#share-native");
+    if (navigator.share) {
+      nativeBtn.addEventListener("click", async () => {
+        try {
+          await navigator.share({
+            title: "My Tanks beta",
+            text:  ta.value,
+            url
+          });
+        } catch(_){ /* user cancelled — ignore */ }
+      });
+    } else {
+      nativeBtn.style.display = "none";
+    }
+
+    $("#share-copy").addEventListener("click", (e) => copy(ta.value, e.currentTarget, "✓ Copied!"));
+    $("#share-copy-link").addEventListener("click", (e) => copy(url, e.currentTarget, "✓ Link copied!"));
+    $("#share-close").addEventListener("click", closeModal);
+  });
 }
 
 function openBackupModal(){
