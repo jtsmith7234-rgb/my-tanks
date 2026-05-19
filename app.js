@@ -535,15 +535,100 @@ function renderFish(t){
     <div class="section">
       <h2>Add fish or invertebrate</h2>
       <div class="row">
-        <label class="field"><span>Species</span><input class="input" id="add-species" placeholder="e.g. Cardinal Tetra" /></label>
+        <label class="field species-field"><span>Species</span>
+          <input class="input" id="add-species" placeholder="Start typing (e.g. neon, betta, cory)" autocomplete="off" />
+          <div id="species-suggest" class="species-suggest" hidden></div>
+        </label>
         <label class="field"><span>Count</span><input class="input" id="add-count" type="number" min="1" value="1" /></label>
       </div>
       <label class="field"><span>Name (optional)</span><input class="input" id="add-name" placeholder="e.g. Boss" /></label>
+      <div id="species-info"></div>
       <button class="btn block" id="add-fish-btn">Add to tank</button>
+    </div>
+
+    <div class="section">
+      <h2>Species browser</h2>
+      <p class="muted" style="margin-top:0">Reference for ${window.FISHDB_API ? window.FISHDB_API.all.length : 60}+ popular freshwater species. Sources: Aqueon, SeriouslyFish, Aquarium Co-Op.</p>
+      <label class="field"><span>Search the database</span>
+        <input class="input" id="db-search" placeholder="e.g. tetra, shrimp, gourami" autocomplete="off" />
+      </label>
+      <div id="db-results"></div>
     </div>
   `;
 }
 function bindFish(t){
+  // ----- Autocomplete on species input -----
+  const spInput = $("#add-species");
+  const spSugg  = $("#species-suggest");
+  const spInfo  = $("#species-info");
+
+  function showSuggestions(q){
+    if (!window.FISHDB_API) return;
+    const results = window.FISHDB_API.search(q, 6);
+    if (!results.length){ spSugg.hidden = true; spSugg.innerHTML = ""; return; }
+    spSugg.innerHTML = results.map(f => `
+      <button type="button" class="species-suggest-row" data-name="${escapeHTML(f.name)}">
+        <span class="species-suggest-name">${escapeHTML(f.name)}</span>
+        <span class="species-suggest-meta">${f.minGal} gal · ${f.tempLo}-${f.tempHi}°F · pH ${f.phLo}-${f.phHi}</span>
+      </button>
+    `).join("");
+    spSugg.hidden = false;
+    $$(".species-suggest-row", spSugg).forEach(b => b.addEventListener("click", () => {
+      spInput.value = b.dataset.name;
+      spSugg.hidden = true;
+      renderSpeciesInfo(b.dataset.name);
+    }));
+  }
+
+  function renderSpeciesInfo(name){
+    if (!window.FISHDB_API){ spInfo.innerHTML = ""; return; }
+    const f = window.FISHDB_API.byName(name);
+    if (!f){ spInfo.innerHTML = ""; return; }
+    // Tank-size warning
+    let warn = "";
+    if (t.gallons && f.minGal > t.gallons){
+      warn = `<div class="species-warn"><b>Heads up:</b> This species needs at least ${f.minGal} gal. Your tank is ${t.gallons} gal.</div>`;
+    }
+    spInfo.innerHTML = warn + window.FISHDB_API.card(f);
+  }
+
+  if (spInput){
+    spInput.addEventListener("input", () => {
+      showSuggestions(spInput.value);
+      // Clear info when user types past an exact match
+      const f = window.FISHDB_API && window.FISHDB_API.byName(spInput.value.trim());
+      if (f) renderSpeciesInfo(spInput.value.trim()); else spInfo.innerHTML = "";
+    });
+    spInput.addEventListener("blur", () => {
+      // delay to allow click on suggestion
+      setTimeout(() => { spSugg.hidden = true; }, 150);
+    });
+  }
+
+  // ----- Species browser search -----
+  const dbSearch = $("#db-search");
+  const dbResults = $("#db-results");
+  function renderDbResults(q){
+    if (!window.FISHDB_API){ dbResults.innerHTML = ""; return; }
+    if (!q || !q.trim()){
+      // Show a curated default sample so it doesn't look empty
+      const sample = window.FISHDB_API.all.slice(0, 5);
+      dbResults.innerHTML = `<p class="muted small" style="margin:8px 0">Showing 5 of ${window.FISHDB_API.all.length}. Type to filter.</p>` +
+        sample.map(f => window.FISHDB_API.card(f)).join("");
+      return;
+    }
+    const results = window.FISHDB_API.search(q, 12);
+    if (!results.length){
+      dbResults.innerHTML = `<p class="muted" style="margin:8px 0">No matches. Try a shorter search.</p>`;
+      return;
+    }
+    dbResults.innerHTML = results.map(f => window.FISHDB_API.card(f)).join("");
+  }
+  if (dbSearch){
+    dbSearch.addEventListener("input", () => renderDbResults(dbSearch.value));
+    renderDbResults("");
+  }
+
   $("#add-fish-btn").addEventListener("click", () => {
     const sp = $("#add-species").value.trim();
     const ct = parseInt($("#add-count").value, 10) || 1;
@@ -741,6 +826,8 @@ function renderTests(t){
           ${ld.notes ? `<b>Notes</b><span>${escapeHTML(ld.notes)}</span>` : ""}
         </div>
       </div>` : ""}
+
+    ${window.GRAPHS ? window.GRAPHS.renderGraphsSection(t) : ""}
 
     ${recent.length > 1 ? `
       <div class="section">
