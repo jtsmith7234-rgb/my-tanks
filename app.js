@@ -706,6 +706,7 @@ function renderClean(t){
     <div class="section">
       <h2>Water change calculator</h2>
       <p class="muted" style="margin-top:0">Doses calculate against the gallons of new water you're putting back in. ${suggested} gal would be a ~50% change on this tank.</p>
+      <p class="verify-helper">Always confirm label directions before dosing. Bottle instructions can change between batches.</p>
       <div class="row">
         <label class="field"><span>Gallons being changed</span>
           <input class="input" id="wc-gallons" type="number" min="0" step="0.5" value="${suggested}" />
@@ -739,6 +740,37 @@ function bindClean(t){
   const inp = $("#wc-gallons");
   const out = $("#dose-out");
 
+  // Per-product verification state (resets each calculator session)
+  const verifyState = {
+    prime:     { verified: false, note: "" },
+    stability: { verified: false, note: "" },
+    easygreen: { verified: false, note: "" }
+  };
+
+  function doseCard(key, label, valueHTML, ruleText){
+    const v = verifyState[key];
+    const heading = v.verified ? "Dose" : "Estimated dose";
+    const badge = v.verified
+      ? `<span class="verify-badge verified">✓ Verified from bottle</span>`
+      : `<span class="verify-badge">Unverified</span>`;
+    return `
+      <div class="dose-card ${v.verified ? "verified" : ""}">
+        <div class="dose-card-head">
+          <div class="label">${label}</div>
+          ${badge}
+        </div>
+        <div class="dose-heading">${heading}</div>
+        <div class="big">${valueHTML}</div>
+        <div class="sub">${ruleText}</div>
+        <label class="verify-toggle">
+          <input type="checkbox" data-verify="${key}" ${v.verified ? "checked" : ""} />
+          <span>Verified from bottle label</span>
+        </label>
+        <input class="input verify-note" data-note="${key}" placeholder="Label note (e.g. '1 cap per 50 gal — 2026 batch')" value="${escapeHTML(v.note || "")}" ${v.verified ? "" : "hidden"} />
+      </div>
+    `;
+  }
+
   function paint(){
     const g = parseFloat(inp.value);
     if(!g || g <= 0){
@@ -746,25 +778,26 @@ function bindClean(t){
       return;
     }
     const d = calcDoses(g);
+    const primeVal     = `${fmt(d.prime.mL)}<span class="unit">mL</span> <span class="sub-inline">(${fmt(d.prime.caps)} cap${d.prime.caps===1?"":"s"})</span>`;
+    const stabilityVal = `${fmt(d.stability.mL)}<span class="unit">mL</span> <span class="sub-inline">(${fmt(d.stability.caps)} cap${d.stability.caps===1?"":"s"})</span>`;
+    const easyVal      = `${fmt(d.easygreen.pumps)}<span class="unit">pumps</span>`;
     out.innerHTML = `
       <div class="dose-grid">
-        <div class="dose-card">
-          <div class="label">Seachem Prime</div>
-          <div class="big">${fmt(d.prime.mL)}<span class="unit">mL</span></div>
-          <div class="sub">${fmt(d.prime.caps)} capful${d.prime.caps===1?"":"s"} &middot; ${DOSING.prime.rule}</div>
-        </div>
-        <div class="dose-card">
-          <div class="label">Seachem Stability</div>
-          <div class="big">${fmt(d.stability.mL)}<span class="unit">mL</span></div>
-          <div class="sub">${fmt(d.stability.caps)} capful${d.stability.caps===1?"":"s"} &middot; ${DOSING.stability.rule}</div>
-        </div>
-        <div class="dose-card">
-          <div class="label">Easy Green</div>
-          <div class="big">${fmt(d.easygreen.pumps)}<span class="unit">pumps</span></div>
-          <div class="sub">${DOSING.easygreen.rule}</div>
-        </div>
+        ${doseCard("prime",     "Seachem Prime",     primeVal,     DOSING.prime.rule)}
+        ${doseCard("stability", "Seachem Stability", stabilityVal, DOSING.stability.rule)}
+        ${doseCard("easygreen", "Easy Green",        easyVal,      DOSING.easygreen.rule)}
       </div>
     `;
+    // Wire up checkboxes + label-note inputs
+    $$("input[data-verify]", out).forEach(cb => cb.addEventListener("change", () => {
+      const key = cb.dataset.verify;
+      verifyState[key].verified = cb.checked;
+      paint();
+    }));
+    $$("input[data-note]", out).forEach(inp2 => inp2.addEventListener("input", () => {
+      const key = inp2.dataset.note;
+      verifyState[key].note = inp2.value;
+    }));
   }
   inp.addEventListener("input", paint);
   paint();
@@ -779,6 +812,12 @@ function bindClean(t){
       prime_mL: +d.prime.mL.toFixed(2),
       stability_mL: +d.stability.mL.toFixed(2),
       fert_pumps: +d.easygreen.pumps.toFixed(2),
+      prime_verified:     !!verifyState.prime.verified,
+      stability_verified: !!verifyState.stability.verified,
+      easygreen_verified: !!verifyState.easygreen.verified,
+      prime_label_note:     verifyState.prime.note     || "",
+      stability_label_note: verifyState.stability.note || "",
+      easygreen_label_note: verifyState.easygreen.note || "",
       notes: $("#wc-notes").value.trim()
     });
     toast("Logged");
