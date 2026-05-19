@@ -228,6 +228,10 @@ function renderHome(){
       <div class="section center">
         <h2>No tanks yet</h2>
         <p class="muted">Tap the + button to add your first tank.</p>
+      </div>
+      <div class="section first-tank-cta">
+        <h2>🌱 First time setting up a tank?</h2>
+        <p class="muted" style="margin:0">After you add your tank, open the Details tab and start <b>First Tank Mode</b> — a guided 30-day walkthrough so you don't kill your first fish.</p>
       </div>`;
     return;
   }
@@ -366,6 +370,8 @@ function renderDetails(t){
       ${t.notes ? `<div class="hr"></div><p class="muted" style="margin:0">${escapeHTML(t.notes)}</p>` : ""}
     </div>
 
+    ${window.FIRSTTANK ? window.FIRSTTANK.render(t) : ""}
+
     ${renderRemindersSection(t)}
 
     <div class="section">
@@ -478,6 +484,13 @@ function bindReminders(t){
 
 function bindDetails(t){
   bindReminders(t);
+  if (window.FIRSTTANK){
+    window.FIRSTTANK.bind(t, (msg) => {
+      saveTanks(tanks);
+      logEvent(t.id, "first_tank", { msg });
+      render();
+    });
+  }
   $("#save-details").addEventListener("click", () => {
     const before = { name:t.name, gallons:t.gallons, type:t.type, substrate:t.substrate, decor:t.decor, notes:t.notes };
     t.name      = $("#d-name").value.trim() || t.name;
@@ -701,7 +714,15 @@ function calcDoses(gallons){
 }
 
 function renderClean(t){
-  const suggested = Math.round(t.gallons * 0.5); // suggest 50% water change
+  const suggested = Math.round(t.gallons * 0.5);
+  // Migrate legacy: ensure tank.chemicals exists. Auto-seed Prime + Stability + Easy Green for older tanks.
+  if (!t.chemicals){
+    t.chemicals = [
+      { instanceId: uid(), libraryId: "prime",     custom: null },
+      { instanceId: uid(), libraryId: "stability", custom: null },
+      { instanceId: uid(), libraryId: "easygreen", custom: null }
+    ];
+  }
   return `
     <div class="section">
       <h2>Water change calculator</h2>
@@ -715,80 +736,148 @@ function renderClean(t){
           <input class="input" id="wc-date" type="date" value="${new Date().toISOString().slice(0,10)}" />
         </label>
       </div>
-
-      <div id="dose-out"></div>
-
-      <label class="field" style="margin-top:10px"><span>Notes (optional)</span>
-        <input class="input" id="wc-notes" placeholder="e.g. trimmed moss, vacuumed substrate" /></label>
-
-      <div class="row">
-        <button class="btn block" id="log-btn">Save to history</button>
-      </div>
     </div>
 
     <div class="section">
-      <h2>Dosing rules used</h2>
-      <ul class="muted" style="line-height:1.7;margin:0;padding-left:18px">
-        <li><b style="color:var(--ink)">Seachem Prime</b> — ${DOSING.prime.rule}</li>
-        <li><b style="color:var(--ink)">Seachem Stability</b> — ${DOSING.stability.rule}</li>
-        <li><b style="color:var(--ink)">Easy Green</b> — ${DOSING.easygreen.rule}</li>
-      </ul>
+      <div class="chem-section-head">
+        <h2>Your chemicals</h2>
+        <button class="btn small" id="add-chem-btn">+ Add</button>
+      </div>
+      <div id="dose-out"></div>
+    </div>
+
+    <div class="section">
+      <label class="field"><span>Session notes (optional)</span>
+        <input class="input" id="wc-notes" placeholder="e.g. trimmed moss, vacuumed substrate" /></label>
+      <button class="btn block" id="log-btn" style="margin-top:10px">Save to history</button>
     </div>
   `;
 }
+
+function renderChemPickerModal(){
+  if (!window.CHEMICALS) return "";
+  const byType = {};
+  window.CHEMICALS.ALL.forEach(c => {
+    byType[c.type] = byType[c.type] || [];
+    byType[c.type].push(c);
+  });
+  const sections = Object.keys(byType).map(type => `
+    <div class="chem-picker-section">
+      <div class="chem-picker-type">${type}</div>
+      ${byType[type].map(c => `
+        <button type="button" class="chem-picker-item" data-lib="${c.id}">
+          <div>
+            <div class="chem-picker-name">${c.brand} ${c.name}</div>
+            <div class="chem-picker-rule muted small">${c.rule}</div>
+          </div>
+        </button>
+      `).join("")}
+    </div>
+  `).join("");
+  return `
+    <h3 style="margin-top:0">Add a chemical</h3>
+    <p class="muted" style="margin-top:0">Pick from the library or add your own.</p>
+    <input class="input" id="chem-search" placeholder="Search (e.g. Prime, bacteria, fert)" style="margin-bottom:8px" />
+    <div id="chem-picker-list">${sections}</div>
+    <div class="chem-picker-not-found">
+      <p class="muted small" style="margin:12px 0 6px">Don't see your chemical?</p>
+      <button class="btn block secondary" id="chem-custom-btn">+ Add custom chemical</button>
+    </div>
+    <button class="btn block secondary" id="chem-cancel-btn" style="margin-top:8px">Cancel</button>
+  `;
+}
+
+function renderChemCustomModal(){
+  return `
+    <h3 style="margin-top:0">Custom chemical</h3>
+    <p class="muted" style="margin-top:0">Read the bottle carefully. Enter the dose exactly as the label states.</p>
+    <label class="field"><span>Brand</span><input class="input" id="cc-brand" placeholder="e.g. Seachem" /></label>
+    <label class="field"><span>Product name</span><input class="input" id="cc-name" placeholder="e.g. Flourish Trace" /></label>
+    <label class="field"><span>Type</span>
+      <select class="input" id="cc-type">
+        ${(window.CHEMICALS ? window.CHEMICALS.TYPES : []).map(t => `<option>${t}</option>`).join("")}
+      </select>
+    </label>
+    <div class="row">
+      <label class="field"><span>Amount per gallon</span><input class="input" id="cc-amount" type="number" step="0.01" placeholder="e.g. 0.1" /></label>
+      <label class="field"><span>Unit</span>
+        <select class="input" id="cc-unit">
+          <option>mL</option><option>pumps</option><option>drops</option><option>g</option><option>tsp</option><option>oz</option>
+        </select>
+      </label>
+    </div>
+    <label class="field"><span>Bottle directions (what it says on the label)</span>
+      <input class="input" id="cc-rule" placeholder="e.g. 1 mL per 10 gal weekly" /></label>
+    <div class="row">
+      <button class="btn" id="cc-save">Add to tank</button>
+      <button class="btn secondary" id="cc-cancel">Cancel</button>
+    </div>
+  `;
+}
+function chemResolve(c){
+  // Returns the effective spec for a tank chemical entry (library or custom)
+  if (c.custom) return c.custom;
+  if (window.CHEMICALS) return window.CHEMICALS.byId(c.libraryId);
+  return null;
+}
+
 function bindClean(t){
   const inp = $("#wc-gallons");
   const out = $("#dose-out");
 
-  // Per-product verification state (resets each calculator session)
-  const verifyState = {
-    prime:     { verified: false, note: "" },
-    stability: { verified: false, note: "" },
-    easygreen: { verified: false, note: "" }
-  };
+  // Per-session verification state, keyed by instanceId
+  const verifyState = {};
+  (t.chemicals || []).forEach(c => { verifyState[c.instanceId] = { verified: false, note: "" }; });
 
-  function doseCard(key, label, valueHTML, ruleText){
-    const v = verifyState[key];
+  function doseCard(c, gallons){
+    const spec = chemResolve(c);
+    if (!spec) return "";
+    const v = verifyState[c.instanceId] || { verified: false, note: "" };
     const heading = v.verified ? "Dose" : "Estimated dose";
     const badge = v.verified
       ? `<span class="verify-badge verified">✓ Verified from bottle</span>`
       : `<span class="verify-badge">Unverified</span>`;
+    const amount = (spec.mlPerGallon || 0) * gallons;
+    const caps = spec.capSize ? amount / spec.capSize : 0;
+    const unit = spec.unit || "mL";
+    const inline = (spec.capSize && spec.capSize > 1)
+      ? `<span class="sub-inline">(${fmt(caps)} cap${caps===1?"":"s"})</span>`
+      : "";
+    const valueHTML = `${fmt(amount)}<span class="unit">${unit}</span> ${inline}`;
+    const srcLink = spec.source
+      ? `<a class="chem-source" href="${spec.source}" target="_blank" rel="noopener">Source</a>`
+      : "";
     return `
       <div class="dose-card ${v.verified ? "verified" : ""}">
         <div class="dose-card-head">
-          <div class="label">${label}</div>
+          <div class="label">${escapeHTML(spec.brand || "")} ${escapeHTML(spec.name || "")}</div>
           ${badge}
         </div>
         <div class="dose-heading">${heading}</div>
         <div class="big">${valueHTML}</div>
-        <div class="sub">${ruleText}</div>
+        <div class="sub">${escapeHTML(spec.rule || "")} ${srcLink}</div>
         <label class="verify-toggle">
-          <input type="checkbox" data-verify="${key}" ${v.verified ? "checked" : ""} />
+          <input type="checkbox" data-verify="${c.instanceId}" ${v.verified ? "checked" : ""} />
           <span>Verified from bottle label</span>
         </label>
-        <input class="input verify-note" data-note="${key}" placeholder="Label note (e.g. '1 cap per 50 gal — 2026 batch')" value="${escapeHTML(v.note || "")}" ${v.verified ? "" : "hidden"} />
+        <input class="input verify-note" data-note="${c.instanceId}" placeholder="Label note (e.g. '1 cap per 50 gal — 2026 batch')" value="${escapeHTML(v.note || "")}" ${v.verified ? "" : "hidden"} />
+        <button class="chem-remove" data-remove="${c.instanceId}" title="Remove from tank">×</button>
       </div>
     `;
   }
 
   function paint(){
     const g = parseFloat(inp.value);
-    if(!g || g <= 0){
-      out.innerHTML = `<p class="muted center" style="margin:10px 0 0">Enter a gallon amount to see your doses.</p>`;
+    const list = t.chemicals || [];
+    if (!list.length){
+      out.innerHTML = `<p class="muted center" style="margin:10px 0 0">No chemicals added. Tap <b>+ Add</b> to pick what you use.</p>`;
       return;
     }
-    const d = calcDoses(g);
-    const primeVal     = `${fmt(d.prime.mL)}<span class="unit">mL</span> <span class="sub-inline">(${fmt(d.prime.caps)} cap${d.prime.caps===1?"":"s"})</span>`;
-    const stabilityVal = `${fmt(d.stability.mL)}<span class="unit">mL</span> <span class="sub-inline">(${fmt(d.stability.caps)} cap${d.stability.caps===1?"":"s"})</span>`;
-    const easyVal      = `${fmt(d.easygreen.pumps)}<span class="unit">pumps</span>`;
-    out.innerHTML = `
-      <div class="dose-grid">
-        ${doseCard("prime",     "Seachem Prime",     primeVal,     DOSING.prime.rule)}
-        ${doseCard("stability", "Seachem Stability", stabilityVal, DOSING.stability.rule)}
-        ${doseCard("easygreen", "Easy Green",        easyVal,      DOSING.easygreen.rule)}
-      </div>
-    `;
-    // Wire up checkboxes + label-note inputs
+    if(!g || g <= 0){
+      out.innerHTML = `<p class="muted center" style="margin:10px 0 0">Enter a gallon amount above to see your doses.</p>`;
+      return;
+    }
+    out.innerHTML = `<div class="dose-grid">${list.map(c => doseCard(c, g)).join("")}</div>`;
     $$("input[data-verify]", out).forEach(cb => cb.addEventListener("change", () => {
       const key = cb.dataset.verify;
       verifyState[key].verified = cb.checked;
@@ -798,26 +887,112 @@ function bindClean(t){
       const key = inp2.dataset.note;
       verifyState[key].note = inp2.value;
     }));
+    $$("button[data-remove]", out).forEach(b => b.addEventListener("click", () => {
+      const id = b.dataset.remove;
+      t.chemicals = (t.chemicals || []).filter(c => c.instanceId !== id);
+      delete verifyState[id];
+      saveTanks(tanks);
+      paint();
+    }));
   }
   inp.addEventListener("input", paint);
   paint();
 
+  // ----- + Add chemical flow -----
+  function openChemPicker(){
+    openModal(renderChemPickerModal(), () => {
+      const search = $("#chem-search");
+      const list   = $("#chem-picker-list");
+      function filter(q){
+        const norm = (q || "").toLowerCase().trim();
+        $$(".chem-picker-item", list).forEach(item => {
+          const txt = item.textContent.toLowerCase();
+          item.style.display = (!norm || txt.includes(norm)) ? "" : "none";
+        });
+        // Hide empty type sections
+        $$(".chem-picker-section", list).forEach(sec => {
+          const visible = $$(".chem-picker-item", sec).some(i => i.style.display !== "none");
+          sec.style.display = visible ? "" : "none";
+        });
+      }
+      if (search) search.addEventListener("input", e => filter(e.target.value));
+
+      $$(".chem-picker-item").forEach(b => b.addEventListener("click", () => {
+        const libId = b.dataset.lib;
+        const entry = { instanceId: uid(), libraryId: libId, custom: null };
+        t.chemicals = t.chemicals || [];
+        // Prevent duplicates of the same library item
+        if (t.chemicals.some(c => c.libraryId === libId)){
+          toast("Already added");
+          closeModal();
+          return;
+        }
+        t.chemicals.push(entry);
+        verifyState[entry.instanceId] = { verified: false, note: "" };
+        saveTanks(tanks);
+        const spec = window.CHEMICALS && window.CHEMICALS.byId(libId);
+        logEvent(t.id, "chem_add", { name: spec ? `${spec.brand} ${spec.name}` : libId });
+        closeModal();
+        paint();
+      }));
+      $("#chem-custom-btn").addEventListener("click", () => { closeModal(); openCustom(); });
+      $("#chem-cancel-btn").addEventListener("click", closeModal);
+    });
+  }
+  function openCustom(){
+    openModal(renderChemCustomModal(), () => {
+      $("#cc-save").addEventListener("click", () => {
+        const brand = $("#cc-brand").value.trim();
+        const name  = $("#cc-name").value.trim();
+        const type  = $("#cc-type").value;
+        const amt   = parseFloat($("#cc-amount").value);
+        const unit  = $("#cc-unit").value;
+        const rule  = $("#cc-rule").value.trim();
+        if (!brand || !name){ alert("Brand and name are required"); return; }
+        if (!amt || amt <= 0){ alert("Enter the amount per gallon"); return; }
+        const custom = {
+          brand, name, type, unit,
+          mlPerGallon: amt,
+          capSize: 0,
+          rule: rule || `${amt} ${unit} per gallon`,
+          when: "",
+          source: ""
+        };
+        const entry = { instanceId: uid(), libraryId: null, custom };
+        t.chemicals = t.chemicals || [];
+        t.chemicals.push(entry);
+        verifyState[entry.instanceId] = { verified: false, note: "" };
+        saveTanks(tanks);
+        logEvent(t.id, "chem_add", { name: `${brand} ${name}`, custom: true });
+        closeModal();
+        paint();
+      });
+      $("#cc-cancel").addEventListener("click", closeModal);
+    });
+  }
+  $("#add-chem-btn").addEventListener("click", openChemPicker);
+
+  // ----- Save to history -----
   $("#log-btn").addEventListener("click", () => {
     const g = parseFloat(inp.value);
     if(!g || g <= 0){ alert("Enter a gallon amount first."); return; }
-    const d = calcDoses(g);
+    const list = t.chemicals || [];
+    const dosesLogged = list.map(c => {
+      const spec = chemResolve(c);
+      const v = verifyState[c.instanceId] || {};
+      if (!spec) return null;
+      return {
+        name: `${spec.brand || ""} ${spec.name || ""}`.trim(),
+        amount: +((spec.mlPerGallon || 0) * g).toFixed(2),
+        unit: spec.unit || "mL",
+        verified: !!v.verified,
+        label_note: v.note || ""
+      };
+    }).filter(Boolean);
     logEvent(t.id, "water_change", {
       date: $("#wc-date").value || new Date().toISOString().slice(0,10),
       gallons: g,
-      prime_mL: +d.prime.mL.toFixed(2),
-      stability_mL: +d.stability.mL.toFixed(2),
-      fert_pumps: +d.easygreen.pumps.toFixed(2),
-      prime_verified:     !!verifyState.prime.verified,
-      stability_verified: !!verifyState.stability.verified,
-      easygreen_verified: !!verifyState.easygreen.verified,
-      prime_label_note:     verifyState.prime.note     || "",
-      stability_label_note: verifyState.stability.note || "",
-      easygreen_label_note: verifyState.easygreen.note || "",
+      doses: dosesLogged,
       notes: $("#wc-notes").value.trim()
     });
     toast("Logged");
@@ -945,7 +1120,9 @@ const HISTORY_FILTERS = [
   { id: "fish",         label: "Fish"          },
   { id: "tank_edit",    label: "Tank edits"    },
   { id: "advisor",      label: "Advisor"       },
-  { id: "reminder_fired", label: "Reminders"   }
+  { id: "reminder_fired", label: "Reminders"   },
+  { id: "chem_add",     label: "Chemicals"     },
+  { id: "first_tank",   label: "First Tank"    }
 ];
 let historyFilter = "all";
 
@@ -1004,6 +1181,8 @@ function eventIcon(type){
   if (type === "tank_edit")    return "🔧";
   if (type === "advisor")      return "🌸";
   if (type === "reminder_fired") return "🔔";
+  if (type === "chem_add")       return "🧪";
+  if (type === "first_tank")     return "🌱";
   return "•";
 }
 function eventTitle(e){
@@ -1016,15 +1195,25 @@ function eventTitle(e){
   if (e.type === "tank_edit")    return `Tank details updated`;
   if (e.type === "advisor")      return escapeHTML(d.title || "Advisor");
   if (e.type === "reminder_fired") return escapeHTML(d.title || "Reminder");
+  if (e.type === "chem_add")     return `Added chemical: ${escapeHTML(d.name || "")}${d.custom ? " (custom)" : ""}`;
+  if (e.type === "first_tank")   return `First Tank: ${escapeHTML(d.msg || "updated")}`;
   return e.type;
 }
 function eventDetail(e){
   const d = e.data || {};
   if (e.type === "water_change") {
     const bits = [];
-    bits.push(`Prime ${fmt(d.prime_mL)} mL`);
-    bits.push(`Stability ${fmt(d.stability_mL)} mL`);
-    bits.push(`Easy Green ${fmt(d.fert_pumps)} pumps`);
+    if (Array.isArray(d.doses) && d.doses.length){
+      d.doses.forEach(dose => {
+        const v = dose.verified ? " ✓" : "";
+        bits.push(`${escapeHTML(dose.name)} ${fmt(dose.amount)} ${escapeHTML(dose.unit)}${v}`);
+      });
+    } else {
+      // legacy entries
+      if (d.prime_mL != null)     bits.push(`Prime ${fmt(d.prime_mL)} mL`);
+      if (d.stability_mL != null) bits.push(`Stability ${fmt(d.stability_mL)} mL`);
+      if (d.fert_pumps != null)   bits.push(`Easy Green ${fmt(d.fert_pumps)} pumps`);
+    }
     if (d.notes) bits.push(escapeHTML(d.notes));
     return bits.join(" · ");
   }
