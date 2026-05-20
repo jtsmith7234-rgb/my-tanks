@@ -138,14 +138,38 @@ html[data-theme="aquarium"] .petal.p3{ width:18px;height:18px;opacity:.85 }
 /* Shared rules — apply to ALL themes */
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;color:var(--ink);font-family:var(--font-body);-webkit-font-smoothing:antialiased}
-body{ overflow-x:hidden; }
+html,body{ height:100%; max-width:100%; overflow:hidden; overscroll-behavior:none; }
 .petals{ position:fixed;inset:0;pointer-events:none;z-index:-1;overflow:hidden; }
 .petal{ position:absolute; }
 @media (prefers-reduced-motion: reduce){
   .petal{ animation: none; display:none }
 }
 
-#app{max-width:780px;margin:0 auto;padding:max(12px,env(safe-area-inset-top)) 14px 110px;position:relative}
+/* App shell: locks the viewport, flex column with single scroll area. */
+#app{
+  position:fixed; inset:0;
+  max-width:780px;
+  margin:0 auto;            /* center within viewport on wide screens */
+  display:flex; flex-direction:column;
+  padding:
+    max(8px, env(safe-area-inset-top))
+    max(0px, env(safe-area-inset-right))
+    0
+    max(0px, env(safe-area-inset-left));
+  overflow:hidden;
+}
+#app > .topbar,
+#app > #storage-banner,
+#app > .footer{ flex:0 0 auto; }
+#app > #main{
+  flex:1 1 auto;
+  min-height:0;             /* allow flex child to shrink so overflow can scroll */
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  padding:0 14px 18px;
+  scroll-padding-bottom: calc(env(safe-area-inset-bottom) + 12px);
+}
 
 /* ============================================================
    TOP BAR — washi paper bar
@@ -153,8 +177,8 @@ body{ overflow-x:hidden; }
 .topbar{
   display:flex;align-items:center;gap:8px;
   padding:10px 14px;
-  margin:-4px -4px 14px;
-  position:sticky;top:max(4px,env(safe-area-inset-top));
+  margin:0 10px 12px;
+  position:relative;
   z-index:30;
   background:var(--glass-fill);
   border:1px solid var(--glass-stroke);
@@ -205,7 +229,8 @@ html[data-theme="koi"] .topbar h1{
    FOOTER (floating ink bar)
    ============================================================ */
 .footer{
-  position:fixed;left:14px;right:14px;bottom:max(10px,env(safe-area-inset-bottom));
+  position:relative;
+  margin:10px 14px calc(env(safe-area-inset-bottom) + 10px);
   text-align:center;padding:10px 14px;
   background:var(--glass-fill-strong);
   border:1px solid var(--glass-stroke);
@@ -355,18 +380,23 @@ html[data-theme="koi"] .topbar h1{
   -webkit-backdrop-filter:blur(22px) saturate(160%);
           backdrop-filter:blur(22px) saturate(160%);
   overflow-x:auto;
+  overscroll-behavior-x:contain;
+  scroll-snap-type:x proximity;
+  scroll-padding-inline:6px;
   box-shadow:var(--glass-shadow-sm);
   scrollbar-width:none;
 }
 .tabs::-webkit-scrollbar{display:none}
 .tab{
-  flex:1;min-width:max-content;
+  flex:0 0 auto;             /* never get squished; never force-stretch beyond width */
   appearance:none;background:transparent;border:0;color:var(--ink-dim);
-  padding:10px 16px;font-weight:600;border-radius:12px;cursor:pointer;font-size:14px;
+  padding:9px 13px;font-weight:600;border-radius:12px;cursor:pointer;font-size:13.5px;
   transition:.2s cubic-bezier(.2,.8,.2,1);
   white-space:nowrap;
   font-family:inherit;
+  scroll-snap-align:start;
 }
+.tab:last-child{ margin-right:6px; }   /* visible end padding so the last chip is never partially clipped at rest */
 .tab.active{
   background:linear-gradient(180deg, rgba(255,155,190,.28), rgba(255,122,74,.14));
   color:#fff5f7;

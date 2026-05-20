@@ -585,8 +585,8 @@ function renderTank(){
     <div class="tabs" role="tablist">
       <button class="tab ${view.tab==='details'?'active':''}" data-tab="details">Details</button>
       <button class="tab ${view.tab==='fish'?'active':''}" data-tab="fish">Fish</button>
-      <button class="tab ${view.tab==='clean'?'active':''}" data-tab="clean">Clean &amp; Dose</button>
-      <button class="tab ${view.tab==='tests'?'active':''}" data-tab="tests">Water Tests</button>
+      <button class="tab ${view.tab==='clean'?'active':''}" data-tab="clean">Care</button>
+      <button class="tab ${view.tab==='tests'?'active':''}" data-tab="tests">Tests</button>
       <button class="tab ${view.tab==='history'?'active':''}" data-tab="history">History</button>
     </div>
     <div id="tab-body"></div>
