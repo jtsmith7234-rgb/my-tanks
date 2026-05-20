@@ -263,6 +263,66 @@ html[data-theme="koi"] .topbar h1{
 .tank-card .meta{position:relative;color:var(--ink-dim);font-size:13.5px;font-weight:500}
 .tank-card .pill-row{position:relative;margin-top:14px;display:flex;flex-wrap:wrap;gap:6px}
 
+/* New tank-card layout: name + subtle status + meta */
+.tank-card .tc-top{
+  position:relative;
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:6px;
+}
+.tank-card .tc-name{
+  margin:0;
+  font-family:var(--font-display);
+  font-size:22px;
+  font-weight:700;
+  letter-spacing:-.2px;
+  color:var(--ink);
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.tank-card .tc-meta{
+  position:relative;
+  color:var(--ink-dim);
+  font-size:13.5px;
+  font-weight:500;
+}
+.tank-card .tc-status{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  flex-shrink:0;
+  font-size:11.5px;
+  font-weight:600;
+  letter-spacing:.01em;
+  padding:3px 9px 3px 8px;
+  border-radius:999px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+  color: var(--ink-dim);
+}
+.tank-card .tc-dot{
+  width:7px;height:7px;border-radius:50%;
+  background: #6fcf97;
+  box-shadow: 0 0 0 2px rgba(111,207,151,.18);
+  flex-shrink:0;
+}
+.tc-status-ok    .tc-dot{ background:#6fcf97; box-shadow:0 0 0 2px rgba(111,207,151,.18); }
+.tc-status-fyi   .tc-dot{ background:#f0bf6a; box-shadow:0 0 0 2px rgba(240,191,106,.18); }
+.tc-status-soon  .tc-dot{ background:#f0a050; box-shadow:0 0 0 2px rgba(240,160,80,.22); }
+.tc-status-urgent .tc-dot{ background:#ff6b6b; box-shadow:0 0 0 2px rgba(255,107,107,.25); }
+.tc-status-ok    { color: rgba(120,200,150,.95); }
+.tc-status-fyi   { color: rgba(220,180,110,.95); }
+.tc-status-soon  { color: rgba(240,170,100,.95); }
+.tc-status-urgent{ color: rgba(255,130,130,1); }
+/* Subtle left-border tint by status (very quiet) */
+.tank-card.tc-soon   { border-left: 2px solid rgba(240,160,80,.55); }
+.tank-card.tc-urgent { border-left: 2px solid rgba(255,107,107,.65); }
+
 .pill{
   display:inline-flex;align-items:center;gap:6px;
   padding:5px 11px;border-radius:999px;
@@ -784,6 +844,46 @@ button:focus-visible, .tab:focus-visible, .chip:focus-visible{
 .sev-fyi{ color:var(--sakura) }
 
 /* ============================================================
+   UP NEXT — in-app due reminders list
+   ============================================================ */
+.upn-list{ display:flex; flex-direction:column; gap:10px }
+.upn-row{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:10px 12px;
+  align-items:start;
+  padding:12px 12px;
+  border-radius:14px;
+  background:var(--glass-fill);
+  border:1px solid var(--glass-stroke);
+}
+.upn-icon{
+  width:36px;height:36px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+  background:rgba(255,255,255,.55);
+  border:1px solid var(--glass-stroke);
+}
+html[data-theme="koi"] .upn-icon{ background:rgba(255,255,255,.08) }
+.upn-body{ display:flex; flex-direction:column; gap:2px; min-width:0 }
+.upn-title{ font-weight:700; font-size:15px; color:var(--ink); letter-spacing:.1px }
+.upn-sub{ font-size:13px; font-weight:600; color:var(--ink-dim) }
+.upn-sub.bad{ color:var(--bad) }
+.upn-sub.warn{ color:var(--warn) }
+.upn-last{ font-size:12px; margin-top:2px }
+.upn-actions{
+  grid-column:1 / -1;
+  display:flex; gap:6px; flex-wrap:wrap;
+  margin-top:4px;
+}
+.upn-actions .btn{ flex:1 1 auto; min-width:90px; padding:8px 10px; font-size:13px }
+/* Status accents */
+.upn-due-now{ border-color:rgba(224,69,92,.45); box-shadow:0 0 0 3px rgba(224,69,92,.08) }
+.upn-snoozed{ border-color:rgba(232,148,34,.45) }
+html[data-theme="aquarium"] .upn-due-now{ background:linear-gradient(160deg, rgba(255,255,255,.65), rgba(224,69,92,.10)) }
+html[data-theme="aquarium"] .upn-snoozed{ background:linear-gradient(160deg, rgba(255,255,255,.62), rgba(232,148,34,.08)) }
+
+/* ============================================================
    REMINDERS — settings UI in tank Details tab
    ============================================================ */
 .rem-perm-banner{
@@ -885,7 +985,7 @@ input[type=time].input{ font-family:inherit }
 }
 .graph-svg{
   width:100%;
-  height:80px;
+  height:70px;
 }
 .graph-svg svg{
   width:100%;
@@ -893,7 +993,7 @@ input[type=time].input{ font-family:inherit }
   display:block;
 }
 .graph-empty{
-  height:80px;
+  height:70px;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -901,6 +1001,30 @@ input[type=time].input{ font-family:inherit }
   color:var(--ink-dim);
   font-style:italic;
 }
+.graph-latest{
+  display:flex; align-items:baseline; gap:6px; flex-wrap:wrap;
+}
+.graph-num{
+  font-family:var(--font-display);
+  font-size:20px; font-weight:800; color:var(--ink);
+  letter-spacing:-.3px;
+}
+.graph-unit{ font-size:11px; font-weight:600; color:var(--ink-dim) }
+.graph-status{
+  font-size:11px; font-weight:700;
+  padding:2px 8px; border-radius:999px;
+  text-transform:uppercase; letter-spacing:.5px;
+  border:1px solid transparent;
+  margin-left:2px;
+}
+.graph-status-good{ background:rgba(43,182,115,.14); color:var(--jade); border-color:rgba(43,182,115,.30) }
+.graph-status-warn{ background:rgba(232,148,34,.14); color:var(--warn); border-color:rgba(232,148,34,.30) }
+.graph-status-bad{  background:rgba(224,69,92,.14); color:var(--bad);  border-color:rgba(224,69,92,.35) }
+.graph-foot{ margin-top:4px }
+.graph-sub-good{ color:var(--jade); font-weight:600 }
+.graph-sub-warn{ color:var(--warn); font-weight:600 }
+.graph-sub-bad{  color:var(--bad);  font-weight:600 }
+.graph-sub-muted{ color:var(--ink-dim) }
 
 /* ============================================================
    FISH DB / SPECIES BROWSER
@@ -1255,6 +1379,48 @@ input[type=time].input{ font-family:inherit }
   margin-bottom:10px;
 }
 .ft-tip b{ color: var(--warn, #ffa550) }
+
+/* First-tank Need / Do / Expect blocks */
+.ft-block{
+  margin: 0 0 10px;
+  padding: 8px 10px 6px;
+  border-radius: 8px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--glass-stroke, rgba(255,255,255,.06));
+}
+.ft-block-label{
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  margin-bottom: 4px;
+}
+.ft-block-list{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.ft-block-list li{
+  position: relative;
+  padding: 4px 0 4px 18px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+.ft-block-list li::before{
+  position: absolute;
+  left: 2px;
+  top: 4px;
+  font-size: 12px;
+  color: var(--ink-dim);
+}
+.ft-need .ft-block-list li::before{ content: "•"; }
+.ft-do .ft-block-list li::before{ content: "→"; color: #6ea8ff; }
+.ft-expect .ft-block-list li::before{ content: "✓"; color: #5ec98a; }
+.ft-need{ border-left: 3px solid rgba(255,255,255,.18); }
+.ft-do{ border-left: 3px solid #6ea8ff; }
+.ft-expect{ border-left: 3px solid #5ec98a; }
 
 /* ============================================================
    ACTION SHEET (long-press on tank card)

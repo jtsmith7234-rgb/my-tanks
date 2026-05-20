@@ -60,7 +60,7 @@ const FISHDB = [
   { name:"Kribensis", sci:"Pelvicachromis pulcher", minGal:20, tempLo:75, tempHi:81, phLo:6.5, phHi:7.5, diet:"Omnivore", temperament:"Semi-aggressive (breeding)", school:2, care:"Easy", notes:"Cave spawner. Hardy dwarf cichlid." },
   { name:"Convict Cichlid", sci:"Amatitlania nigrofasciata", minGal:30, tempLo:74, tempHi:82, phLo:6.6, phHi:7.8, diet:"Omnivore", temperament:"Aggressive", school:1, care:"Easy", notes:"Will breed and defend territory fiercely." },
   { name:"Discus", sci:"Symphysodon aequifasciatus", minGal:55, tempLo:82, tempHi:88, phLo:6.0, phHi:7.0, diet:"Carnivore", temperament:"Peaceful", school:5, care:"Hard", notes:"Expert fish. Soft warm water, pristine conditions." },
-  { name:"Oscar", sci:"Astronotus ocellatus", minGal:75, tempLo:74, tempHi:81, phLo:6.0, phHi:7.5, diet:"Carnivore", temperament:"Aggressive", school:1, care:"Moderate", notes:"Grows 12+ inches. Massive bioload." },
+  { name:"Oscar", sci:"Astronotus ocellatus", minGal:75, tempLo:74, tempHi:81, phLo:6.0, phHi:7.5, diet:"Carnivore", temperament:"Aggressive", school:1, care:"Moderate", notes:"Grows 12+ inches and produces a lot of waste — needs a very big tank and strong filtration." },
   { name:"Yellow Lab Cichlid", sci:"Labidochromis caeruleus", minGal:40, tempLo:75, tempHi:82, phLo:7.8, phHi:8.6, diet:"Omnivore", temperament:"Semi-aggressive", school:3, care:"Easy", notes:"African Rift Lake. Hard alkaline water." },
 
   // ----- Other community -----

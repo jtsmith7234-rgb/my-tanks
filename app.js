@@ -294,17 +294,47 @@ function openTankActions(tankId){
   });
 }
 
+function _tankStatus(t){
+  // Returns { tone: "ok"|"fyi"|"soon"|"urgent", label, hint }
+  try {
+    const adv = window.ADVISOR && window.ADVISOR.computeAdvice ? window.ADVISOR.computeAdvice(t) : null;
+    if (adv && adv.sev){
+      if (adv.sev === "urgent") return { tone:"urgent", label:"Needs attention", hint: adv.title || "" };
+      if (adv.sev === "soon")   return { tone:"soon",   label:"Check soon",      hint: adv.title || "" };
+      if (adv.sev === "fyi")    return { tone:"fyi",    label:"Heads up",         hint: adv.title || "" };
+    }
+  } catch(e){}
+  return { tone:"ok", label:"Looking good", hint:"" };
+}
+
+function _renderTankCard(t){
+  const st = _tankStatus(t);
+  const animals = totalFish(t);
+  const species = (t.fish||[]).length;
+  return `
+    <button class="tank-card tc-${st.tone}" data-tank="${t.id}">
+      <div class="tc-top">
+        <h3 class="tc-name">${escapeHTML(t.name)}</h3>
+        <span class="tc-status tc-status-${st.tone}" title="${escapeHTML(st.hint)}">
+          <span class="tc-dot"></span>${st.label}
+        </span>
+      </div>
+      <div class="tc-meta">${t.gallons} gal &middot; ${escapeHTML(t.type||"Freshwater")} &middot; ${animals} ${animals === 1 ? "animal" : "animals"}${species ? ` &middot; ${species} ${species === 1 ? "species" : "species"}` : ""}</div>
+    </button>
+  `;
+}
+
 function renderHome(){
   const main = $("#main");
   if(!tanks.length){
     main.innerHTML = `
       <div class="section center">
-        <h2>No tanks yet</h2>
-        <p class="muted">Tap the + button to add your first tank.</p>
+        <h2>Let's add your first tank</h2>
+        <p class="muted">Tap the + button up top to get started. It takes about a minute.</p>
       </div>
       <div class="section first-tank-cta">
-        <h2>🌱 First time setting up a tank?</h2>
-        <p class="muted" style="margin:0">After you add your tank, open the Details tab and start <b>First Tank Mode</b> — a guided 30-day walkthrough so you don't kill your first fish.</p>
+        <h2>🌱 New to keeping fish?</h2>
+        <p class="muted" style="margin:0">Once your tank is added, open it and turn on <b>First Tank Mode</b> — a simple, day-by-day walkthrough that gets you to healthy fish safely.</p>
       </div>`;
     return;
   }
@@ -322,20 +352,12 @@ function renderHome(){
               <span class="swipe-ico">🗑️</span><span class="swipe-lbl">Delete</span>
             </button>
           </div>
-          <button class="tank-card" data-tank="${t.id}">
-            <h3>${escapeHTML(t.name)}</h3>
-            <div class="meta">${t.gallons} gal &middot; ${escapeHTML(t.type||"Freshwater")}</div>
-            <div class="pill-row">
-              <span class="pill">${totalFish(t)} animals</span>
-              <span class="pill alt">${(t.fish||[]).length} species</span>
-              ${t.substrate ? `<span class="pill gray">${escapeHTML(t.substrate)}</span>` : ""}
-            </div>
-          </button>
+          ${_renderTankCard(t)}
         </div>
       `).join("")}
     </div>
     <div class="spacer-12"></div>
-    <p class="muted center" style="font-size:12px">Data saves in this browser. Add to Home Screen from Safari to use like an app.</p>
+    <p class="muted center" style="font-size:12px">Your data is saved right on this device. Add to Home Screen from Safari to use it like a real app.</p>
     <div class="center" style="margin-top:10px">
       <button class="btn small secondary" id="reset-defaults">Reset to default tanks</button>
     </div>
@@ -603,8 +625,118 @@ function renderTank(){
 /* ============================================================
    DETAILS TAB
    ============================================================ */
+/* ============================================================
+   FRIENDLY DATE HELPERS — used by Up Next reminders list
+   ============================================================ */
+function _friendlyRelative(ts){
+  if (!ts) return "";
+  const diffMs = ts - Date.now();
+  const absMs  = Math.abs(diffMs);
+  const future = diffMs > 0;
+  const minute = 60000, hour = 3600000, day = 86400000;
+  if (absMs < minute)         return future ? "in under a minute" : "just now";
+  if (absMs < hour){
+    const m = Math.round(absMs/minute);
+    return future ? `in ${m} min` : `${m} min ago`;
+  }
+  if (absMs < day){
+    const h = Math.round(absMs/hour);
+    return future ? `in ${h} hr` : `${h} hr ago`;
+  }
+  const d = Math.round(absMs/day);
+  if (d === 1) return future ? "tomorrow" : "yesterday";
+  if (d < 7)   return future ? `in ${d} days` : `${d} days ago`;
+  if (d < 30){
+    const w = Math.round(d/7);
+    return future ? `in ${w} wk` : `${w} wk ago`;
+  }
+  const months = Math.round(d/30);
+  return future ? `in ${months} mo` : `${months} mo ago`;
+}
+function _friendlyShortDate(ts){
+  if (!ts) return "";
+  const d = new Date(ts);
+  return d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+}
+
+function renderUpNextSection(t){
+  if (!window.REMINDERS || !window.REMINDERS.computeDueList) return "";
+  const items = window.REMINDERS.computeDueList(t);
+  if (!items.length){
+    return `
+      <div class="section">
+        <h2>Up next</h2>
+        <p class="muted" style="margin:0">No reminders turned on yet. Scroll down to set up water-change and water-test reminders.</p>
+      </div>
+    `;
+  }
+  const rows = items.map(it => {
+    const sub = it.status === "due-now"
+      ? `<span class="upn-sub bad">Due now</span>`
+      : it.status === "snoozed"
+        ? `<span class="upn-sub warn">Snoozed — next ${_friendlyRelative(it.nextDueTs)}</span>`
+        : `<span class="upn-sub">Next ${_friendlyRelative(it.nextDueTs)} · ${_friendlyShortDate(it.nextDueTs)}</span>`;
+    const lastTxt = it.lastDoneTs
+      ? `Last done ${_friendlyRelative(it.lastDoneTs)}`
+      : `Never done yet`;
+    const showActions = it.status === "due-now" || it.status === "snoozed";
+    const actions = showActions ? `
+      <div class="upn-actions">
+        <button class="btn small upn-done" data-type="${it.type}">Mark done</button>
+        <button class="btn small secondary upn-snooze" data-type="${it.type}">Snooze 1 day</button>
+        <button class="btn small secondary upn-skip" data-type="${it.type}">Skip once</button>
+      </div>` : "";
+    return `
+      <div class="upn-row upn-${it.status}">
+        <div class="upn-icon">${it.icon}</div>
+        <div class="upn-body">
+          <div class="upn-title">${escapeHTML(it.label)}</div>
+          ${sub}
+          <div class="upn-last muted small">${lastTxt} · every ${it.intervalDays} days</div>
+        </div>
+        ${actions}
+      </div>
+    `;
+  }).join("");
+  return `
+    <div class="section">
+      <h2>Up next</h2>
+      <div class="upn-list">${rows}</div>
+    </div>
+  `;
+}
+
+function bindUpNext(t){
+  if (!window.REMINDERS) return;
+  $$(".upn-done").forEach(b => b.addEventListener("click", () => {
+    const type = b.dataset.type;
+    window.REMINDERS.markReminderDone(t, type);
+    window.REMINDERS.scheduleAllReminders();
+    toast("Marked done — next one scheduled");
+    render();
+  }));
+  $$(".upn-snooze").forEach(b => b.addEventListener("click", () => {
+    const type = b.dataset.type;
+    window.REMINDERS.snoozeReminder(t, type, 24);
+    window.REMINDERS.scheduleAllReminders();
+    toast("Snoozed for 1 day");
+    render();
+  }));
+  $$(".upn-skip").forEach(b => b.addEventListener("click", () => {
+    const type = b.dataset.type;
+    const meta = window.REMINDERS.REM_META[type];
+    if (!confirm(`Skip this ${meta.label.toLowerCase()}? We'll bump it to the next regular cycle.`)) return;
+    window.REMINDERS.skipReminder(t, type);
+    window.REMINDERS.scheduleAllReminders();
+    toast("Skipped — see you next cycle");
+    render();
+  }));
+}
+
 function renderDetails(t){
   return `
+    ${renderUpNextSection(t)}
+
     <div class="section">
       <h2>Overview</h2>
       <div class="kv">
@@ -651,36 +783,37 @@ function renderRemindersSection(t){
 
   let permBanner = "";
   if (!supported){
-    permBanner = `<div class="rem-perm-banner muted">Notifications aren\u2019t supported in this browser. They\u2019ll work once the app is installed from the App Store.</div>`;
+    permBanner = `<div class="rem-perm-banner muted">Phone notifications won\u2019t work in this browser. They\u2019ll start working once you install the app from the App Store.</div>`;
   } else if (perm === "default"){
-    permBanner = `<div class="rem-perm-banner"><span>Turn on notifications to get reminders.</span><button class="btn small" id="rem-enable">Enable</button></div>`;
+    permBanner = `<div class="rem-perm-banner"><span>Want a phone alert when something is due?</span><button class="btn small" id="rem-enable">Turn on</button></div>`;
   } else if (perm === "denied"){
-    permBanner = `<div class="rem-perm-banner muted">Notifications are blocked. Enable them in your browser/iOS settings to get reminders.</div>`;
+    permBanner = `<div class="rem-perm-banner muted">Phone notifications are off. You can turn them back on in your iOS settings under My Tanks.</div>`;
   } else {
-    permBanner = `<div class="rem-perm-banner ok">\u2713 Notifications are on for this device.</div>`;
+    permBanner = `<div class="rem-perm-banner ok">\u2713 Phone notifications are on for this device.</div>`;
   }
 
   return `
     <div class="section">
-      <h2>Reminders</h2>
+      <h2>Reminder settings</h2>
+      <p class="muted small" style="margin:-4px 0 10px">Choose how often each task should come up. You can mark, snooze, or skip from the Up next list above.</p>
       ${permBanner}
       <div class="rem-row">
-        <label class="toggle"><input type="checkbox" id="rem-wc-on" ${rem.water_change.enabled?"checked":""}/><span>Water change reminder</span></label>
+        <label class="toggle"><input type="checkbox" id="rem-wc-on" ${rem.water_change.enabled?"checked":""}/><span>Remind me to do a water change</span></label>
         <label class="rem-interval"><span>every</span><input class="input tiny" id="rem-wc-days" type="number" min="1" max="60" value="${wcInterval}" /><span>days</span></label>
       </div>
       <div class="rem-row">
-        <label class="toggle"><input type="checkbox" id="rem-wt-on" ${rem.water_test.enabled?"checked":""}/><span>Water test reminder</span></label>
+        <label class="toggle"><input type="checkbox" id="rem-wt-on" ${rem.water_test.enabled?"checked":""}/><span>Remind me to test the water</span></label>
         <label class="rem-interval"><span>every</span><input class="input tiny" id="rem-wt-days" type="number" min="1" max="60" value="${wtInterval}" /><span>days</span></label>
       </div>
       <div class="rem-row">
-        <label class="toggle"><input type="checkbox" id="rem-daily-on" ${rem.daily.enabled?"checked":""}/><span>Daily check-in</span></label>
+        <label class="toggle"><input type="checkbox" id="rem-daily-on" ${rem.daily.enabled?"checked":""}/><span>Daily check-in nudge</span></label>
         <label class="rem-interval"><span>at</span><input class="input tiny" id="rem-daily-time" type="time" value="${dailyTime}" /></label>
       </div>
       <div class="rem-row">
-        <label class="toggle"><input type="checkbox" id="rem-urgent-on" ${rem.advisor_urgent.enabled?"checked":""}/><span>Urgent advisor alerts</span></label>
-        <span class="muted small">Fires immediately if ammonia, nitrite, nitrate, or pH go unsafe.</span>
+        <label class="toggle"><input type="checkbox" id="rem-urgent-on" ${rem.advisor_urgent.enabled?"checked":""}/><span>Alert me right away if water looks unsafe</span></label>
+        <span class="muted small">Sends a notification if ammonia, nitrite, nitrate, or pH cross a danger line.</span>
       </div>
-      <button class="btn" id="rem-save">Save reminders</button>
+      <button class="btn" id="rem-save">Save reminder settings</button>
     </div>
   `;
 }
@@ -724,12 +857,14 @@ function bindReminders(t){
       };
       window.REMINDERS.setTankReminders(t.id, rem);
       window.REMINDERS.scheduleAllReminders();
-      toast("Reminders saved");
+      toast("Reminder settings saved");
+      render();
     });
   }
 }
 
 function bindDetails(t){
+  bindUpNext(t);
   bindReminders(t);
   if (window.FIRSTTANK){
     window.FIRSTTANK.bind(t, (msg) => {
@@ -788,7 +923,7 @@ function renderFish(t){
               <button class="btn small danger" data-act="del" data-id="${f.id}">Remove</button>
             </div>
           </div>
-        `).join("") || `<p class="muted">No fish yet.</p>`}
+        `).join("") || `<p class="muted">No fish added yet. Use the picker below to add your first one.</p>`}
       </div>
     </div>
 

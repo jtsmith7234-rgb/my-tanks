@@ -1,104 +1,154 @@
 /* ============================================================
-   FIRST TANK MODE — Guided new-tank cycle walkthrough
-   For users setting up their very first aquarium.
-   Sources: Aqueon, Aquarium Co-Op, PetMD, Seachem.
+   FIRST TANK MODE — Guided new-tank walkthrough
+   For people setting up their very first aquarium.
+   Each stage is structured as:
+     need[]   — what you should have on hand
+     do[]     — what to actually do
+     expect[] — what should happen if it's going right
+   Plain language first. Hobby terms only when needed, with an
+   inline plain-English explanation.
    ============================================================ */
 
 const FIRST_TANK_STAGES = [
   {
     key: "setup",
     daysOffset: 0,
-    title: "Day 0 — Set up your tank",
-    summary: "Get all the gear in place before water goes in.",
-    checklist: [
-      "Tank (10+ gallons recommended for beginners — bigger is more forgiving)",
-      "Filter rated for your tank size",
-      "Heater (75–80°F for most tropical fish)",
-      "Substrate (gravel or sand) — rinsed",
-      "Dechlorinator (Seachem Prime or similar)",
-      "Bacteria starter (Stability, FritzZyme 7, or Quick Start)",
-      "API Master Test Kit (liquid, not strips — much more accurate)",
-      "Thermometer",
-      "A few hardscape pieces (rocks, driftwood) and/or plants"
+    title: "Day 0 — Get your gear together",
+    summary: "Grab everything before water goes in. Bigger tanks are easier than small ones.",
+    need: [
+      "A tank — 10 gallons or bigger (more water = more forgiving of mistakes)",
+      "A filter rated for your tank size",
+      "A heater (most tropical fish like 75–80°F)",
+      "Gravel or sand for the bottom",
+      "A water conditioner like Seachem Prime (removes chlorine from tap water)",
+      "A bottle of starter bacteria (Fritz Turbo Start, Seachem Stability, or API Quick Start)",
+      "A liquid water test kit (API Master Kit) — strips are less accurate",
+      "A thermometer",
+      "Optional: rocks, driftwood, or live plants for decoration"
     ],
-    tip: "Don't add fish yet. Even one fish before the cycle is done can die from ammonia poisoning."
+    do: [
+      "Pick the spot for the tank — somewhere level and strong enough to hold the weight",
+      "Read the back of each box so you know what you're working with"
+    ],
+    expect: [
+      "You'll have a pile of gear and an empty tank. That's the right starting point.",
+      "Don't put any fish in yet — even one fish now would likely die in the first week."
+    ],
+    tip: "A 20-gallon tank is actually easier to keep stable than a 5-gallon. Bigger is friendlier for beginners."
   },
   {
     key: "fill",
     daysOffset: 1,
-    title: "Day 1 — Fill the tank",
-    summary: "Add water, treat with dechlorinator, plug in equipment.",
-    checklist: [
-      "Place tank on a level surface that can support the weight (8 lbs per gallon)",
-      "Rinse and add substrate, hardscape, plants",
-      "Fill with tap water — dose dechlorinator BEFORE or as you fill",
-      "Plug in filter and heater",
-      "Let temperature stabilize at 75–80°F",
-      "Test water (pH, ammonia, nitrite, nitrate) — log baseline in the Tests tab"
+    title: "Day 1 — Fill it up",
+    summary: "Add gravel, water, and turn the equipment on.",
+    need: [
+      "Everything from Day 0",
+      "A clean bucket (never used with soap)"
     ],
-    tip: "Tap water out of the faucet has chlorine/chloramine that will kill beneficial bacteria. Always dechlorinate."
+    do: [
+      "Rinse the gravel in plain water until it runs clear, then add it to the tank",
+      "Place any rocks, wood, or plants",
+      "Add tap water — and add water conditioner as you fill (it neutralizes chlorine before it kills anything)",
+      "Plug in the filter and heater",
+      "Wait a few hours for the temperature to settle around 75–80°F",
+      "Run a baseline water test and log the numbers in the Tests tab"
+    ],
+    expect: [
+      "The water may look cloudy at first — that's just dust from the gravel and it clears in a day or two.",
+      "Your first test will likely show 0 ammonia, 0 nitrite, 0 nitrate. That's normal for a brand-new tank."
+    ],
+    tip: "Untreated tap water has chlorine, which kills the good bacteria you're about to grow. Always add conditioner."
   },
   {
     key: "cycle_start",
     daysOffset: 2,
-    title: "Days 2–7 — Start the nitrogen cycle",
-    summary: "Add bacteria starter daily. Add an ammonia source.",
-    checklist: [
-      "Dose bacteria starter daily per bottle directions",
-      "Add an ammonia source — easiest: a small pinch of fish food daily (it decays into ammonia)",
-      "OR use pure ammonia drops (~2–4 ppm) for a fishless cycle",
-      "Test ammonia daily — should rise then start to fall as bacteria grow",
-      "Don't add fish yet"
+    title: "Days 2–7 — Start growing good bacteria",
+    summary: "You're 'cycling' the tank — growing invisible bacteria that turn fish waste into something safe.",
+    need: [
+      "Your starter bacteria bottle",
+      "A pinch of fish food (yes, even with no fish)",
+      "Your test kit"
     ],
-    tip: "The cycle is your tank growing the bacteria that turn fish waste (ammonia → nitrite → nitrate) into safe levels."
+    do: [
+      "Add a dose of starter bacteria each day (follow the bottle)",
+      "Drop a small pinch of fish food into the tank daily — it breaks down into ammonia, which feeds the bacteria",
+      "Test ammonia every day or two and write down the number",
+      "Still no fish — the tank isn't ready"
+    ],
+    expect: [
+      "Ammonia will climb from 0 to maybe 1–4 ppm over the week. That's a good sign — it means the bacteria have food to grow on.",
+      "The water may still look totally normal. The action is microscopic."
+    ],
+    tip: "Hobbyists call this a 'fishless cycle' — growing the bacteria first, so no fish get hurt. It's the safest way to start."
   },
   {
     key: "cycle_middle",
     daysOffset: 8,
-    title: "Days 8–21 — Watch ammonia drop, nitrite rise",
-    summary: "Bacteria are working. Test every 2–3 days.",
-    checklist: [
-      "Keep testing every 2–3 days",
-      "Expect: ammonia drops toward 0, nitrite spikes (this is normal)",
-      "Keep dosing a small ammonia source so bacteria don't starve",
-      "Continue bacteria starter weekly",
-      "DON'T do water changes yet — you'd reset the cycle"
+    title: "Days 8–21 — The middle stretch",
+    summary: "Ammonia starts dropping. A new number called nitrite shows up. This is the cycle working.",
+    need: [
+      "Patience — this is the slowest stage",
+      "Your test kit"
     ],
-    tip: "If you see nitrite rising while ammonia falls, congrats — the first half of your cycle is working."
+    do: [
+      "Test every 2–3 days",
+      "Keep adding a tiny pinch of food so the bacteria don't starve",
+      "Skip water changes for now — they'd slow down the bacteria you're trying to grow"
+    ],
+    expect: [
+      "Ammonia falls toward 0",
+      "Nitrite (the second number on your test kit) rises — sometimes high. This is expected, not a problem.",
+      "Total time so far feels long. That's normal — most tanks take 3–6 weeks to fully cycle."
+    ],
+    tip: "If ammonia is dropping and nitrite is rising, the first half of the cycle is working. You're on track."
   },
   {
     key: "cycle_finish",
     daysOffset: 22,
-    title: "Days 22–28 — Cycle finishing up",
-    summary: "Nitrite drops to 0. Nitrate appears.",
-    checklist: [
-      "Test daily now — you're close",
-      "Cycled = ammonia 0, nitrite 0, nitrate 5–20 ppm, within 24 hours of dosing ammonia",
-      "When you hit those numbers two days in a row, you're cycled",
-      "Do a 25–50% water change with dechlorinated water before adding fish",
-      "You're ready for your first fish"
+    title: "Days 22–28 — Almost there",
+    summary: "Nitrite drops to zero. A third number — nitrate — appears. That's the finish line.",
+    need: [
+      "Your test kit",
+      "Water conditioner for the pre-fish water change"
     ],
-    tip: "Patience here is everything. Adding fish to an uncycled tank is the #1 cause of new-fish deaths."
+    do: [
+      "Test daily — you're close",
+      "Watch for: ammonia 0, nitrite 0, nitrate 5–20 ppm",
+      "When you hit those numbers two days in a row, the tank is cycled",
+      "Do a 25–50% water change with conditioned tap water before adding any fish"
+    ],
+    expect: [
+      "Nitrate (the third number) showing up is the sign you've been waiting for — it means the full bacteria chain works.",
+      "After the water change, you're ready for your first fish."
+    ],
+    tip: "Adding fish to a tank that isn't cycled is the #1 cause of new-fish deaths. The wait is worth it."
   },
   {
     key: "first_fish",
     daysOffset: 30,
     title: "Day 30+ — Add your first fish",
-    summary: "Start small. Add hardy beginner species.",
-    checklist: [
-      "Start with 4–6 hardy fish — NOT a full stock",
-      "Acclimate properly: float bag 15 min, then drip-acclimate 30+ min",
-      "Test water 24 hours after adding fish — confirm 0 ammonia, 0 nitrite",
-      "Feed lightly first week (less waste = safer cycle)",
-      "Wait 2 weeks before adding more fish",
-      "Browse the Fish tab — filter the species browser for beginner-friendly options"
+    summary: "Start small. Pick hardy beginner fish. Don't fill the tank up all at once.",
+    need: [
+      "A short list of beginner-friendly fish (try the Fish tab and filter for beginners)",
+      "A small bucket and a clip or clothespin"
     ],
-    tip: "Recommended starters: White Cloud Mountain Minnows, Zebra Danios, Platies, Bronze Cory Cats, Cherry Shrimp."
+    do: [
+      "Buy 4–6 small hardy fish — not a full tank's worth",
+      "Float the bag in the tank for 15 minutes so the water warms slowly",
+      "Slowly mix tank water into the bag over another 20–30 minutes, then gently scoop the fish in (leave the store water behind)",
+      "Test water 24 hours later — ammonia and nitrite should both still be 0",
+      "Feed lightly the first week — less food means less waste",
+      "Wait 2 weeks before adding any more fish"
+    ],
+    expect: [
+      "Fish may hide for the first day or two — that's normal, they're new to the place.",
+      "If ammonia or nitrite shows up after adding fish, do a 25% water change and recheck the next day."
+    ],
+    tip: "Easy starter fish: White Cloud Minnows, Zebra Danios, Platies, Bronze Cory Cats, or Cherry Shrimp."
   }
 ];
 
 function getStartedDate(tank){
-  // Use stored start date if present, otherwise tank.createdAt or now
   if (tank.firstTank && tank.firstTank.startedAt) return new Date(tank.firstTank.startedAt);
   if (tank.createdAt) return new Date(tank.createdAt);
   return new Date();
@@ -118,12 +168,24 @@ function isComplete(tank, key){
   return !!(tank.firstTank && tank.firstTank.completed && tank.firstTank.completed[key]);
 }
 
+function _renderList(label, items, cls){
+  if (!items || !items.length) return "";
+  return `
+    <div class="ft-block ${cls}">
+      <div class="ft-block-label">${label}</div>
+      <ul class="ft-block-list">
+        ${items.map(item => `<li>${item}</li>`).join("")}
+      </ul>
+    </div>
+  `;
+}
+
 function renderFirstTankSection(tank){
   if (!tank.firstTank || !tank.firstTank.enabled){
     return `
       <div class="section first-tank-cta">
         <h2>🌱 First time setting up a tank?</h2>
-        <p class="muted" style="margin-top:0">A guided 30-day walkthrough — what to buy, when to cycle, when it's safe to add fish. Built for absolute beginners.</p>
+        <p class="muted" style="margin-top:0">A simple, day-by-day walkthrough — what to buy, what to do, and what to expect. No prior knowledge needed.</p>
         <button class="btn block" id="enable-first-tank">Start First Tank Mode</button>
       </div>
     `;
@@ -142,7 +204,7 @@ function renderFirstTankSection(tank){
       </div>
       <div class="ft-progress">
         <div class="ft-progress-bar"><div class="ft-progress-fill" style="width:${(completedCount/totalStages*100)}%"></div></div>
-        <div class="ft-progress-text">${completedCount} of ${totalStages} stages complete</div>
+        <div class="ft-progress-text">${completedCount} of ${totalStages} steps done</div>
       </div>
 
       ${FIRST_TANK_STAGES.map((st, i) => {
@@ -157,15 +219,15 @@ function renderFirstTankSection(tank){
             </div>
             <div class="ft-stage-body" ${active || done ? "" : "hidden"}>
               <p class="ft-stage-summary">${st.summary}</p>
-              <ul class="ft-checklist">
-                ${st.checklist.map(item => `<li>${item}</li>`).join("")}
-              </ul>
+              ${_renderList("What you need", st.need, "ft-need")}
+              ${_renderList("What to do", st.do, "ft-do")}
+              ${_renderList("What to expect", st.expect, "ft-expect")}
               <div class="ft-tip"><b>Tip:</b> ${st.tip}</div>
               ${done
-                ? `<button class="btn small secondary ft-uncomplete" data-stage="${st.key}">Mark incomplete</button>`
+                ? `<button class="btn small secondary ft-uncomplete" data-stage="${st.key}">Mark as not done</button>`
                 : locked
                   ? `<p class="muted small" style="margin:8px 0 0">Unlocks on day ${st.daysOffset}.</p>`
-                  : `<button class="btn small ft-complete" data-stage="${st.key}">Mark complete</button>`}
+                  : `<button class="btn small ft-complete" data-stage="${st.key}">Mark this step done</button>`}
             </div>
           </div>
         `;
@@ -190,7 +252,7 @@ function bindFirstTank(tank, onChange){
   const disable = document.getElementById("ft-disable");
   if (disable){
     disable.addEventListener("click", () => {
-      if (!confirm("Hide First Tank Mode? Your progress is saved — you can re-enable anytime.")) return;
+      if (!confirm("Hide First Tank Mode? Your progress is saved — you can turn it back on anytime.")) return;
       tank.firstTank.enabled = false;
       onChange("Hidden First Tank Mode");
     });
