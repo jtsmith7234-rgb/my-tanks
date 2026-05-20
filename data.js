@@ -8,66 +8,66 @@
    Legacy alias DEFAULT_TANKS = SAMPLE_TANKS kept at bottom
    of this file so older code paths don't break.
    --------------------------------------------------------- */
+/* Curated showcase: 4 sample tanks chosen to demonstrate the
+   variety the app supports — community, betta, shrimp, coldwater.
+   These are NOT real personal tanks. Every new visitor who taps
+   "Load sample tanks" sees this exact same set. */
 const SAMPLE_TANKS = [
   {
-    id: "tank-75",
-    name: "75 Gallon Community",
-    gallons: 75,
-    type: "Freshwater Community",
-    substrate: "Black gravel",
-    decor: "Artificial plants",
-    notes: "Main showpiece tank. Weekly ~50% water changes.",
+    id: "sample-community-40",
+    name: "Community Showcase (40g)",
+    kind: "community",
+    gallons: 40,
+    type: "Freshwater Community — Planted",
+    substrate: "Fine natural gravel",
+    decor: "Driftwood, java fern, anubias, amazon sword",
+    notes: "Sample tank. Mid-size planted community with peaceful schooling fish and a cleanup crew.",
     fish: [
-      { id: "f1",  species: "Guppy",          count: 11, name: "" },
-      { id: "f2",  species: "Molly",          count: 6,  name: "" },
-      { id: "f3",  species: "Mollie (other)", count: 1,  name: "" },
-      { id: "f4",  species: "Angelfish",      count: 2,  name: "" },
-      { id: "f5",  species: "Heart Tetra",    count: 2,  name: "" },
-      { id: "f6",  species: "Albino Tetra",   count: 3,  name: "" },
-      { id: "f7",  species: "Fruit Tetra",    count: 2,  name: "" },
-      { id: "f8",  species: "Cherry Barb",    count: 5,  name: "" },
-      { id: "f9",  species: "Sucker Fish",    count: 2,  name: "" },
-      { id: "f10", species: "Snail",          count: 2,  name: "" },
-      { id: "f11", species: "Shrimp",         count: 1,  name: "" }
+      { id: "sc1", species: "Neon Tetra",      count: 8, name: "" },
+      { id: "sc2", species: "Harlequin Rasbora", count: 6, name: "" },
+      { id: "sc3", species: "Bronze Cory",     count: 5, name: "" },
+      { id: "sc4", species: "Otocinclus",      count: 3, name: "" },
+      { id: "sc5", species: "Mystery Snail",   count: 2, name: "" }
     ]
   },
   {
-    id: "tank-buddha",
-    name: "Buddha's Tank (11g Japanese)",
-    gallons: 11,
-    type: "Planted Betta (AIO Rimless)",
-    substrate: "Aquasoil",
-    decor: "Live spider wood bonsai with live moss, Japanese theme",
-    notes: "Expensive UNS-style rimless AIO. Bonsai centerpiece.",
-    fish: [
-      { id: "b1", species: "Betta", count: 1, name: "Buddha" }
-    ]
-  },
-  {
-    id: "tank-tim",
-    name: "Hellboy's Tank (5g)",
-    gallons: 5,
+    id: "sample-betta-10",
+    name: "Betta Sanctuary (10g)",
+    kind: "betta",
+    gallons: 10,
     type: "Planted Betta",
     substrate: "Black sand",
-    decor: "Live moss and driftwood",
-    notes: "",
+    decor: "Indian almond leaves, live moss, smooth driftwood",
+    notes: "Sample tank. Beginner-friendly single-betta setup with gentle flow.",
     fish: [
-      { id: "t1", species: "Betta",       count: 1, name: "Hellboy" },
-      { id: "t2", species: "Snail",       count: 1, name: "" },
-      { id: "t3", species: "Sucker Fish", count: 1, name: "" }
+      { id: "sb1", species: "Betta",        count: 1, name: "Sample Betta" },
+      { id: "sb2", species: "Nerite Snail", count: 2, name: "" }
     ]
   },
   {
-    id: "tank-kelsey",
-    name: "Moon Pie's Tank (5g)",
+    id: "sample-shrimp-5",
+    name: "Shrimp Garden (5g)",
+    kind: "shrimp",
     gallons: 5,
-    type: "Planted Betta",
-    substrate: "Black sand",
-    decor: "Live moss and driftwood",
-    notes: "",
+    type: "Nano Planted Shrimp",
+    substrate: "Active aquasoil",
+    decor: "Java moss, cholla wood, small lava rocks",
+    notes: "Sample tank. Heavily planted shrimp-only nano. Stable parameters, no fish predators.",
     fish: [
-      { id: "k1", species: "Betta", count: 1, name: "Moon Pie" },
-      { id: "k2", species: "Snail", count: 1, name: "" }
+      { id: "sh1", species: "Cherry Shrimp", count: 12, name: "" }
+    ]
+  },
+  {
+    id: "sample-goldfish-29",
+    name: "Goldfish Pair (29g)",
+    kind: "species",
+    gallons: 29,
+    type: "Coldwater Species-Only",
+    substrate: "Large smooth river rock",
+    decor: "Hardy plants (anubias, java fern), no sharp decor",
+    notes: "Sample tank. No heater. Coldwater setup — very different from tropical tanks.",
+    fish: [
+      { id: "sg1", species: "Fancy Goldfish", count: 2, name: "" }
     ]
   }
 ];
