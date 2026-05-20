@@ -370,11 +370,18 @@ function renderFirstTankSection(tank){
   }
 
   const stages = stagesForTank(tank);
-  const { stage, daysIn } = currentStage(tank, stages);
+  const { daysIn } = currentStage(tank, stages);
   const totalStages = stages.length;
-  const stageIdx = stages.findIndex(s => s.key === stage.key);
   const completedCount = stages.filter(s => isComplete(tank, s.key)).length;
   const kindLabel = (tank.firstTank && tank.firstTank.kind) || tank.kind || "";
+
+  // Order: incomplete stages first (in original order), completed stages last.
+  // The first incomplete stage is the "active" one and starts expanded.
+  // Completed stages stay collapsed but remain tappable to reopen.
+  const incomplete = stages.filter(s => !isComplete(tank, s.key));
+  const completed  = stages.filter(s =>  isComplete(tank, s.key));
+  const ordered = [...incomplete, ...completed];
+  const activeKey = incomplete.length ? incomplete[0].key : null;
 
   return `
     <div class="section first-tank-active">
@@ -387,17 +394,17 @@ function renderFirstTankSection(tank){
         <div class="ft-progress-text">${completedCount} of ${totalStages} steps done</div>
       </div>
 
-      ${stages.map((st, i) => {
+      ${ordered.map((st) => {
         const done = isComplete(tank, st.key);
-        const active = i === stageIdx;
-        const locked = daysIn < st.daysOffset && !done;
+        const active = st.key === activeKey;
+        const expanded = active; // only the next-up stage is open by default
         return `
-          <div class="ft-stage ${done ? "done" : ""} ${active ? "active" : ""} ${locked ? "locked" : ""}">
+          <div class="ft-stage ${done ? "done" : ""} ${active ? "active" : ""}">
             <div class="ft-stage-head" data-stage="${st.key}">
-              <span class="ft-stage-icon">${done ? "✓" : active ? "▶" : locked ? "🔒" : "○"}</span>
+              <span class="ft-stage-icon">${done ? "✓" : active ? "▶" : "○"}</span>
               <span class="ft-stage-title">${st.title}</span>
             </div>
-            <div class="ft-stage-body" ${active || done ? "" : "hidden"}>
+            <div class="ft-stage-body" ${expanded ? "" : "hidden"}>
               <p class="ft-stage-summary">${st.summary}</p>
               ${_renderList("What you need", st.need, "ft-need")}
               ${_renderList("What to do", st.do, "ft-do")}
@@ -405,9 +412,7 @@ function renderFirstTankSection(tank){
               <div class="ft-tip"><b>Tip:</b> ${st.tip}</div>
               ${done
                 ? `<button class="btn small secondary ft-uncomplete" data-stage="${st.key}">Mark as not done</button>`
-                : locked
-                  ? `<p class="muted small" style="margin:8px 0 0">Unlocks on day ${st.daysOffset}.</p>`
-                  : `<button class="btn small ft-complete" data-stage="${st.key}">Mark this step done</button>`}
+                : `<button class="btn small ft-complete" data-stage="${st.key}">Mark this step done</button>`}
             </div>
           </div>
         `;

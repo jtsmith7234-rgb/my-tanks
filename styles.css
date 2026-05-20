@@ -1331,9 +1331,12 @@ input[type=time].input{ font-family:inherit }
   overflow:hidden;
 }
 .ft-stage.done{
-  background: rgba(80,200,120,.06);
-  border-color: rgba(80,200,120,.25);
+  background: rgba(80,200,120,.05);
+  border-color: rgba(80,200,120,.18);
+  opacity:.72;
 }
+.ft-stage.done .ft-stage-head{ padding:10px 12px; }
+.ft-stage.done .ft-stage-title{ font-weight:500; }
 .ft-stage.active{
   border-color: var(--koi, #ff7a4a);
   box-shadow: 0 0 0 1px rgba(255,122,74,.20) inset;
