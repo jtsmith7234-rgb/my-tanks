@@ -148,17 +148,195 @@ const FIRST_TANK_STAGES = [
   }
 ];
 
+/* ============================================================
+   TANK-KIND EXTRAS — appended on top of the universal stages
+   Keyed by stage.key. Each entry is { need?, do?, expect?, tip? }.
+   Wording stays plain-language; jargon explained inline.
+   ============================================================ */
+const TANK_KIND_EXTRAS = {
+  betta: {
+    setup: {
+      need: [
+        "A tight-fitting lid — bettas are jumpers",
+        "A heater (bettas need 76–82°F; they are tropical)",
+        "A gentle filter or a filter with adjustable flow — bettas hate strong current"
+      ],
+      do: [
+        "Pick smooth decor only — rough plastic plants can tear betta fins"
+      ],
+      tip: "Run a fingernail over every decoration. If it catches your nail, it'll catch a betta fin."
+    },
+    first_fish: {
+      need: [
+        "One betta. No tank mates yet — see how this one settles first"
+      ],
+      do: [
+        "Float the bag, then add tank water slowly over 30 minutes — bettas are sensitive to sudden changes",
+        "Feed 2–3 small pellets once a day. Bettas overeat easily."
+      ],
+      expect: [
+        "Your betta may flare, sulk, or hide for a day or two. That's normal first-day stress."
+      ]
+    }
+  },
+
+  community: {
+    setup: {
+      need: [
+        "At least 20 gallons — community tanks need swim space and dilute waste better"
+      ],
+      do: [
+        "Plan your stocking before buying any fish. Open the Fish tab to check compatibility."
+      ],
+      tip: "Most community fish are schoolers — plan groups of 6+ for tetras, rasboras, danios."
+    },
+    first_fish: {
+      need: [
+        "A short list of hardy schooling fish — not a mix of singles"
+      ],
+      do: [
+        "Add ONE species at a time. Wait 2 weeks between groups.",
+        "Start with the most peaceful species first (tetras/rasboras), add bottom dwellers (cories) later"
+      ],
+      expect: [
+        "Schooling fish look stressed when alone. A group of 6 will settle within a day or two."
+      ]
+    }
+  },
+
+  shrimp: {
+    setup: {
+      need: [
+        "Plenty of live plants or moss — shrimp hide constantly and graze on biofilm",
+        "A sponge over your filter intake — baby shrimp get sucked in otherwise",
+        "Stable parameters more than perfect ones — shrimp hate sudden swings"
+      ],
+      do: [
+        "Plan for a mature, fully cycled tank before adding shrimp — they're more sensitive than fish"
+      ],
+      tip: "Avoid copper-based medications or fertilizers — copper is toxic to shrimp."
+    },
+    cycle_finish: {
+      do: [
+        "For shrimp, wait an extra 1–2 weeks past cycle completion. Mature tanks grow biofilm that baby shrimp eat."
+      ]
+    },
+    first_fish: {
+      need: [
+        "10–12 shrimp to start — they're social and breed better in groups"
+      ],
+      do: [
+        "Drip-acclimate over 1–2 hours — slow drip from tank to bag using airline tubing",
+        "Don't add fish that eat shrimp (most cichlids, bettas, large tetras)"
+      ],
+      expect: [
+        "Shrimp will hide for the first week. You'll see them more once they feel safe.",
+        "Berried (egg-carrying) females are a sign they're happy."
+      ]
+    }
+  },
+
+  planted: {
+    setup: {
+      need: [
+        "Aquarium plant substrate or root-tab capable gravel — plants need something to root in",
+        "A plant-friendly light (most LED aquarium lights work)",
+        "Liquid fertilizer (Seachem Flourish or similar)"
+      ],
+      do: [
+        "Pick easy starter plants: java fern, anubias, amazon sword, vallisneria, cryptocoryne"
+      ],
+      tip: "Anubias and java fern attach to wood/rock — do NOT bury their rhizome (the thick stem). It'll rot."
+    },
+    cycle_start: {
+      do: [
+        "Plant heavily from day one — plants use ammonia directly and speed up cycling"
+      ],
+      expect: [
+        "Some plant melt (leaves dying back) in the first 1–2 weeks is normal. New growth replaces them."
+      ]
+    },
+    first_fish: {
+      do: [
+        "Choose fish that don't dig or eat plants — avoid goldfish, large cichlids, silver dollars"
+      ]
+    }
+  },
+
+  species: {
+    setup: {
+      do: [
+        "Research your one species before buying gear — their needs drive the whole setup",
+        "Match temperature, pH, and tank size to that species specifically"
+      ],
+      tip: "Species-only tanks let you tune everything for one fish's ideal life. Worth the homework upfront."
+    },
+    first_fish: {
+      do: [
+        "Add the recommended group size all at once for schooling species, or just the pair for breeding species"
+      ]
+    }
+  },
+
+  quarantine: {
+    setup: {
+      need: [
+        "A bare-bottom tank (no gravel) — easier to clean and spot waste/parasites",
+        "Simple decor only: a few PVC pipes or a cheap plastic plant for cover",
+        "A sponge filter — cheap, gentle, easy to sterilize between uses"
+      ],
+      do: [
+        "Skip live plants — medications can kill them and they're hard to sterilize"
+      ],
+      tip: "Quarantine length is usually 2–4 weeks. Watch for spots, clamped fins, or odd swimming."
+    },
+    cycle_start: {
+      do: [
+        "You can run a quarantine tank uncycled if you do daily water changes and use Seachem Prime",
+        "Or borrow filter media from an established tank to instantly seed bacteria"
+      ]
+    },
+    first_fish: {
+      do: [
+        "Move new fish here BEFORE adding to your main tank — not after they're already sick",
+        "Observe for 2–4 weeks. No new tank mates during that time."
+      ]
+    }
+  },
+
+  other: {} // no extras
+};
+
+function _mergeStage(base, extras){
+  if (!extras) return base;
+  return {
+    ...base,
+    need:   [...(base.need || []),   ...(extras.need || [])],
+    do:     [...(base.do || []),     ...(extras.do || [])],
+    expect: [...(base.expect || []), ...(extras.expect || [])],
+    tip:    extras.tip || base.tip
+  };
+}
+
+/* Returns the stages personalized for this tank's kind. */
+function stagesForTank(tank){
+  const kind = (tank.firstTank && tank.firstTank.kind) || tank.kind || "other";
+  const extras = TANK_KIND_EXTRAS[kind] || {};
+  return FIRST_TANK_STAGES.map(st => _mergeStage(st, extras[st.key]));
+}
+
 function getStartedDate(tank){
   if (tank.firstTank && tank.firstTank.startedAt) return new Date(tank.firstTank.startedAt);
   if (tank.createdAt) return new Date(tank.createdAt);
   return new Date();
 }
 
-function currentStage(tank){
+function currentStage(tank, stages){
+  const list = stages || FIRST_TANK_STAGES;
   const started = getStartedDate(tank);
   const daysIn = Math.floor((Date.now() - started.getTime()) / 86400000);
-  let cur = FIRST_TANK_STAGES[0];
-  for (const st of FIRST_TANK_STAGES){
+  let cur = list[0];
+  for (const st of list){
     if (daysIn >= st.daysOffset) cur = st;
   }
   return { stage: cur, daysIn };
@@ -191,15 +369,17 @@ function renderFirstTankSection(tank){
     `;
   }
 
-  const { stage, daysIn } = currentStage(tank);
-  const totalStages = FIRST_TANK_STAGES.length;
-  const stageIdx = FIRST_TANK_STAGES.findIndex(s => s.key === stage.key);
-  const completedCount = FIRST_TANK_STAGES.filter(s => isComplete(tank, s.key)).length;
+  const stages = stagesForTank(tank);
+  const { stage, daysIn } = currentStage(tank, stages);
+  const totalStages = stages.length;
+  const stageIdx = stages.findIndex(s => s.key === stage.key);
+  const completedCount = stages.filter(s => isComplete(tank, s.key)).length;
+  const kindLabel = (tank.firstTank && tank.firstTank.kind) || tank.kind || "";
 
   return `
     <div class="section first-tank-active">
       <div class="ft-head">
-        <h2>🌱 First Tank — Day ${daysIn}</h2>
+        <h2>🌱 First Tank — Day ${daysIn}${kindLabel && kindLabel !== "other" ? ` · <span class="muted" style="font-weight:500;font-size:14px">${kindLabel.charAt(0).toUpperCase() + kindLabel.slice(1)}</span>` : ""}</h2>
         <button class="btn small secondary" id="ft-disable">Hide</button>
       </div>
       <div class="ft-progress">
@@ -207,7 +387,7 @@ function renderFirstTankSection(tank){
         <div class="ft-progress-text">${completedCount} of ${totalStages} steps done</div>
       </div>
 
-      ${FIRST_TANK_STAGES.map((st, i) => {
+      ${stages.map((st, i) => {
         const done = isComplete(tank, st.key);
         const active = i === stageIdx;
         const locked = daysIn < st.daysOffset && !done;

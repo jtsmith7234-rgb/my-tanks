@@ -40,6 +40,20 @@ const KEY_TANKS  = "tm.tanks.v1";
 const KEY_LOGS   = "tm.logs.v1";    // legacy water-change-only log (migrated on boot)
 const KEY_EVENTS = "tm.events.v1";  // unified timeline
 const KEY_THEME  = "tm.theme.v1";
+const KEY_PREFS  = "tm.prefs.v1";   // small key-value preferences bag
+
+function getPrefs(){
+  try { return JSON.parse(store.get(KEY_PREFS) || "{}") || {}; } catch(_) { return {}; }
+}
+function setPref(k, v){
+  const p = getPrefs();
+  p[k] = v;
+  store.set(KEY_PREFS, JSON.stringify(p));
+}
+function getPref(k, fallback){
+  const p = getPrefs();
+  return (k in p) ? p[k] : fallback;
+}
 const THEMES = {
   aquarium: { id:"aquarium", label:"Clean Aquarium", desc:"Bright modern frosted glass on aqua water (default)" },
   koi:      { id:"koi",      label:"Japanese Koi",   desc:"Original sumi-e koi pond with cherry blossoms" }
@@ -1648,29 +1662,109 @@ function formatTSShort(ts){
 /* ============================================================
    ADD TANK MODAL
    ============================================================ */
-function openAddTank(){
+/* ============================================================
+   TANK KINDS — drives setup checklist branching
+   ============================================================ */
+const TANK_KINDS = [
+  { id:"betta",      label:"Betta",                 typeText:"Freshwater Betta",     desc:"One betta, peaceful setup" },
+  { id:"community",  label:"Freshwater community",  typeText:"Freshwater Community", desc:"Mixed peaceful fish" },
+  { id:"shrimp",     label:"Shrimp",                typeText:"Freshwater Shrimp",    desc:"Cherry, neocaridina, caridina" },
+  { id:"planted",    label:"Planted tank",          typeText:"Planted Freshwater",   desc:"Plants are the focus" },
+  { id:"species",    label:"Species-only",          typeText:"Species-only Freshwater", desc:"One species, breeding or display" },
+  { id:"quarantine", label:"Quarantine / hospital", typeText:"Quarantine",           desc:"Short-term observation tank" },
+  { id:"other",      label:"Other / custom",        typeText:"Freshwater",           desc:"None of these fit" }
+];
+function tankKindById(id){ return TANK_KINDS.find(k => k.id === id) || TANK_KINDS[TANK_KINDS.length - 1]; }
+
+/* Entry point for the + button. Decides whether to show the help prompt first. */
+function handleAddTankTap(){
+  if (getPref("hideFirstTankPrompt", false) === true){
+    openAddTank({ guided:false });
+    return;
+  }
+  openFirstTankHelpModal();
+}
+
+function openFirstTankHelpModal(){
   openModal(`
-    <h3>Add a tank</h3>
-    <label class="field"><span>Name</span><input class="input" id="n-name" placeholder="e.g. Quarantine 10g" /></label>
+    <h3 style="margin:0 0 6px">Need help setting up your first tank?</h3>
+    <p class="muted" style="margin:0 0 14px;font-size:13.5px;line-height:1.5">Choose guided setup if you want a beginner-friendly checklist based on the kind of tank you're making.</p>
+    <div class="col" style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn block" id="ftp-yes">Yes, guide me</button>
+      <button class="btn block secondary" id="ftp-no">No, don't ask again</button>
+      <button class="btn block ghost" id="ftp-later" style="background:transparent;border:0;color:var(--ink-dim);font-weight:500">Not now</button>
+    </div>
+  `, () => {
+    $("#ftp-yes").addEventListener("click", () => {
+      closeModal();
+      openAddTank({ guided:true });
+    });
+    $("#ftp-no").addEventListener("click", () => {
+      setPref("hideFirstTankPrompt", true);
+      closeModal();
+      openAddTank({ guided:false });
+    });
+    $("#ftp-later").addEventListener("click", () => {
+      closeModal();
+      openAddTank({ guided:false });
+    });
+  });
+}
+
+function openAddTank(opts){
+  const guided = !!(opts && opts.guided);
+  const kindOpts = TANK_KINDS.map(k =>
+    `<option value="${k.id}">${escapeHTML(k.label)}</option>`
+  ).join("");
+  openModal(`
+    <h3>Add a tank${guided ? ` <span class="pill" style="vertical-align:middle;font-size:11px;margin-left:6px">Guided</span>` : ""}</h3>
+    <label class="field">
+      <span>What kind of tank?</span>
+      <select class="input" id="n-kind">${kindOpts}</select>
+    </label>
+    <p class="muted small" id="n-kind-desc" style="margin:-4px 0 8px 2px;font-size:12px"></p>
+    <label class="field"><span>Name</span><input class="input" id="n-name" placeholder="e.g. Living-room 20g" /></label>
     <div class="row">
       <label class="field"><span>Gallons</span><input class="input" id="n-gallons" type="number" min="1" step="0.5" value="10" /></label>
-      <label class="field"><span>Type</span><input class="input" id="n-type" placeholder="e.g. Freshwater Betta" /></label>
+      <label class="field"><span>Main fish or plant <span class="muted small">(optional)</span></span><input class="input" id="n-mainfish" placeholder="e.g. Crowntail betta" /></label>
     </div>
     <div class="row">
       <button class="btn" id="n-save">Create</button>
       <button class="btn secondary" id="n-cancel">Cancel</button>
     </div>
   `, () => {
+    const kindSel = $("#n-kind");
+    const desc = $("#n-kind-desc");
+    const syncDesc = () => {
+      const k = tankKindById(kindSel.value);
+      desc.textContent = k.desc;
+    };
+    syncDesc();
+    kindSel.addEventListener("change", syncDesc);
+
     $("#n-save").addEventListener("click", () => {
       const name = $("#n-name").value.trim();
       if(!name){ alert("Name required"); return; }
+      const k = tankKindById(kindSel.value);
+      const mainFish = $("#n-mainfish").value.trim();
       const tank = {
         id: "tank-" + uid(),
         name,
         gallons: parseFloat($("#n-gallons").value) || 10,
-        type: $("#n-type").value.trim() || "Freshwater",
+        type: k.typeText,
+        kind: k.id,
+        mainFish: mainFish || "",
+        createdAt: Date.now(),
         substrate: "", decor: "", notes: "", fish: []
       };
+      if (guided){
+        tank.firstTank = {
+          enabled: true,
+          startedAt: Date.now(),
+          kind: k.id,
+          completed: {}
+        };
+      }
       tanks.push(tank); saveTanks(tanks); closeModal();
       view = { screen:"tank", tankId: tank.id, tab:"details" };
       render();
@@ -1740,7 +1834,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     view = { screen:"home", tankId:null, tab:"details" };
     render();
   });
-  $("#add-tank-btn").addEventListener("click", openAddTank);
+  $("#add-tank-btn").addEventListener("click", handleAddTankTap);
   $("#backup-btn").addEventListener("click", openBackupModal);
   $("#share-btn").addEventListener("click", openShareModal);
   $("#import-file").addEventListener("change", handleImportFile);
@@ -1935,6 +2029,15 @@ function openBackupModal(){
     </div>
 
     <div class="backup-block">
+      <h4>🌱 Beginner setup help</h4>
+      <p>Shows the “Need help setting up your first tank?” prompt when you tap the + button. Turn off if you don't want to see it again.</p>
+      <label class="row" style="align-items:center;gap:10px;cursor:pointer">
+        <input type="checkbox" id="toggle-first-tank-prompt" />
+        <span>Show beginner setup help</span>
+      </label>
+    </div>
+
+    <div class="backup-block">
       <h4>🎨 Theme</h4>
       <p>Switch the look of the app. Your data isn't affected.</p>
       <div class="theme-picker">
@@ -1973,6 +2076,15 @@ function openBackupModal(){
         toast(`Theme: ${THEMES[c.dataset.themeId].label}`);
       });
     });
+
+    const ftpToggle = $("#toggle-first-tank-prompt");
+    if (ftpToggle){
+      ftpToggle.checked = getPref("hideFirstTankPrompt", false) !== true;
+      ftpToggle.addEventListener("change", () => {
+        setPref("hideFirstTankPrompt", !ftpToggle.checked);
+        toast(ftpToggle.checked ? "Beginner help is on" : "Beginner help hidden");
+      });
+    }
 
     $("#do-export").addEventListener("click", downloadBackup);
     $("#do-import").addEventListener("click", () => $("#import-file").click());
