@@ -124,6 +124,102 @@ function loadSampleTanks(){
                : [];
   return JSON.parse(JSON.stringify(sample));
 }
+
+/* Build a realistic history (water changes, water tests, dosing notes,
+   fish-add entries) for each sample tank so graphs and the history log
+   populate the moment someone taps "Load sample tanks". All timestamps
+   are anchored to "now" so the timeline always looks recent. */
+function seedSampleEvents(sampleTankList){
+  const DAY = 86400000;
+  const now = Date.now();
+  const out = {};
+
+  // Per-tank scripted histories. Each entry is {daysAgo, type, data}.
+  // Numbers chosen to look like a tank that's been running ~6–8 weeks
+  // and has cycled through ammonia→nitrite→nitrate already.
+  const SCRIPTS = {
+    "sample-community-40": [
+      {daysAgo:55, type:"tank_edit",   data:{notes:"Tank set up and filled"}},
+      {daysAgo:54, type:"water_test",  data:{ph:7.4, ammonia:0,    nitrite:0,    nitrate:0,  temp_f:78}},
+      {daysAgo:48, type:"water_test",  data:{ph:7.4, ammonia:1.0,  nitrite:0.25, nitrate:5,  temp_f:78}},
+      {daysAgo:40, type:"water_test",  data:{ph:7.3, ammonia:0.5,  nitrite:1.0,  nitrate:10, temp_f:78}},
+      {daysAgo:32, type:"water_test",  data:{ph:7.3, ammonia:0,    nitrite:0.25, nitrate:20, temp_f:78}},
+      {daysAgo:28, type:"water_change",data:{gallons:15, prime_mL:1.5, stability_mL:1.5, fert_pumps:0, notes:"First post-cycle change"}},
+      {daysAgo:28, type:"water_test",  data:{ph:7.3, ammonia:0, nitrite:0, nitrate:10, temp_f:78}},
+      {daysAgo:25, type:"fish_add",    data:{species:"Neon Tetra", count:8, notes:"Added first school"}},
+      {daysAgo:21, type:"water_change",data:{gallons:15, prime_mL:1.5, stability_mL:1.5, fert_pumps:1, notes:"Weekly change"}},
+      {daysAgo:21, type:"water_test",  data:{ph:7.3, ammonia:0, nitrite:0, nitrate:15, temp_f:78}},
+      {daysAgo:18, type:"fish_add",    data:{species:"Harlequin Rasbora", count:6, notes:"Second species added"}},
+      {daysAgo:14, type:"water_change",data:{gallons:15, prime_mL:1.5, stability_mL:0, fert_pumps:1, notes:""}},
+      {daysAgo:14, type:"water_test",  data:{ph:7.4, ammonia:0, nitrite:0, nitrate:20, temp_f:78}},
+      {daysAgo:11, type:"fish_add",    data:{species:"Bronze Cory", count:5, notes:"Bottom dwellers"}},
+      {daysAgo:7,  type:"water_change",data:{gallons:15, prime_mL:1.5, stability_mL:0, fert_pumps:1, notes:""}},
+      {daysAgo:7,  type:"water_test",  data:{ph:7.4, ammonia:0, nitrite:0, nitrate:15, temp_f:78}},
+      {daysAgo:2,  type:"water_test",  data:{ph:7.4, ammonia:0, nitrite:0, nitrate:20, temp_f:78}}
+    ],
+
+    "sample-betta-10": [
+      {daysAgo:45, type:"tank_edit",   data:{notes:"Tank cycled with bacteria starter"}},
+      {daysAgo:42, type:"water_test",  data:{ph:7.0, ammonia:0.5, nitrite:0.25, nitrate:5,  temp_f:80}},
+      {daysAgo:30, type:"water_test",  data:{ph:7.0, ammonia:0,   nitrite:0,    nitrate:10, temp_f:80}},
+      {daysAgo:28, type:"water_change",data:{gallons:3, prime_mL:0.3, stability_mL:0.3, fert_pumps:0, notes:"Pre-fish water change"}},
+      {daysAgo:27, type:"fish_add",    data:{species:"Betta", count:1, name:"Sample Betta", notes:"Acclimated over 30 min"}},
+      {daysAgo:21, type:"water_change",data:{gallons:2.5, prime_mL:0.25, stability_mL:0, fert_pumps:0, notes:""}},
+      {daysAgo:21, type:"water_test",  data:{ph:7.0, ammonia:0, nitrite:0, nitrate:10, temp_f:80}},
+      {daysAgo:14, type:"water_change",data:{gallons:2.5, prime_mL:0.25, stability_mL:0, fert_pumps:0, notes:""}},
+      {daysAgo:14, type:"water_test",  data:{ph:7.0, ammonia:0, nitrite:0, nitrate:15, temp_f:80}},
+      {daysAgo:10, type:"fish_add",    data:{species:"Nerite Snail", count:2, notes:"Algae crew"}},
+      {daysAgo:7,  type:"water_change",data:{gallons:2.5, prime_mL:0.25, stability_mL:0, fert_pumps:0, notes:""}},
+      {daysAgo:7,  type:"water_test",  data:{ph:7.0, ammonia:0, nitrite:0, nitrate:10, temp_f:80}},
+      {daysAgo:1,  type:"water_test",  data:{ph:7.0, ammonia:0, nitrite:0, nitrate:15, temp_f:80}}
+    ],
+
+    "sample-shrimp-5": [
+      {daysAgo:60, type:"tank_edit",   data:{notes:"Aquasoil added, plants in, light running"}},
+      {daysAgo:55, type:"water_test",  data:{ph:6.5, ammonia:2.0, nitrite:0.25, nitrate:5,  temp_f:72}},
+      {daysAgo:45, type:"water_test",  data:{ph:6.5, ammonia:0.5, nitrite:1.0,  nitrate:10, temp_f:72}},
+      {daysAgo:35, type:"water_test",  data:{ph:6.6, ammonia:0,   nitrite:0,    nitrate:15, temp_f:72}},
+      {daysAgo:30, type:"water_change",data:{gallons:1, prime_mL:0.1, stability_mL:0, fert_pumps:0, notes:"Extra wait — maturing biofilm"}},
+      {daysAgo:25, type:"fish_add",    data:{species:"Cherry Shrimp", count:12, notes:"Drip-acclimated 90 min"}},
+      {daysAgo:18, type:"water_change",data:{gallons:1, prime_mL:0.1, stability_mL:0, fert_pumps:0, notes:""}},
+      {daysAgo:18, type:"water_test",  data:{ph:6.6, ammonia:0, nitrite:0, nitrate:10, temp_f:72}},
+      {daysAgo:11, type:"water_change",data:{gallons:1, prime_mL:0.1, stability_mL:0, fert_pumps:0, notes:""}},
+      {daysAgo:11, type:"water_test",  data:{ph:6.6, ammonia:0, nitrite:0, nitrate:15, temp_f:72}},
+      {daysAgo:5,  type:"water_change",data:{gallons:1, prime_mL:0.1, stability_mL:0, fert_pumps:0, notes:"Berried female spotted"}},
+      {daysAgo:2,  type:"water_test",  data:{ph:6.6, ammonia:0, nitrite:0, nitrate:10, temp_f:72}}
+    ],
+
+    "sample-goldfish-29": [
+      {daysAgo:70, type:"tank_edit",   data:{notes:"Coldwater setup — no heater"}},
+      {daysAgo:65, type:"water_test",  data:{ph:7.6, ammonia:0,   nitrite:0,    nitrate:0,  temp_f:68}},
+      {daysAgo:55, type:"water_test",  data:{ph:7.6, ammonia:1.5, nitrite:0.5,  nitrate:5,  temp_f:68}},
+      {daysAgo:42, type:"water_test",  data:{ph:7.5, ammonia:0,   nitrite:0,    nitrate:20, temp_f:68}},
+      {daysAgo:38, type:"water_change",data:{gallons:10, prime_mL:1, stability_mL:1, fert_pumps:0, notes:"Heavy change before fish"}},
+      {daysAgo:35, type:"fish_add",    data:{species:"Fancy Goldfish", count:2, notes:"Slow drip acclimation"}},
+      {daysAgo:28, type:"water_change",data:{gallons:10, prime_mL:1, stability_mL:0, fert_pumps:0, notes:"Weekly change — goldfish are messy"}},
+      {daysAgo:28, type:"water_test",  data:{ph:7.5, ammonia:0,   nitrite:0,    nitrate:30, temp_f:68}},
+      {daysAgo:21, type:"water_change",data:{gallons:10, prime_mL:1, stability_mL:0, fert_pumps:0, notes:""}},
+      {daysAgo:21, type:"water_test",  data:{ph:7.5, ammonia:0,   nitrite:0,    nitrate:25, temp_f:68}},
+      {daysAgo:14, type:"water_change",data:{gallons:10, prime_mL:1, stability_mL:0, fert_pumps:0, notes:""}},
+      {daysAgo:14, type:"water_test",  data:{ph:7.5, ammonia:0,   nitrite:0,    nitrate:30, temp_f:68}},
+      {daysAgo:7,  type:"water_change",data:{gallons:10, prime_mL:1, stability_mL:0, fert_pumps:0, notes:""}},
+      {daysAgo:7,  type:"water_test",  data:{ph:7.5, ammonia:0,   nitrite:0,    nitrate:25, temp_f:68}},
+      {daysAgo:1,  type:"water_test",  data:{ph:7.5, ammonia:0,   nitrite:0,    nitrate:30, temp_f:68}}
+    ]
+  };
+
+  sampleTankList.forEach(t => {
+    const script = SCRIPTS[t.id];
+    if (!script) return;
+    // Build events newest-first to match existing convention.
+    const list = script
+      .map(s => ({ id: uid(), ts: now - s.daysAgo*DAY, type: s.type, data: s.data }))
+      .sort((a, b) => b.ts - a.ts);
+    out[t.id] = list;
+  });
+
+  return out;
+}
 function saveTanks(t){ store.set(KEY_TANKS, JSON.stringify(t)); }
 function loadLogs(){
   const raw = store.get(KEY_LOGS);
@@ -365,8 +461,11 @@ function renderHome(){
     if (sampleBtn) sampleBtn.addEventListener("click", () => {
       if (!confirm("Load sample tanks for a tour? You can clear them anytime from Backup & Settings.")) return;
       tanks = loadSampleTanks();
+      events = seedSampleEvents(tanks);
+      window.events = events;
       saveTanks(tanks);
-      toast("Sample tanks loaded");
+      saveEvents(events);
+      toast("Sample tanks loaded with history");
       render();
     });
     return;
@@ -2107,13 +2206,19 @@ function openBackupModal(){
 
     const loadSampleBtn = $("#do-load-sample");
     if (loadSampleBtn) loadSampleBtn.addEventListener("click", () => {
-      if (!confirm("Load sample tanks? This adds 4 example tanks to your list. You can wipe them again from this same screen.")) return;
+      if (!confirm("Load sample tanks? This adds 4 example tanks (with example water-change and test history) to your list. You can wipe them again from this same screen.")) return;
       const sample = loadSampleTanks();
       // append, don't overwrite — user may already have real tanks
       const existingIds = new Set(tanks.map(t => t.id));
       const fresh = sample.filter(t => !existingIds.has(t.id));
       tanks = tanks.concat(fresh);
+      // Seed history only for the freshly added sample tanks — don't
+      // touch any history on tanks the user already has.
+      const seeded = seedSampleEvents(fresh);
+      Object.keys(seeded).forEach(tankId => { events[tankId] = seeded[tankId]; });
+      window.events = events;
       saveTanks(tanks);
+      saveEvents(events);
       toast(`Added ${fresh.length} sample tank${fresh.length===1?"":"s"}`);
       closeModal(); render();
     });
