@@ -1,9 +1,14 @@
 /* ---------------------------------------------------------
-   DEFAULT TANK DATA
-   Used the first time the app loads or if user resets.
-   After that, all edits live in localStorage.
+   SAMPLE TANK DATA — opt-in demo only.
+   These are personal example tanks. They are NEVER loaded
+   automatically. A fresh install starts with zero tanks so
+   new users get a clean app. Sample data is offered as an
+   opt-in "Load sample data" button in Backup & Settings.
+
+   Legacy alias DEFAULT_TANKS = SAMPLE_TANKS kept at bottom
+   of this file so older code paths don't break.
    --------------------------------------------------------- */
-const DEFAULT_TANKS = [
+const SAMPLE_TANKS = [
   {
     id: "tank-75",
     name: "75 Gallon Community",
@@ -66,6 +71,10 @@ const DEFAULT_TANKS = [
     ]
   }
 ];
+
+// Legacy alias — older references still resolve, but the
+// app should treat a missing store as EMPTY, not as SAMPLE_TANKS.
+const DEFAULT_TANKS = SAMPLE_TANKS;
 
 /* ---------------------------------------------------------
    DOSING RULES

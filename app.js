@@ -77,7 +77,7 @@ function snapshot(){
     app: "My Tanks",
     version: 1,
     exportedAt: new Date().toISOString(),
-    tanks: JSON.parse(store.get(KEY_TANKS) || "null") || (typeof tanks !== "undefined" ? tanks : DEFAULT_TANKS),
+    tanks: JSON.parse(store.get(KEY_TANKS) || "null") || (typeof tanks !== "undefined" ? tanks : []),
     events: JSON.parse(store.get(KEY_EVENTS) || "null") || (typeof events !== "undefined" ? events : {}),
     legacyLogs: JSON.parse(store.get(KEY_LOGS) || "null") || (typeof logs !== "undefined" ? logs : {})
   };
@@ -113,9 +113,16 @@ function restoreFromText(text){
    STATE
    ============================================================ */
 function loadTanks(){
+  // Fresh install → EMPTY tank list. Sample data is opt-in via Backup modal.
   const raw = store.get(KEY_TANKS);
-  if(!raw) return JSON.parse(JSON.stringify(DEFAULT_TANKS));
-  try { return JSON.parse(raw); } catch(e){ return JSON.parse(JSON.stringify(DEFAULT_TANKS)); }
+  if(!raw) return [];
+  try { return JSON.parse(raw); } catch(e){ return []; }
+}
+function loadSampleTanks(){
+  const sample = (typeof SAMPLE_TANKS !== "undefined") ? SAMPLE_TANKS
+               : (typeof DEFAULT_TANKS !== "undefined") ? DEFAULT_TANKS
+               : [];
+  return JSON.parse(JSON.stringify(sample));
 }
 function saveTanks(t){ store.set(KEY_TANKS, JSON.stringify(t)); }
 function loadLogs(){
@@ -349,7 +356,19 @@ function renderHome(){
       <div class="section first-tank-cta">
         <h2>🌱 New to keeping fish?</h2>
         <p class="muted" style="margin:0">Once your tank is added, open it and turn on <b>First Tank Mode</b> — a simple, day-by-day walkthrough that gets you to healthy fish safely.</p>
+      </div>
+      <div class="center" style="margin-top:14px">
+        <button class="btn small secondary" id="load-sample-data">Just looking? Load sample tanks</button>
+        <p class="muted" style="font-size:11px;margin:8px 0 0">Demo data only — safe to wipe later from Backup &amp; Settings.</p>
       </div>`;
+    const sampleBtn = $("#load-sample-data");
+    if (sampleBtn) sampleBtn.addEventListener("click", () => {
+      if (!confirm("Load sample tanks for a tour? You can clear them anytime from Backup & Settings.")) return;
+      tanks = loadSampleTanks();
+      saveTanks(tanks);
+      toast("Sample tanks loaded");
+      render();
+    });
     return;
   }
   main.innerHTML = `
@@ -372,9 +391,6 @@ function renderHome(){
     </div>
     <div class="spacer-12"></div>
     <p class="muted center" style="font-size:12px">Your data is saved right on this device. Add to Home Screen from Safari to use it like a real app.</p>
-    <div class="center" style="margin-top:10px">
-      <button class="btn small secondary" id="reset-defaults">Reset to default tanks</button>
-    </div>
   `;
   // ---- Swipe-to-reveal on tank rows (iOS-style) ----
   const REVEAL = 96;       // px the card slides to expose the action button
@@ -545,18 +561,9 @@ function renderHome(){
     if (!openRow) return;
     if (!e.target.closest(".swipe-row")) closeOpenRow();
   }, { capture: true });
-  const resetBtn = $("#reset-defaults");
-  if (resetBtn) resetBtn.addEventListener("click", () => {
-    if(!confirm("Reset all tanks to defaults? This wipes any tank edits, fish lists, water changes, and tests. This can't be undone.")) return;
-    store.del(KEY_TANKS); store.del(KEY_LOGS); store.del(KEY_EVENTS);
-    tanks  = loadTanks();
-    logs   = {};
-    events = {};
-    window.events = events;
-    saveTanks(tanks);
-    toast("Reset complete");
-    render();
-  });
+  // Reset-to-defaults button removed — it would have wiped user data and
+  // replaced it with personal sample tanks. Sample data is now opt-in via
+  // the Backup & Settings modal ("Load sample data").
 }
 
 function renderAdvisorBanner(t){
@@ -2029,6 +2036,15 @@ function openBackupModal(){
     </div>
 
     <div class="backup-block">
+      <h4>🧪 Sample data</h4>
+      <p>Load a few example tanks to explore the app, or wipe everything to start fresh.</p>
+      <div class="row" style="gap:8px;flex-wrap:wrap">
+        <button class="btn small secondary" id="do-load-sample">Load sample tanks</button>
+        <button class="btn small secondary" id="do-wipe-all" style="color:#ff7a4a">Wipe all my data</button>
+      </div>
+    </div>
+
+    <div class="backup-block">
       <h4>🌱 Beginner setup help</h4>
       <p>Shows the “Need help setting up your first tank?” prompt when you tap the + button. Turn off if you don't want to see it again.</p>
       <label class="row" style="align-items:center;gap:10px;cursor:pointer">
@@ -2088,6 +2104,28 @@ function openBackupModal(){
 
     $("#do-export").addEventListener("click", downloadBackup);
     $("#do-import").addEventListener("click", () => $("#import-file").click());
+
+    const loadSampleBtn = $("#do-load-sample");
+    if (loadSampleBtn) loadSampleBtn.addEventListener("click", () => {
+      if (!confirm("Load sample tanks? This adds 4 example tanks to your list. You can wipe them again from this same screen.")) return;
+      const sample = loadSampleTanks();
+      // append, don't overwrite — user may already have real tanks
+      const existingIds = new Set(tanks.map(t => t.id));
+      const fresh = sample.filter(t => !existingIds.has(t.id));
+      tanks = tanks.concat(fresh);
+      saveTanks(tanks);
+      toast(`Added ${fresh.length} sample tank${fresh.length===1?"":"s"}`);
+      closeModal(); render();
+    });
+
+    const wipeBtn = $("#do-wipe-all");
+    if (wipeBtn) wipeBtn.addEventListener("click", () => {
+      if (!confirm("Wipe all tanks, fish, water changes, and tests on this device? This can't be undone. Save a backup first if you want to keep anything.")) return;
+      store.del(KEY_TANKS); store.del(KEY_LOGS); store.del(KEY_EVENTS);
+      tanks = []; logs = {}; events = {}; window.events = events;
+      toast("All data cleared");
+      closeModal(); render();
+    });
     $("#copy-backup").addEventListener("click", async () => {
       try { await navigator.clipboard.writeText(ta.value); toast("Copied"); }
       catch(e){ ta.select(); document.execCommand && document.execCommand("copy"); toast("Copied"); }
