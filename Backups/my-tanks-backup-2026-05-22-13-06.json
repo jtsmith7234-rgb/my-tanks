@@ -1,0 +1,477 @@
+{
+  "app": "My Tanks",
+  "version": 1,
+  "exportedAt": "2026-05-22T13:06:09.452Z",
+  "tanks": [
+    {
+      "id": "tank-75",
+      "fish": [
+        {
+          "id": "f1",
+          "name": "",
+          "count": 11,
+          "species": "Guppy"
+        },
+        {
+          "id": "f2",
+          "name": "",
+          "count": 6,
+          "species": "Molly"
+        },
+        {
+          "id": "f3",
+          "name": "",
+          "count": 1,
+          "species": "Mollie (other)"
+        },
+        {
+          "id": "f4",
+          "name": "",
+          "count": 2,
+          "species": "Angelfish"
+        },
+        {
+          "id": "f5",
+          "name": "",
+          "count": 2,
+          "species": "Heart Tetra"
+        },
+        {
+          "id": "f6",
+          "name": "",
+          "count": 3,
+          "species": "Albino Tetra"
+        },
+        {
+          "id": "f7",
+          "name": "",
+          "count": 2,
+          "species": "Fruit Tetra"
+        },
+        {
+          "id": "f8",
+          "name": "",
+          "count": 5,
+          "species": "Cherry Barb"
+        },
+        {
+          "id": "f9",
+          "name": "",
+          "count": 2,
+          "species": "Sucker Fish"
+        },
+        {
+          "id": "f10",
+          "name": "",
+          "count": 2,
+          "species": "Snail"
+        },
+        {
+          "id": "f11",
+          "name": "",
+          "count": 1,
+          "species": "Shrimp"
+        }
+      ],
+      "name": "75 Gallon Community",
+      "type": "Freshwater Community",
+      "decor": "Artificial plants",
+      "notes": "Main showpiece tank.",
+      "gallons": 75,
+      "chemicals": [
+        {
+          "custom": null,
+          "libraryId": "prime",
+          "instanceId": "ni05u5d"
+        }
+      ],
+      "substrate": "Black gravel"
+    },
+    {
+      "id": "tank-buddha",
+      "fish": [
+        {
+          "id": "b1",
+          "name": "Buddha",
+          "count": 1,
+          "species": "Betta"
+        }
+      ],
+      "name": "HellBoy’s Tank",
+      "type": "Planted Betta (AIO Rimless)",
+      "decor": "Live spider wood bonsai with live moss, Japanese theme",
+      "notes": "Expensive UNS-style rimless AIO. Bonsai centerpiece.",
+      "gallons": 11,
+      "chemicals": [
+        {
+          "custom": null,
+          "libraryId": "prime",
+          "instanceId": "b5q38b5"
+        },
+        {
+          "custom": null,
+          "libraryId": "easygreen",
+          "instanceId": "pz4n6u2"
+        }
+      ],
+      "substrate": "Black Sand"
+    },
+    {
+      "id": "tank-tim",
+      "fish": [
+        {
+          "id": "t1",
+          "name": "Hellboy",
+          "count": 1,
+          "species": "Betta"
+        },
+        {
+          "id": "t2",
+          "name": "",
+          "count": 1,
+          "species": "Snail"
+        },
+        {
+          "id": "t3",
+          "name": "",
+          "count": 1,
+          "species": "Sucker Fish"
+        }
+      ],
+      "name": "Buddha’s Tank",
+      "type": "Planted Betta",
+      "decor": "Live moss and driftwood",
+      "notes": "",
+      "gallons": 5,
+      "chemicals": [
+        {
+          "custom": null,
+          "libraryId": "prime",
+          "instanceId": "8b2k6v9"
+        },
+        {
+          "custom": null,
+          "libraryId": "easygreen",
+          "instanceId": "abnbrq2"
+        }
+      ],
+      "substrate": "Black sand"
+    },
+    {
+      "id": "tank-kelsey",
+      "fish": [
+        {
+          "id": "k1",
+          "name": "Moon Pie",
+          "count": 1,
+          "species": "Betta"
+        },
+        {
+          "id": "k2",
+          "name": "",
+          "count": 1,
+          "species": "Snail"
+        }
+      ],
+      "name": "Moon Pie's Tank",
+      "type": "Planted Betta",
+      "decor": "Live moss and driftwood",
+      "notes": "",
+      "gallons": 5,
+      "chemicals": [
+        {
+          "custom": null,
+          "libraryId": "prime",
+          "instanceId": "rrbrehb"
+        },
+        {
+          "custom": null,
+          "libraryId": "easygreen",
+          "instanceId": "37b8rf5"
+        }
+      ],
+      "substrate": "Black sand"
+    },
+    {
+      "id": "tank-4v7nffu",
+      "fish": [],
+      "kind": "betta",
+      "name": "Jdjdjdj",
+      "type": "Freshwater Betta",
+      "decor": "",
+      "notes": "",
+      "gallons": 10,
+      "mainFish": "",
+      "createdAt": 1779398478318,
+      "firstTank": {
+        "kind": "betta",
+        "enabled": true,
+        "completed": {},
+        "startedAt": 1779398478318
+      },
+      "substrate": ""
+    }
+  ],
+  "events": {
+    "tank-75": [
+      {
+        "id": "jcxq1eh",
+        "ts": 1779284724468,
+        "data": {
+          "changes": {
+            "notes": {
+              "to": "Main showpiece tank.",
+              "from": "Main showpiece tank. Weekly ~50% water changes."
+            }
+          }
+        },
+        "type": "tank_edit"
+      },
+      {
+        "id": "waowsm4",
+        "ts": 1779284691353,
+        "data": {
+          "source": "reminder"
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "7783oog",
+        "ts": 1779284687324,
+        "data": {
+          "sev": "fyi",
+          "sig": "Log a water test soon | no water_test events",
+          "body": "Recommendations get sharper once you log a test. Even one set of readings (pH, ammonia, nitrite, nitrate) tells me a lot about how your tank is doing.",
+          "rule": "no water_test events",
+          "title": "Log a water test soon"
+        },
+        "type": "advisor"
+      },
+      {
+        "id": "koxuxem",
+        "ts": 1779284687310,
+        "data": {
+          "source": "reminder"
+        },
+        "type": "water_change"
+      }
+    ],
+    "tank-tim": [
+      {
+        "id": "h50qwnu",
+        "ts": 1779372937854,
+        "data": {
+          "changes": {
+            "name": {
+              "to": "Buddha’s Tank",
+              "from": "Budda’s Tank"
+            }
+          }
+        },
+        "type": "tank_edit"
+      },
+      {
+        "id": "yvuqpgj",
+        "ts": 1779372854943,
+        "data": {
+          "changes": {
+            "name": {
+              "to": "Budda’s Tank",
+              "from": "Hellboy's Tank"
+            }
+          }
+        },
+        "type": "tank_edit"
+      },
+      {
+        "id": "6tdc38l",
+        "ts": 1779372838045,
+        "data": {
+          "sev": "soon",
+          "sig": "No water changes logged yet | no water_change events",
+          "body": "Heads up — once you log your first water change on the Clean & Dose tab, future recommendations will be timed to your specific schedule.",
+          "rule": "no water_change events",
+          "title": "No water changes logged yet"
+        },
+        "type": "advisor"
+      },
+      {
+        "id": "g90bzon",
+        "ts": 1779231864851,
+        "data": {
+          "sev": "soon",
+          "sig": "No water changes logged yet | no water_change events",
+          "body": "Heads up — once you log your first water change on the Clean & Dose tab, future recommendations will be timed to your specific schedule.",
+          "rule": "no water_change events",
+          "title": "No water changes logged yet"
+        },
+        "type": "advisor"
+      },
+      {
+        "id": "pva32u8",
+        "ts": 1778976292178,
+        "data": {
+          "changes": {
+            "name": {
+              "to": "Hellboy's Tank",
+              "from": "Hellboy's Tank (5g)"
+            }
+          }
+        },
+        "type": "tank_edit"
+      }
+    ],
+    "tank-buddha": [
+      {
+        "id": "nesfjxa",
+        "ts": 1779372909967,
+        "data": {
+          "changes": {
+            "name": {
+              "to": "HellBoy’s Tank",
+              "from": "Buddha's Tank (11g)"
+            }
+          }
+        },
+        "type": "tank_edit"
+      },
+      {
+        "id": "1b97rjh",
+        "ts": 1779239379948,
+        "data": {
+          "ph": 7.6,
+          "date": "2026-05-18",
+          "notes": "",
+          "temp_f": 81,
+          "ammonia": 0,
+          "nitrate": 0,
+          "nitrite": 0
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "471ko4d",
+        "ts": 1779239332502,
+        "data": {
+          "sev": "fyi",
+          "sig": "Log a water test soon | no water_test events",
+          "body": "Recommendations get sharper once you log a test. Even one set of readings (pH, ammonia, nitrite, nitrate) tells me a lot about how your tank is doing.",
+          "rule": "no water_test events",
+          "title": "Log a water test soon"
+        },
+        "type": "advisor"
+      },
+      {
+        "id": "abkt94d",
+        "ts": 1779239332490,
+        "data": {
+          "date": "2026-05-18",
+          "doses": [
+            {
+              "name": "Seachem Prime",
+              "unit": "mL",
+              "amount": 0.6,
+              "verified": true,
+              "label_note": ""
+            },
+            {
+              "name": "Aquarium Co-Op Easy Green All-in-One",
+              "unit": "pumps",
+              "amount": 0.6,
+              "verified": false,
+              "label_note": ""
+            }
+          ],
+          "notes": "Everything looking great",
+          "gallons": 6
+        },
+        "type": "water_change"
+      },
+      {
+        "id": "48u2j5b",
+        "ts": 1779231701971,
+        "data": {
+          "sev": "soon",
+          "sig": "No water changes logged yet | no water_change events",
+          "body": "Heads up — once you log your first water change on the Clean & Dose tab, future recommendations will be timed to your specific schedule.",
+          "rule": "no water_change events",
+          "title": "No water changes logged yet"
+        },
+        "type": "advisor"
+      },
+      {
+        "id": "t97ig48",
+        "ts": 1779231701959,
+        "data": {
+          "changes": {
+            "name": {
+              "to": "Buddha's Tank (11g)",
+              "from": "Buddha's Tank (11g Japanese)"
+            },
+            "substrate": {
+              "to": "Black Sand",
+              "from": "Aquasoil"
+            }
+          }
+        },
+        "type": "tank_edit"
+      }
+    ],
+    "tank-kelsey": [
+      {
+        "id": "c1dmh0b",
+        "ts": 1779284840517,
+        "data": {
+          "source": "reminder"
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "b0u5e5h",
+        "ts": 1779284838616,
+        "data": {
+          "sev": "fyi",
+          "sig": "Log a water test soon | no water_test events",
+          "body": "Recommendations get sharper once you log a test. Even one set of readings (pH, ammonia, nitrite, nitrate) tells me a lot about how your tank is doing.",
+          "rule": "no water_test events",
+          "title": "Log a water test soon"
+        },
+        "type": "advisor"
+      },
+      {
+        "id": "dp26m3x",
+        "ts": 1779284838602,
+        "data": {
+          "source": "reminder"
+        },
+        "type": "water_change"
+      },
+      {
+        "id": "19x969f",
+        "ts": 1779238655319,
+        "data": {
+          "sev": "soon",
+          "sig": "No water changes logged yet | no water_change events",
+          "body": "Heads up — once you log your first water change on the Clean & Dose tab, future recommendations will be timed to your specific schedule.",
+          "rule": "no water_change events",
+          "title": "No water changes logged yet"
+        },
+        "type": "advisor"
+      },
+      {
+        "id": "jc4x2zo",
+        "ts": 1778976304007,
+        "data": {
+          "changes": {
+            "name": {
+              "to": "Moon Pie's Tank",
+              "from": "Moon Pie's Tank (5g)"
+            }
+          }
+        },
+        "type": "tank_edit"
+      }
+    ]
+  },
+  "legacyLogs": {}
+}
