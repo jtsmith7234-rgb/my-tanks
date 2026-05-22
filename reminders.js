@@ -117,8 +117,8 @@ function _fireNotification(title, body, tankId){
   try {
     const n = new Notification(title, {
       body,
-      icon: "icon-192.png",
-      badge: "icon-192.png",
+      icon: "icon-192-v3.png",
+      badge: "icon-192-v3.png",
       tag: "mytanks-" + (tankId || "general"),
       requireInteraction: false
     });
