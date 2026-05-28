@@ -1,0 +1,1450 @@
+{
+  "app": "My Tanks",
+  "version": 1,
+  "exportedAt": "2026-05-26T21:08:30.410Z",
+  "tanks": [
+    {
+      "id": "tank-75",
+      "fish": [
+        {
+          "id": "f1",
+          "name": "",
+          "count": 11,
+          "species": "Guppy"
+        },
+        {
+          "id": "f2",
+          "name": "",
+          "count": 4,
+          "species": "Molly"
+        },
+        {
+          "id": "f3",
+          "name": "",
+          "count": 1,
+          "species": "Mollie (other)"
+        },
+        {
+          "id": "f4",
+          "name": "",
+          "count": 2,
+          "species": "Angelfish"
+        },
+        {
+          "id": "f5",
+          "name": "",
+          "count": 2,
+          "species": "Heart Tetra"
+        },
+        {
+          "id": "f6",
+          "name": "",
+          "count": 3,
+          "species": "Albino Tetra"
+        },
+        {
+          "id": "f7",
+          "name": "",
+          "count": 2,
+          "species": "Fruit Tetra"
+        },
+        {
+          "id": "f8",
+          "name": "",
+          "count": 5,
+          "species": "Cherry Barb"
+        },
+        {
+          "id": "f9",
+          "name": "",
+          "count": 2,
+          "species": "Sucker Fish"
+        },
+        {
+          "id": "f10",
+          "name": "",
+          "count": 2,
+          "species": "Snail"
+        },
+        {
+          "id": "f11",
+          "name": "",
+          "count": 1,
+          "species": "Shrimp"
+        },
+        {
+          "id": "ui6d8c2",
+          "species": "Neon Tetra",
+          "count": 4,
+          "name": ""
+        },
+        {
+          "id": "745l082",
+          "species": "ghost knife fish",
+          "count": 1,
+          "name": ""
+        },
+        {
+          "id": "8u7xrtc",
+          "species": "blood orange guppies",
+          "count": 2,
+          "name": ""
+        },
+        {
+          "id": "vohwl0c",
+          "species": "green Killian (lampeye)",
+          "count": 1,
+          "name": ""
+        },
+        {
+          "id": "kogzjdv",
+          "species": "platties",
+          "count": 2,
+          "name": ""
+        }
+      ],
+      "name": "75 Gallon Community",
+      "type": "Freshwater Community",
+      "decor": "Artificial plants",
+      "notes": "Main showpiece tank. Weekly ~50% water changes.",
+      "gallons": 75,
+      "chemicals": [
+        {
+          "custom": null,
+          "libraryId": "prime",
+          "instanceId": "vgrecfo"
+        },
+        {
+          "custom": null,
+          "libraryId": "stability",
+          "instanceId": "udam3o3"
+        }
+      ],
+      "substrate": "Black gravel"
+    },
+    {
+      "id": "tank-buddha",
+      "fish": [
+        {
+          "id": "b1",
+          "name": "hell boy",
+          "count": 1,
+          "species": "Betta"
+        },
+        {
+          "id": "7c2c39c",
+          "species": "sucker fish",
+          "count": 1,
+          "name": ""
+        },
+        {
+          "id": "vmbkbwf",
+          "species": "snail",
+          "count": 1,
+          "name": ""
+        }
+      ],
+      "name": "Hell Boy's Tank (11g Japanese)",
+      "type": "Planted Betta (AIO Rimless)",
+      "decor": "Live spider wood bonsai with live moss, Japanese theme",
+      "notes": "Expensive UNS-style rimless AIO. Bonsai centerpiece.",
+      "gallons": 11,
+      "substrate": "Aquasoil"
+    },
+    {
+      "id": "tank-tim",
+      "fish": [
+        {
+          "id": "t1",
+          "name": "buddha",
+          "count": 1,
+          "species": "Betta"
+        },
+        {
+          "id": "t2",
+          "name": "",
+          "count": 1,
+          "species": "Snail"
+        },
+        {
+          "id": "t3",
+          "name": "",
+          "count": 1,
+          "species": "Sucker Fish"
+        }
+      ],
+      "name": "Buddha's Tank (5g)",
+      "type": "Planted Betta",
+      "decor": "Live moss and driftwood",
+      "notes": "",
+      "gallons": 5,
+      "substrate": "Black sand"
+    },
+    {
+      "id": "tank-kelsey",
+      "fish": [
+        {
+          "id": "k1",
+          "name": "Moon Pie",
+          "count": 1,
+          "species": "Betta"
+        },
+        {
+          "id": "k2",
+          "name": "",
+          "count": 1,
+          "species": "Snail"
+        }
+      ],
+      "name": "Moon Pie's Tank (5g)",
+      "type": "Planted Betta",
+      "decor": "Live moss and driftwood",
+      "notes": "",
+      "gallons": 5,
+      "substrate": "Black sand"
+    },
+    {
+      "id": "tank-63vg9wn",
+      "fish": [
+        {
+          "id": "z1yifk7",
+          "name": "",
+          "count": 1,
+          "species": "Betta dumbo"
+        }
+      ],
+      "kind": "betta",
+      "name": "Mom Tank",
+      "type": "Freshwater Betta",
+      "decor": "",
+      "notes": "",
+      "gallons": 8,
+      "mainFish": "",
+      "chemicals": [
+        {
+          "custom": null,
+          "libraryId": "prime",
+          "instanceId": "cycj8ih"
+        },
+        {
+          "custom": null,
+          "libraryId": "stability",
+          "instanceId": "s6tu353"
+        }
+      ],
+      "createdAt": 1779489599099,
+      "substrate": ""
+    },
+    {
+      "id": "sample-community-40",
+      "fish": [
+        {
+          "id": "sc1",
+          "name": "",
+          "count": 8,
+          "species": "Neon Tetra"
+        },
+        {
+          "id": "sc2",
+          "name": "",
+          "count": 6,
+          "species": "Harlequin Rasbora"
+        },
+        {
+          "id": "sc3",
+          "name": "",
+          "count": 5,
+          "species": "Bronze Cory"
+        },
+        {
+          "id": "sc4",
+          "name": "",
+          "count": 3,
+          "species": "Otocinclus"
+        },
+        {
+          "id": "sc5",
+          "name": "",
+          "count": 2,
+          "species": "Mystery Snail"
+        }
+      ],
+      "kind": "community",
+      "name": "(TEST) Community Showcase (40g)",
+      "type": "Freshwater Community — Planted",
+      "decor": "Driftwood, java fern, anubias, amazon sword",
+      "notes": "Sample tank. Mid-size planted community with peaceful schooling fish and a cleanup crew.",
+      "gallons": 40,
+      "substrate": "Fine natural gravel"
+    },
+    {
+      "id": "sample-betta-10",
+      "fish": [
+        {
+          "id": "sb1",
+          "name": "Sample Betta",
+          "count": 1,
+          "species": "Betta"
+        },
+        {
+          "id": "sb2",
+          "name": "",
+          "count": 2,
+          "species": "Nerite Snail"
+        }
+      ],
+      "kind": "betta",
+      "name": "(TEST) Betta Sanctuary (10g)",
+      "type": "Planted Betta",
+      "decor": "Indian almond leaves, live moss, smooth driftwood",
+      "notes": "Sample tank. Beginner-friendly single-betta setup with gentle flow.",
+      "gallons": 10,
+      "substrate": "Black sand"
+    },
+    {
+      "id": "sample-shrimp-5",
+      "fish": [
+        {
+          "id": "sh1",
+          "name": "",
+          "count": 12,
+          "species": "Cherry Shrimp"
+        }
+      ],
+      "kind": "shrimp",
+      "name": "(TEST) Shrimp Garden (5g)",
+      "type": "Nano Planted Shrimp",
+      "decor": "Java moss, cholla wood, small lava rocks",
+      "notes": "Sample tank. Heavily planted shrimp-only nano. Stable parameters, no fish predators.",
+      "gallons": 5,
+      "substrate": "Active aquasoil"
+    },
+    {
+      "id": "sample-goldfish-29",
+      "fish": [
+        {
+          "id": "sg1",
+          "name": "",
+          "count": 2,
+          "species": "Fancy Goldfish"
+        }
+      ],
+      "kind": "species",
+      "name": "(TEST) Goldfish Pair (29g)",
+      "type": "Coldwater Species-Only",
+      "decor": "Hardy plants (anubias, java fern), no sharp decor",
+      "notes": "Sample tank. No heater. Coldwater setup — very different from tropical tanks.",
+      "gallons": 29,
+      "substrate": "Large smooth river rock"
+    }
+  ],
+  "events": {
+    "tank-75": [
+      {
+        "id": "7rc3f6n",
+        "ts": 1779829440527,
+        "type": "fish_edit",
+        "data": {
+          "species": "Molly",
+          "name": "",
+          "changes": {
+            "count": {
+              "from": 6,
+              "to": 4
+            }
+          }
+        }
+      },
+      {
+        "id": "pp5epp6",
+        "ts": 1779828899754,
+        "type": "fish_add",
+        "data": {
+          "species": "platties",
+          "count": 2,
+          "name": ""
+        }
+      },
+      {
+        "id": "mhz5md3",
+        "ts": 1779828806185,
+        "type": "fish_add",
+        "data": {
+          "species": "green Killian (lampeye)",
+          "count": 1,
+          "name": ""
+        }
+      },
+      {
+        "id": "s1agejk",
+        "ts": 1779828755272,
+        "type": "fish_add",
+        "data": {
+          "species": "blood orange guppies",
+          "count": 2,
+          "name": ""
+        }
+      },
+      {
+        "id": "kpvo1xm",
+        "ts": 1779828730954,
+        "type": "fish_add",
+        "data": {
+          "species": "ghost knife fish",
+          "count": 1,
+          "name": ""
+        }
+      },
+      {
+        "id": "2xgb1aj",
+        "ts": 1779828691238,
+        "type": "fish_add",
+        "data": {
+          "species": "Neon Tetra",
+          "count": 4,
+          "name": ""
+        }
+      },
+      {
+        "id": "njkyqse",
+        "ts": 1779828639368,
+        "type": "water_test",
+        "data": {
+          "date": "2026-05-26",
+          "ph": 7.6,
+          "ammonia": 0,
+          "nitrite": 0,
+          "nitrate": 0,
+          "temp_f": 79.2,
+          "notes": "weekly water change new fish (7)"
+        }
+      },
+      {
+        "id": "vru41q5",
+        "ts": 1779828553227,
+        "type": "advisor",
+        "data": {
+          "sev": "soon",
+          "title": "No water changes logged yet",
+          "body": "Heads up — once you log your first water change on the Clean & Dose tab, future recommendations will be timed to your specific schedule.",
+          "rule": "no water_change events",
+          "sig": "No water changes logged yet | no water_change events"
+        }
+      },
+      {
+        "id": "evacdr7",
+        "ts": 1779828553225,
+        "type": "water_test",
+        "data": {
+          "source": "reminder"
+        }
+      },
+      {
+        "id": "u7q2sdc",
+        "ts": 1779560201494,
+        "data": {
+          "sev": "fyi",
+          "sig": "Log a water test soon | no water_test events",
+          "body": "Recommendations get sharper once you log a test. Even one set of readings (pH, ammonia, nitrite, nitrate) tells me a lot about how your tank is doing.",
+          "rule": "no water_test events",
+          "title": "Log a water test soon"
+        },
+        "type": "advisor"
+      }
+    ],
+    "tank-tim": [
+      {
+        "id": "0ro8s0j",
+        "ts": 1779829098115,
+        "type": "fish_edit",
+        "data": {
+          "species": "Betta",
+          "name": "buddha",
+          "changes": {
+            "name": {
+              "from": "Hellboy",
+              "to": "buddha"
+            }
+          }
+        }
+      },
+      {
+        "id": "6bjl5qj",
+        "ts": 1779824845789,
+        "data": {
+          "sev": "soon",
+          "sig": "No water changes logged yet | no water_change events",
+          "body": "Heads up — once you log your first water change on the Clean & Dose tab, future recommendations will be timed to your specific schedule.",
+          "rule": "no water_change events",
+          "title": "No water changes logged yet"
+        },
+        "type": "advisor"
+      },
+      {
+        "id": "h5j4wtc",
+        "ts": 1779824845788,
+        "data": {
+          "changes": {
+            "name": {
+              "to": "Buddha's Tank (5g)",
+              "from": "Hellboy's Tank (5g)"
+            }
+          }
+        },
+        "type": "tank_edit"
+      }
+    ],
+    "tank-buddha": [
+      {
+        "id": "lojr9ok",
+        "ts": 1779829408758,
+        "type": "water_test",
+        "data": {
+          "date": "2026-05-26",
+          "ph": 7.6,
+          "ammonia": 0,
+          "nitrite": 0,
+          "nitrate": 0,
+          "temp_f": 81,
+          "notes": ""
+        }
+      },
+      {
+        "id": "18rlb4s",
+        "ts": 1779828970889,
+        "type": "fish_add",
+        "data": {
+          "species": "snail",
+          "count": 1,
+          "name": ""
+        }
+      },
+      {
+        "id": "kb9ek7i",
+        "ts": 1779828964843,
+        "type": "fish_add",
+        "data": {
+          "species": "sucker fish",
+          "count": 1,
+          "name": ""
+        }
+      },
+      {
+        "id": "yv3pxp4",
+        "ts": 1779828955120,
+        "type": "fish_edit",
+        "data": {
+          "species": "Betta",
+          "name": "hell boy",
+          "changes": {
+            "name": {
+              "from": "Buddha",
+              "to": "hell boy"
+            }
+          }
+        }
+      },
+      {
+        "id": "6cqhz0u",
+        "ts": 1779824806440,
+        "data": {
+          "sev": "soon",
+          "sig": "No water changes logged yet | no water_change events",
+          "body": "Heads up — once you log your first water change on the Clean & Dose tab, future recommendations will be timed to your specific schedule.",
+          "rule": "no water_change events",
+          "title": "No water changes logged yet"
+        },
+        "type": "advisor"
+      },
+      {
+        "id": "sdmnid4",
+        "ts": 1779824806439,
+        "data": {
+          "changes": {
+            "name": {
+              "to": "Hell Boy's Tank (11g Japanese)",
+              "from": "Buddha's Tank (11g Japanese)"
+            }
+          }
+        },
+        "type": "tank_edit"
+      }
+    ],
+    "tank-63vg9wn": [
+      {
+        "id": "l13qarw",
+        "ts": 1779559259887,
+        "data": {
+          "name": "",
+          "count": 1,
+          "species": "Betta dumbo"
+        },
+        "type": "fish_add"
+      },
+      {
+        "id": "klqa4yd",
+        "ts": 1779559205216,
+        "data": {
+          "sev": "fyi",
+          "sig": "Log a water test soon | no water_test events",
+          "body": "Recommendations get sharper once you log a test. Even one set of readings (pH, ammonia, nitrite, nitrate) tells me a lot about how your tank is doing.",
+          "rule": "no water_test events",
+          "title": "Log a water test soon"
+        },
+        "type": "advisor"
+      },
+      {
+        "id": "11wive3",
+        "ts": 1779559205203,
+        "data": {
+          "date": "2026-05-23",
+          "doses": [
+            {
+              "name": "Seachem Prime",
+              "unit": "mL",
+              "amount": 0.4,
+              "verified": true,
+              "label_note": ""
+            },
+            {
+              "name": "Seachem Stability",
+              "unit": "mL",
+              "amount": 2,
+              "verified": true,
+              "label_note": ""
+            }
+          ],
+          "notes": "",
+          "gallons": 4
+        },
+        "type": "water_change"
+      }
+    ],
+    "sample-betta-10": [
+      {
+        "id": "ewy0nx2",
+        "ts": 1779824690805,
+        "data": {
+          "changes": {
+            "name": {
+              "to": "(TEST) Betta Sanctuary (10g)",
+              "from": "Betta Sanctuary (10g)"
+            }
+          }
+        },
+        "type": "tank_edit"
+      },
+      {
+        "id": "hv9fq6l",
+        "ts": 1779824676358,
+        "data": {
+          "sev": "soon",
+          "sig": "Water change due | 10d since last WC, ideal ~9d",
+          "body": "10 days since your last change — about right for this stocking. A 25-30% change in the next day or two keeps nitrates steady.",
+          "rule": "10d since last WC, ideal ~9d",
+          "title": "Water change due"
+        },
+        "type": "advisor"
+      },
+      {
+        "id": "bd8i0yy",
+        "ts": 1779760150459,
+        "data": {
+          "sev": "soon",
+          "sig": "Water change due | 9d since last WC, ideal ~9d",
+          "body": "9 days since your last change — about right for this stocking. A 25-30% change in the next day or two keeps nitrates steady.",
+          "rule": "9d since last WC, ideal ~9d",
+          "title": "Water change due"
+        },
+        "type": "advisor"
+      },
+      {
+        "id": "2wgxy8g",
+        "ts": 1779473304963,
+        "data": {
+          "ph": 7,
+          "temp_f": 80,
+          "ammonia": 0,
+          "nitrate": 15,
+          "nitrite": 0
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "ldzpwsr",
+        "ts": 1778954904963,
+        "data": {
+          "notes": "",
+          "gallons": 2.5,
+          "prime_mL": 0.25,
+          "fert_pumps": 0,
+          "stability_mL": 0
+        },
+        "type": "water_change"
+      },
+      {
+        "id": "psfhc5d",
+        "ts": 1778954904963,
+        "data": {
+          "ph": 7,
+          "temp_f": 80,
+          "ammonia": 0,
+          "nitrate": 10,
+          "nitrite": 0
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "4nz5aat",
+        "ts": 1778695704963,
+        "data": {
+          "count": 2,
+          "notes": "Algae crew",
+          "species": "Nerite Snail"
+        },
+        "type": "fish_add"
+      },
+      {
+        "id": "bprckhg",
+        "ts": 1778350104963,
+        "data": {
+          "notes": "",
+          "gallons": 2.5,
+          "prime_mL": 0.25,
+          "fert_pumps": 0,
+          "stability_mL": 0
+        },
+        "type": "water_change"
+      },
+      {
+        "id": "k3hy5g3",
+        "ts": 1778350104963,
+        "data": {
+          "ph": 7,
+          "temp_f": 80,
+          "ammonia": 0,
+          "nitrate": 15,
+          "nitrite": 0
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "4v7wcr0",
+        "ts": 1777745304963,
+        "data": {
+          "notes": "",
+          "gallons": 2.5,
+          "prime_mL": 0.25,
+          "fert_pumps": 0,
+          "stability_mL": 0
+        },
+        "type": "water_change"
+      },
+      {
+        "id": "d4mh613",
+        "ts": 1777745304963,
+        "data": {
+          "ph": 7,
+          "temp_f": 80,
+          "ammonia": 0,
+          "nitrate": 10,
+          "nitrite": 0
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "9a6uebe",
+        "ts": 1777226904963,
+        "data": {
+          "name": "Sample Betta",
+          "count": 1,
+          "notes": "Acclimated over 30 min",
+          "species": "Betta"
+        },
+        "type": "fish_add"
+      },
+      {
+        "id": "ziiuzbe",
+        "ts": 1777140504963,
+        "data": {
+          "notes": "Pre-fish water change",
+          "gallons": 3,
+          "prime_mL": 0.3,
+          "fert_pumps": 0,
+          "stability_mL": 0.3
+        },
+        "type": "water_change"
+      },
+      {
+        "id": "jehq1kk",
+        "ts": 1776967704963,
+        "data": {
+          "ph": 7,
+          "temp_f": 80,
+          "ammonia": 0,
+          "nitrate": 10,
+          "nitrite": 0
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "s3i6pcl",
+        "ts": 1775930904963,
+        "data": {
+          "ph": 7,
+          "temp_f": 80,
+          "ammonia": 0.5,
+          "nitrate": 5,
+          "nitrite": 0.25
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "beuk68h",
+        "ts": 1775671704963,
+        "data": {
+          "notes": "Tank cycled with bacteria starter"
+        },
+        "type": "tank_edit"
+      }
+    ],
+    "sample-shrimp-5": [
+      {
+        "id": "3ivuki7",
+        "ts": 1779824728390,
+        "data": {
+          "changes": {
+            "name": {
+              "to": "(TEST) Shrimp Garden (5g)",
+              "from": "(TEST)Shrimp Garden (5g)"
+            }
+          }
+        },
+        "type": "tank_edit"
+      },
+      {
+        "id": "xtm791w",
+        "ts": 1779824666640,
+        "data": {
+          "changes": {
+            "name": {
+              "to": "(TEST)Shrimp Garden (5g)",
+              "from": "Shrimp Garden (5g)"
+            }
+          }
+        },
+        "type": "tank_edit"
+      },
+      {
+        "id": "czk1nn0",
+        "ts": 1779824652873,
+        "data": {
+          "sev": "soon",
+          "sig": "Water change due | 8d since last WC, ideal ~5d",
+          "body": "8 days since your last change — about right for this stocking. A 25-30% change in the next day or two keeps nitrates steady.",
+          "rule": "8d since last WC, ideal ~5d",
+          "title": "Water change due"
+        },
+        "type": "advisor"
+      },
+      {
+        "id": "q669gk7",
+        "ts": 1779559709670,
+        "data": {
+          "sev": "soon",
+          "sig": "Water change due | 5d since last WC, ideal ~5d",
+          "body": "5 days since your last change — about right for this stocking. A 25-30% change in the next day or two keeps nitrates steady.",
+          "rule": "5d since last WC, ideal ~5d",
+          "title": "Water change due"
+        },
+        "type": "advisor"
+      },
+      {
+        "id": "iifl73i",
+        "ts": 1779386904963,
+        "data": {
+          "ph": 6.6,
+          "temp_f": 72,
+          "ammonia": 0,
+          "nitrate": 10,
+          "nitrite": 0
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "xlpuoxr",
+        "ts": 1779127704963,
+        "data": {
+          "notes": "Berried female spotted",
+          "gallons": 1,
+          "prime_mL": 0.1,
+          "fert_pumps": 0,
+          "stability_mL": 0
+        },
+        "type": "water_change"
+      },
+      {
+        "id": "wkxhc98",
+        "ts": 1778609304963,
+        "data": {
+          "notes": "",
+          "gallons": 1,
+          "prime_mL": 0.1,
+          "fert_pumps": 0,
+          "stability_mL": 0
+        },
+        "type": "water_change"
+      },
+      {
+        "id": "0pol9gz",
+        "ts": 1778609304963,
+        "data": {
+          "ph": 6.6,
+          "temp_f": 72,
+          "ammonia": 0,
+          "nitrate": 15,
+          "nitrite": 0
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "gf457es",
+        "ts": 1778004504963,
+        "data": {
+          "notes": "",
+          "gallons": 1,
+          "prime_mL": 0.1,
+          "fert_pumps": 0,
+          "stability_mL": 0
+        },
+        "type": "water_change"
+      },
+      {
+        "id": "l99ta10",
+        "ts": 1778004504963,
+        "data": {
+          "ph": 6.6,
+          "temp_f": 72,
+          "ammonia": 0,
+          "nitrate": 10,
+          "nitrite": 0
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "1x8ny6p",
+        "ts": 1777399704963,
+        "data": {
+          "count": 12,
+          "notes": "Drip-acclimated 90 min",
+          "species": "Cherry Shrimp"
+        },
+        "type": "fish_add"
+      },
+      {
+        "id": "nu9cgfe",
+        "ts": 1776967704963,
+        "data": {
+          "notes": "Extra wait — maturing biofilm",
+          "gallons": 1,
+          "prime_mL": 0.1,
+          "fert_pumps": 0,
+          "stability_mL": 0
+        },
+        "type": "water_change"
+      },
+      {
+        "id": "htwm10i",
+        "ts": 1776535704963,
+        "data": {
+          "ph": 6.6,
+          "temp_f": 72,
+          "ammonia": 0,
+          "nitrate": 15,
+          "nitrite": 0
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "x4kflch",
+        "ts": 1775671704963,
+        "data": {
+          "ph": 6.5,
+          "temp_f": 72,
+          "ammonia": 0.5,
+          "nitrate": 10,
+          "nitrite": 1
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "guqtikg",
+        "ts": 1774807704963,
+        "data": {
+          "ph": 6.5,
+          "temp_f": 72,
+          "ammonia": 2,
+          "nitrate": 5,
+          "nitrite": 0.25
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "924k6jm",
+        "ts": 1774375704963,
+        "data": {
+          "notes": "Aquasoil added, plants in, light running"
+        },
+        "type": "tank_edit"
+      }
+    ],
+    "sample-goldfish-29": [
+      {
+        "id": "w3aerwd",
+        "ts": 1779824748639,
+        "data": {
+          "changes": {
+            "name": {
+              "to": "(TEST) Goldfish Pair (29g)",
+              "from": "Goldfish Pair (29g)"
+            }
+          }
+        },
+        "type": "tank_edit"
+      },
+      {
+        "id": "hl72h4c",
+        "ts": 1779824736822,
+        "data": {
+          "sev": "soon",
+          "sig": "Nitrate creeping up | nitrate=30 ppm",
+          "body": "Last reading was 30 ppm. Long-term above 20 ppm stresses sensitive species (tetras, shrimp) and slows plant growth. A 25-30% change in the next day or two will bring it back down.",
+          "rule": "nitrate=30 ppm",
+          "title": "Nitrate creeping up"
+        },
+        "type": "advisor"
+      },
+      {
+        "id": "xm3pb0d",
+        "ts": 1779473304963,
+        "data": {
+          "ph": 7.5,
+          "temp_f": 68,
+          "ammonia": 0,
+          "nitrate": 30,
+          "nitrite": 0
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "jaymg83",
+        "ts": 1778954904963,
+        "data": {
+          "notes": "",
+          "gallons": 10,
+          "prime_mL": 1,
+          "fert_pumps": 0,
+          "stability_mL": 0
+        },
+        "type": "water_change"
+      },
+      {
+        "id": "g6iru6p",
+        "ts": 1778954904963,
+        "data": {
+          "ph": 7.5,
+          "temp_f": 68,
+          "ammonia": 0,
+          "nitrate": 25,
+          "nitrite": 0
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "l3z5ocy",
+        "ts": 1778350104963,
+        "data": {
+          "notes": "",
+          "gallons": 10,
+          "prime_mL": 1,
+          "fert_pumps": 0,
+          "stability_mL": 0
+        },
+        "type": "water_change"
+      },
+      {
+        "id": "49mcpx8",
+        "ts": 1778350104963,
+        "data": {
+          "ph": 7.5,
+          "temp_f": 68,
+          "ammonia": 0,
+          "nitrate": 30,
+          "nitrite": 0
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "wcsxmht",
+        "ts": 1777745304963,
+        "data": {
+          "notes": "",
+          "gallons": 10,
+          "prime_mL": 1,
+          "fert_pumps": 0,
+          "stability_mL": 0
+        },
+        "type": "water_change"
+      },
+      {
+        "id": "hshzfw6",
+        "ts": 1777745304963,
+        "data": {
+          "ph": 7.5,
+          "temp_f": 68,
+          "ammonia": 0,
+          "nitrate": 25,
+          "nitrite": 0
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "dxlxem9",
+        "ts": 1777140504963,
+        "data": {
+          "notes": "Weekly change — goldfish are messy",
+          "gallons": 10,
+          "prime_mL": 1,
+          "fert_pumps": 0,
+          "stability_mL": 0
+        },
+        "type": "water_change"
+      },
+      {
+        "id": "8lm4c7t",
+        "ts": 1777140504963,
+        "data": {
+          "ph": 7.5,
+          "temp_f": 68,
+          "ammonia": 0,
+          "nitrate": 30,
+          "nitrite": 0
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "dk0uwlc",
+        "ts": 1776535704963,
+        "data": {
+          "count": 2,
+          "notes": "Slow drip acclimation",
+          "species": "Fancy Goldfish"
+        },
+        "type": "fish_add"
+      },
+      {
+        "id": "2jxobe5",
+        "ts": 1776276504963,
+        "data": {
+          "notes": "Heavy change before fish",
+          "gallons": 10,
+          "prime_mL": 1,
+          "fert_pumps": 0,
+          "stability_mL": 1
+        },
+        "type": "water_change"
+      },
+      {
+        "id": "yuqjxv6",
+        "ts": 1775930904963,
+        "data": {
+          "ph": 7.5,
+          "temp_f": 68,
+          "ammonia": 0,
+          "nitrate": 20,
+          "nitrite": 0
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "axgx1x7",
+        "ts": 1774807704963,
+        "data": {
+          "ph": 7.6,
+          "temp_f": 68,
+          "ammonia": 1.5,
+          "nitrate": 5,
+          "nitrite": 0.5
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "ovct1dw",
+        "ts": 1773943704963,
+        "data": {
+          "ph": 7.6,
+          "temp_f": 68,
+          "ammonia": 0,
+          "nitrate": 0,
+          "nitrite": 0
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "j0r5p2v",
+        "ts": 1773511704963,
+        "data": {
+          "notes": "Coldwater setup — no heater"
+        },
+        "type": "tank_edit"
+      }
+    ],
+    "sample-community-40": [
+      {
+        "id": "oruvsmh",
+        "ts": 1779824713122,
+        "data": {
+          "changes": {
+            "name": {
+              "to": "(TEST) Community Showcase (40g)",
+              "from": "(TEST)Community Showcase (40g)"
+            }
+          }
+        },
+        "type": "tank_edit"
+      },
+      {
+        "id": "k15qgvj",
+        "ts": 1779824640991,
+        "data": {
+          "changes": {
+            "name": {
+              "to": "(TEST)Community Showcase (40g)",
+              "from": "Community Showcase (40g)"
+            }
+          }
+        },
+        "type": "tank_edit"
+      },
+      {
+        "id": "fiqmr8g",
+        "ts": 1779824625939,
+        "data": {
+          "sev": "soon",
+          "sig": "Water change due | 10d since last WC, ideal ~9d",
+          "body": "10 days since your last change — about right for this stocking. A 25-30% change in the next day or two keeps nitrates steady.",
+          "rule": "10d since last WC, ideal ~9d",
+          "title": "Water change due"
+        },
+        "type": "advisor"
+      },
+      {
+        "id": "92ks3cp",
+        "ts": 1779572423629,
+        "data": {
+          "sev": "fyi",
+          "sig": "Water change coming up | 7d since last WC, ideal ~9d",
+          "body": "7 days since last change. You're on track — plan to do one in ~2 day(s).",
+          "rule": "7d since last WC, ideal ~9d",
+          "title": "Water change coming up"
+        },
+        "type": "advisor"
+      },
+      {
+        "id": "rqvbxhp",
+        "ts": 1779386904963,
+        "data": {
+          "ph": 7.4,
+          "temp_f": 78,
+          "ammonia": 0,
+          "nitrate": 20,
+          "nitrite": 0
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "da5oce1",
+        "ts": 1778954904963,
+        "data": {
+          "notes": "",
+          "gallons": 15,
+          "prime_mL": 1.5,
+          "fert_pumps": 1,
+          "stability_mL": 0
+        },
+        "type": "water_change"
+      },
+      {
+        "id": "3oyhmjs",
+        "ts": 1778954904963,
+        "data": {
+          "ph": 7.4,
+          "temp_f": 78,
+          "ammonia": 0,
+          "nitrate": 15,
+          "nitrite": 0
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "6qei5vp",
+        "ts": 1778609304963,
+        "data": {
+          "count": 5,
+          "notes": "Bottom dwellers",
+          "species": "Bronze Cory"
+        },
+        "type": "fish_add"
+      },
+      {
+        "id": "lv414ke",
+        "ts": 1778350104963,
+        "data": {
+          "notes": "",
+          "gallons": 15,
+          "prime_mL": 1.5,
+          "fert_pumps": 1,
+          "stability_mL": 0
+        },
+        "type": "water_change"
+      },
+      {
+        "id": "vozk88s",
+        "ts": 1778350104963,
+        "data": {
+          "ph": 7.4,
+          "temp_f": 78,
+          "ammonia": 0,
+          "nitrate": 20,
+          "nitrite": 0
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "5qjw6p4",
+        "ts": 1778004504963,
+        "data": {
+          "count": 6,
+          "notes": "Second species added",
+          "species": "Harlequin Rasbora"
+        },
+        "type": "fish_add"
+      },
+      {
+        "id": "obfunj9",
+        "ts": 1777745304963,
+        "data": {
+          "notes": "Weekly change",
+          "gallons": 15,
+          "prime_mL": 1.5,
+          "fert_pumps": 1,
+          "stability_mL": 1.5
+        },
+        "type": "water_change"
+      },
+      {
+        "id": "us70x2k",
+        "ts": 1777745304963,
+        "data": {
+          "ph": 7.3,
+          "temp_f": 78,
+          "ammonia": 0,
+          "nitrate": 15,
+          "nitrite": 0
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "ur60dcp",
+        "ts": 1777399704963,
+        "data": {
+          "count": 8,
+          "notes": "Added first school",
+          "species": "Neon Tetra"
+        },
+        "type": "fish_add"
+      },
+      {
+        "id": "iyuxbl9",
+        "ts": 1777140504963,
+        "data": {
+          "notes": "First post-cycle change",
+          "gallons": 15,
+          "prime_mL": 1.5,
+          "fert_pumps": 0,
+          "stability_mL": 1.5
+        },
+        "type": "water_change"
+      },
+      {
+        "id": "3dlfigh",
+        "ts": 1777140504963,
+        "data": {
+          "ph": 7.3,
+          "temp_f": 78,
+          "ammonia": 0,
+          "nitrate": 10,
+          "nitrite": 0
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "88ufqyb",
+        "ts": 1776794904963,
+        "data": {
+          "ph": 7.3,
+          "temp_f": 78,
+          "ammonia": 0,
+          "nitrate": 20,
+          "nitrite": 0.25
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "sj46jnb",
+        "ts": 1776103704963,
+        "data": {
+          "ph": 7.3,
+          "temp_f": 78,
+          "ammonia": 0.5,
+          "nitrate": 10,
+          "nitrite": 1
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "fuj7xw6",
+        "ts": 1775412504963,
+        "data": {
+          "ph": 7.4,
+          "temp_f": 78,
+          "ammonia": 1,
+          "nitrate": 5,
+          "nitrite": 0.25
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "s08uqaf",
+        "ts": 1774894104963,
+        "data": {
+          "ph": 7.4,
+          "temp_f": 78,
+          "ammonia": 0,
+          "nitrate": 0,
+          "nitrite": 0
+        },
+        "type": "water_test"
+      },
+      {
+        "id": "25dvylx",
+        "ts": 1774807704963,
+        "data": {
+          "notes": "Tank set up and filled"
+        },
+        "type": "tank_edit"
+      }
+    ]
+  },
+  "legacyLogs": {}
+}
