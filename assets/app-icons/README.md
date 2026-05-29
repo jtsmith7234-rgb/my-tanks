@@ -42,7 +42,7 @@ assets/app-icons/
 
 ## Where these are NOT used yet
 
-These master files are **not** wired into the live web app. The web app uses a single root icon at `/apple-touch-icon.png` (referenced from `index.html` and `manifest.json`). When Capacitor is initialized, native iOS icons will be regenerated from the master in this folder.
+These master files are **not** wired into the live web app. The web app uses a single icon at `apple-touch-icon.png` (referenced from `index.html` and `manifest.json` using a relative path so it resolves under deployment subpaths like GitHub Pages). When Capacitor is initialized, native iOS icons will be regenerated from the master in this folder.
 
 ## Next step (when we initialize Capacitor/iOS)
 
