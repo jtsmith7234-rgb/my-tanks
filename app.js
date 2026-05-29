@@ -1787,23 +1787,19 @@ const TANK_KINDS = [
 ];
 function tankKindById(id){ return TANK_KINDS.find(k => k.id === id) || TANK_KINDS[TANK_KINDS.length - 1]; }
 
-/* Entry point for the + button. Decides whether to show the help prompt first. */
+/* Entry point for the + button. Always shows the help prompt first. */
 function handleAddTankTap(){
-  if (getPref("hideFirstTankPrompt", false) === true){
-    openAddTank({ guided:false });
-    return;
-  }
   openFirstTankHelpModal();
 }
 
 function openFirstTankHelpModal(){
   openModal(`
-    <h3 style="margin:0 0 6px">Need help setting up your first tank?</h3>
+    <h3 style="margin:0 0 6px">Need help setting up this tank?</h3>
     <p class="muted" style="margin:0 0 14px;font-size:13.5px;line-height:1.5">Choose guided setup if you want a beginner-friendly checklist based on the kind of tank you're making.</p>
     <div class="col" style="display:flex;flex-direction:column;gap:8px">
-      <button class="btn block" id="ftp-yes">Yes, guide me</button>
-      <button class="btn block secondary" id="ftp-no">No, don't ask again</button>
-      <button class="btn block ghost" id="ftp-later" style="background:transparent;border:0;color:var(--ink-dim);font-weight:500">Not now</button>
+      <button class="btn block" id="ftp-yes">Yes</button>
+      <button class="btn block secondary" id="ftp-no">No</button>
+      <button class="btn block ghost" id="ftp-cancel" style="background:transparent;border:0;color:var(--ink-dim);font-weight:500">Cancel</button>
     </div>
   `, () => {
     $("#ftp-yes").addEventListener("click", () => {
@@ -1811,19 +1807,18 @@ function openFirstTankHelpModal(){
       openAddTank({ guided:true });
     });
     $("#ftp-no").addEventListener("click", () => {
-      setPref("hideFirstTankPrompt", true);
       closeModal();
-      openAddTank({ guided:false });
+      openAddTank({ guided:false, optedOut:true });
     });
-    $("#ftp-later").addEventListener("click", () => {
+    $("#ftp-cancel").addEventListener("click", () => {
       closeModal();
-      openAddTank({ guided:false });
     });
   });
 }
 
 function openAddTank(opts){
   const guided = !!(opts && opts.guided);
+  const optedOut = !!(opts && opts.optedOut);
   const kindOpts = TANK_KINDS.map(k =>
     `<option value="${k.id}">${escapeHTML(k.label)}</option>`
   ).join("");
@@ -1875,6 +1870,8 @@ function openAddTank(opts){
           kind: k.id,
           completed: {}
         };
+      } else if (optedOut){
+        tank.firstTank = { enabled: false, optedOut: true };
       }
       tanks.push(tank); saveTanks(tanks); closeModal();
       view = { screen:"tank", tankId: tank.id, tab:"details" };
@@ -2166,15 +2163,6 @@ function openBackupModal(){
     </div>
 
     <div class="backup-block">
-      <h4>🌱 Beginner setup help</h4>
-      <p>Shows the “Need help setting up your first tank?” prompt when you tap the + button. Turn off if you don't want to see it again.</p>
-      <label class="row" style="align-items:center;gap:10px;cursor:pointer">
-        <input type="checkbox" id="toggle-first-tank-prompt" />
-        <span>Show beginner setup help</span>
-      </label>
-    </div>
-
-    <div class="backup-block">
       <h4>🎨 Theme</h4>
       <p>Switch the look of the app. Your data isn't affected.</p>
       <div class="theme-picker">
@@ -2213,15 +2201,6 @@ function openBackupModal(){
         toast(`Theme: ${THEMES[c.dataset.themeId].label}`);
       });
     });
-
-    const ftpToggle = $("#toggle-first-tank-prompt");
-    if (ftpToggle){
-      ftpToggle.checked = getPref("hideFirstTankPrompt", false) !== true;
-      ftpToggle.addEventListener("change", () => {
-        setPref("hideFirstTankPrompt", !ftpToggle.checked);
-        toast(ftpToggle.checked ? "Beginner help is on" : "Beginner help hidden");
-      });
-    }
 
     $("#do-export").addEventListener("click", downloadBackup);
     $("#do-import").addEventListener("click", () => $("#import-file").click());

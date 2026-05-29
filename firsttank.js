@@ -359,6 +359,9 @@ function _renderList(label, items, cls){
 }
 
 function renderFirstTankSection(tank){
+  if (tank.firstTank && tank.firstTank.optedOut){
+    return "";
+  }
   if (!tank.firstTank || !tank.firstTank.enabled){
     return `
       <div class="section first-tank-cta">
