@@ -1941,6 +1941,23 @@ async function hydrateFromCloud(){
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // ROOT-CAUSE GUARD for horizontal drift.
+  // Even with overflow-x:hidden, iOS Safari can set scrollLeft > 0 on a scroll
+  // container via focus(), system gestures, or autoscroll. Once that happens,
+  // every child inside that container renders shifted left and stays that way
+  // when navigating between screens. Clamp scrollLeft back to 0 the moment it
+  // moves on the document or the main scroller. Single global listener — no
+  // per-screen hacks.
+  const clampX = () => {
+    if (window.scrollX !== 0) window.scrollTo(0, window.scrollY);
+    const main = document.getElementById("main");
+    if (main && main.scrollLeft !== 0) main.scrollLeft = 0;
+    if (document.documentElement.scrollLeft !== 0) document.documentElement.scrollLeft = 0;
+    if (document.body.scrollLeft !== 0) document.body.scrollLeft = 0;
+  };
+  window.addEventListener("scroll", clampX, { passive: true, capture: true });
+  clampX();
+
   $("#back-btn").addEventListener("click", () => {
     view = { screen:"home", tankId:null, tab:"details" };
     render();
