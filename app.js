@@ -1222,19 +1222,11 @@ function calcDoses(gallons){
 
 function renderClean(t){
   const suggested = Math.round(t.gallons * 0.5);
-  // Migrate legacy: ensure tank.chemicals exists. Auto-seed Prime + Stability + Easy Green for older tanks.
-  if (!t.chemicals){
-    t.chemicals = [
-      { instanceId: uid(), libraryId: "prime",     custom: null },
-      { instanceId: uid(), libraryId: "stability", custom: null },
-      { instanceId: uid(), libraryId: "easygreen", custom: null }
-    ];
-  }
+  if (!t.chemicals) t.chemicals = [];
   return `
     <div class="section">
       <h2>Water change calculator</h2>
       <p class="muted" style="margin-top:0">Doses calculate against the gallons of new water you're putting back in. ${suggested} gal would be a ~50% change on this tank.</p>
-      <p class="verify-helper">Always confirm label directions before dosing. Bottle instructions can change between batches.</p>
       <div class="row">
         <label class="field"><span>Gallons being changed</span>
           <input class="input" id="wc-gallons" type="number" min="0" step="0.5" value="${suggested}" />
@@ -1322,28 +1314,30 @@ function renderChemCustomModal(){
   `;
 }
 function chemResolve(c){
-  // Returns the effective spec for a tank chemical entry (library or custom)
-  if (c.custom) return c.custom;
-  if (window.CHEMICALS) return window.CHEMICALS.byId(c.libraryId);
-  return null;
+  // Returns the effective spec for a tank chemical entry.
+  // If the user verified with a manual dose, the manual values override the library defaults.
+  const base = c.custom ? c.custom
+    : (window.CHEMICALS ? window.CHEMICALS.byId(c.libraryId) : null);
+  if (!base) return null;
+  if (c.savedDose && c.doseSource === "manual"){
+    return Object.assign({}, base, {
+      mlPerGallon: c.savedDose.mlPerGallon,
+      unit:        c.savedDose.unit || base.unit,
+      rule:        c.savedDose.rule || base.rule,
+      capSize:     (c.savedDose.capSize != null) ? c.savedDose.capSize : base.capSize
+    });
+  }
+  return base;
 }
 
 function bindClean(t){
   const inp = $("#wc-gallons");
   const out = $("#dose-out");
 
-  // Per-session verification state, keyed by instanceId
-  const verifyState = {};
-  (t.chemicals || []).forEach(c => { verifyState[c.instanceId] = { verified: false, note: "" }; });
-
   function doseCard(c, gallons){
     const spec = chemResolve(c);
     if (!spec) return "";
-    const v = verifyState[c.instanceId] || { verified: false, note: "" };
-    const heading = v.verified ? "Dose" : "Estimated dose";
-    const badge = v.verified
-      ? `<span class="verify-badge verified">✓ Verified from bottle</span>`
-      : `<span class="verify-badge">Unverified</span>`;
+    const verified = !!c.verified;
     const amount = (spec.mlPerGallon || 0) * gallons;
     const caps = spec.capSize ? amount / spec.capSize : 0;
     const unit = spec.unit || "mL";
@@ -1351,23 +1345,18 @@ function bindClean(t){
       ? `<span class="sub-inline">(${fmt(caps)} cap${caps===1?"":"s"})</span>`
       : "";
     const valueHTML = `${fmt(amount)}<span class="unit">${unit}</span> ${inline}`;
-    const srcLink = spec.source
-      ? `<a class="chem-source" href="${spec.source}" target="_blank" rel="noopener">Source</a>`
-      : "";
+    const action = verified
+      ? `<span class="verify-badge verified">✓ Verified</span>`
+      : `<button class="btn small ghost" data-verify-now="${c.instanceId}">Verify dose</button>`;
     return `
-      <div class="dose-card ${v.verified ? "verified" : ""}">
+      <div class="dose-card ${verified ? "verified" : ""}">
         <div class="dose-card-head">
           <div class="label">${escapeHTML(spec.brand || "")} ${escapeHTML(spec.name || "")}</div>
-          ${badge}
+          ${action}
         </div>
-        <div class="dose-heading">${heading}</div>
+        <div class="dose-heading">Dose</div>
         <div class="big">${valueHTML}</div>
-        <div class="sub">${escapeHTML(spec.rule || "")} ${srcLink}</div>
-        <label class="verify-toggle">
-          <input type="checkbox" data-verify="${c.instanceId}" ${v.verified ? "checked" : ""} />
-          <span>Verified from bottle label</span>
-        </label>
-        <input class="input verify-note" data-note="${c.instanceId}" placeholder="Label note (e.g. '1 cap per 50 gal — 2026 batch')" value="${escapeHTML(v.note || "")}" ${v.verified ? "" : "hidden"} />
+        <div class="sub">${escapeHTML(spec.rule || "")}</div>
         <button class="chem-remove" data-remove="${c.instanceId}" title="Remove from tank">×</button>
       </div>
     `;
@@ -1385,25 +1374,105 @@ function bindClean(t){
       return;
     }
     out.innerHTML = `<div class="dose-grid">${list.map(c => doseCard(c, g)).join("")}</div>`;
-    $$("input[data-verify]", out).forEach(cb => cb.addEventListener("change", () => {
-      const key = cb.dataset.verify;
-      verifyState[key].verified = cb.checked;
-      paint();
-    }));
-    $$("input[data-note]", out).forEach(inp2 => inp2.addEventListener("input", () => {
-      const key = inp2.dataset.note;
-      verifyState[key].note = inp2.value;
+    $$("button[data-verify-now]", out).forEach(b => b.addEventListener("click", () => {
+      const id = b.dataset.verifyNow;
+      const entry = (t.chemicals || []).find(c => c.instanceId === id);
+      if (entry) openVerifyPrompt(entry);
     }));
     $$("button[data-remove]", out).forEach(b => b.addEventListener("click", () => {
       const id = b.dataset.remove;
       t.chemicals = (t.chemicals || []).filter(c => c.instanceId !== id);
-      delete verifyState[id];
       saveTanks(tanks);
       paint();
     }));
   }
   inp.addEventListener("input", paint);
   paint();
+
+  // ----- Verify-dose prompt (researched data + confirm / manual fallback) -----
+  function openVerifyPrompt(entry){
+    const spec = chemResolve(entry);
+    if (!spec) return;
+    const title = `${escapeHTML(spec.brand || "")} ${escapeHTML(spec.name || "")}`.trim();
+    const srcLink = spec.source
+      ? `<a class="chem-source" href="${spec.source}" target="_blank" rel="noopener">Source</a>`
+      : "";
+    openModal(`
+      <h3 style="margin:0 0 6px">${title}</h3>
+      <p class="muted small" style="margin:0 0 10px">Check this against your bottle label before confirming. Manufacturers sometimes change instructions between batches.</p>
+      <div class="verify-prompt-rule">${escapeHTML(spec.rule || "")} ${srcLink}</div>
+      <button class="btn block" id="vp-confirm" style="margin-top:14px">Confirm — matches my bottle</button>
+      <button class="btn block link-btn" id="vp-manual" style="margin-top:8px">Not the correct dosage</button>
+    `, () => {
+      $("#vp-confirm").addEventListener("click", () => {
+        entry.verified = true;
+        entry.doseSource = entry.doseSource === "manual" ? "manual" : "researched";
+        entry.savedDose = {
+          mlPerGallon: spec.mlPerGallon,
+          unit: spec.unit,
+          rule: spec.rule,
+          capSize: spec.capSize
+        };
+        entry.verifiedAt = new Date().toISOString();
+        saveTanks(tanks);
+        logEvent(t.id, "chem_verify", { name: title, source: entry.doseSource });
+        closeModal();
+        paint();
+      });
+      $("#vp-manual").addEventListener("click", () => {
+        closeModal();
+        openManualDose(entry);
+      });
+    });
+  }
+
+  function openManualDose(entry){
+    const spec = chemResolve(entry);
+    if (!spec) return;
+    const title = `${escapeHTML(spec.brand || "")} ${escapeHTML(spec.name || "")}`.trim();
+    const units = ["mL","pumps","drops","g","tsp","oz"];
+    if (spec.unit && !units.includes(spec.unit)) units.unshift(spec.unit);
+    openModal(`
+      <h3 style="margin:0 0 6px">${title} — manual dose</h3>
+      <p class="muted small" style="margin:0 0 10px">Enter the dose exactly as your bottle states.</p>
+      <div class="row">
+        <label class="field"><span>Amount per gallon</span>
+          <input class="input" id="md-amount" type="number" step="0.01" placeholder="e.g. 0.1" /></label>
+        <label class="field"><span>Unit</span>
+          <select class="input" id="md-unit">
+            ${units.map(u => `<option ${u===spec.unit?"selected":""}>${u}</option>`).join("")}
+          </select>
+        </label>
+      </div>
+      <label class="field"><span>Bottle directions (optional)</span>
+        <input class="input" id="md-rule" placeholder="e.g. 1 mL per 10 gal" /></label>
+      <div class="row" style="margin-top:6px">
+        <button class="btn" id="md-save">Save & mark verified</button>
+        <button class="btn secondary" id="md-cancel">Cancel</button>
+      </div>
+    `, () => {
+      $("#md-save").addEventListener("click", () => {
+        const amt = parseFloat($("#md-amount").value);
+        const unit = $("#md-unit").value;
+        const rule = $("#md-rule").value.trim();
+        if (!amt || amt <= 0){ alert("Enter the amount per gallon"); return; }
+        entry.savedDose = {
+          mlPerGallon: amt,
+          unit,
+          rule: rule || `${amt} ${unit} per gallon`,
+          capSize: 0
+        };
+        entry.doseSource = "manual";
+        entry.verified = true;
+        entry.verifiedAt = new Date().toISOString();
+        saveTanks(tanks);
+        logEvent(t.id, "chem_verify", { name: title, source: "manual" });
+        closeModal();
+        paint();
+      });
+      $("#md-cancel").addEventListener("click", closeModal);
+    });
+  }
 
   // ----- + Add chemical flow -----
   function openChemPicker(){
@@ -1435,12 +1504,12 @@ function bindClean(t){
           return;
         }
         t.chemicals.push(entry);
-        verifyState[entry.instanceId] = { verified: false, note: "" };
         saveTanks(tanks);
         const spec = window.CHEMICALS && window.CHEMICALS.byId(libId);
         logEvent(t.id, "chem_add", { name: spec ? `${spec.brand} ${spec.name}` : libId });
         closeModal();
         paint();
+        openVerifyPrompt(entry);
       }));
       $("#chem-custom-btn").addEventListener("click", () => { closeModal(); openCustom(); });
       $("#chem-cancel-btn").addEventListener("click", closeModal);
@@ -1468,11 +1537,11 @@ function bindClean(t){
         const entry = { instanceId: uid(), libraryId: null, custom };
         t.chemicals = t.chemicals || [];
         t.chemicals.push(entry);
-        verifyState[entry.instanceId] = { verified: false, note: "" };
         saveTanks(tanks);
         logEvent(t.id, "chem_add", { name: `${brand} ${name}`, custom: true });
         closeModal();
         paint();
+        openVerifyPrompt(entry);
       });
       $("#cc-cancel").addEventListener("click", closeModal);
     });
@@ -1486,14 +1555,13 @@ function bindClean(t){
     const list = t.chemicals || [];
     const dosesLogged = list.map(c => {
       const spec = chemResolve(c);
-      const v = verifyState[c.instanceId] || {};
       if (!spec) return null;
       return {
         name: `${spec.brand || ""} ${spec.name || ""}`.trim(),
         amount: +((spec.mlPerGallon || 0) * g).toFixed(2),
         unit: spec.unit || "mL",
-        verified: !!v.verified,
-        label_note: v.note || ""
+        verified: !!c.verified,
+        dose_source: c.doseSource || ""
       };
     }).filter(Boolean);
     logEvent(t.id, "water_change", {
