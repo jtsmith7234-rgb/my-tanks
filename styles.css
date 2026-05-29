@@ -166,6 +166,7 @@ html,body{ height:100%; max-width:100%; overflow:hidden; overscroll-behavior:non
   min-height:0;             /* allow flex child to shrink so overflow can scroll */
   overflow-y:auto;
   overflow-x:hidden;
+  overscroll-behavior-x:contain;   /* iOS: kill horizontal rubber-band on the scroll container */
   -webkit-overflow-scrolling:touch;
   padding:0 14px 18px;
   scroll-padding-bottom: calc(env(safe-area-inset-bottom) + 12px);

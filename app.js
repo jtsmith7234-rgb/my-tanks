@@ -593,6 +593,11 @@ function renderHome(){
     }, { passive: true });
     card.addEventListener("touchend",    onEnd);
     card.addEventListener("touchcancel", onEnd);
+    // Safety net: if iOS sends the final touch event somewhere other than the card
+    // (finger drags off the card, system gesture interrupts, scroll takes over),
+    // the card was getting stuck translated. Mirror the desktop mouseup pattern.
+    window.addEventListener("touchend",    () => { if (tracking) onEnd(); }, { passive: true });
+    window.addEventListener("touchcancel", () => { if (tracking) onEnd(); }, { passive: true });
 
     // Pointer fallback for desktop testing
     let mouseDown = false;
