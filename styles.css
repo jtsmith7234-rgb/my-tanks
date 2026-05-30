@@ -1885,14 +1885,14 @@ input[type=time].input{ font-family:inherit }
   flex:0 0 100%; width:100%;
   scroll-snap-align:center; scroll-snap-stop:always;
   box-sizing:border-box;
-  padding:46px 24px 8px;
+  padding:40px 24px 8px;
   display:flex; flex-direction:column; align-items:center; text-align:center;
 }
 .tut-card-label{
   font-size:12px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase;
   color:var(--sakura); margin-bottom:16px;
 }
-.tut-snap{ margin-bottom:22px; }
+.tut-snap{ margin-bottom:18px; }
 .tut-headline{
   margin:0 0 8px; font-family:var(--font-display);
   font-size:23px; font-weight:700; letter-spacing:.2px; color:var(--ink);
@@ -1920,22 +1920,22 @@ input[type=time].input{ font-family:inherit }
 
 /* ---------- Device frame + screen mockups ---------- */
 .tut-device{
-  position:relative; width:194px; margin:0 auto;
-  border-radius:30px; padding:9px;
+  position:relative; width:230px; margin:0 auto;
+  border-radius:34px; padding:10px;
   background:linear-gradient(160deg, rgba(255,255,255,.18), rgba(0,0,0,.20));
   border:1px solid var(--glass-stroke);
   box-shadow:var(--glass-shadow), 0 2px 0 rgba(255,255,255,.18) inset;
 }
 .tut-device-notch{
-  position:absolute; top:10px; left:50%; transform:translateX(-50%);
-  width:54px; height:6px; border-radius:999px;
+  position:absolute; top:11px; left:50%; transform:translateX(-50%);
+  width:62px; height:7px; border-radius:999px;
   background:rgba(0,0,0,.28); z-index:2;
 }
 .tut-screen{
-  border-radius:23px; overflow:hidden;
+  border-radius:26px; overflow:hidden;
   background:linear-gradient(180deg, var(--pond-0), var(--pond-1));
-  padding:16px 10px 12px;
-  min-height:300px;
+  padding:18px 12px 14px;
+  min-height:352px;
   display:flex; flex-direction:column; gap:8px;
   text-align:left; color:var(--ink);
   box-shadow:0 1px 0 rgba(255,255,255,.25) inset;
@@ -1984,6 +1984,22 @@ input[type=time].input{ font-family:inherit }
   background:linear-gradient(180deg, var(--koi) 0%, #d65a32 100%);
   box-shadow:0 4px 12px rgba(255,122,74,.30);
 }
+
+.tut-help-prompt{
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+  padding:6px 4px;
+}
+.tut-help-q{ font-size:13px; font-weight:700; line-height:1.35; text-align:center; }
+.tut-help-opts{ display:flex; flex-direction:column; gap:7px; width:100%; }
+.tut-help-yes,.tut-help-no{
+  text-align:center; font-size:11px; font-weight:700; padding:9px; border-radius:10px;
+}
+.tut-help-yes{
+  color:#fff;
+  background:linear-gradient(180deg, var(--koi) 0%, #d65a32 100%);
+  box-shadow:0 4px 12px rgba(255,122,74,.30);
+}
+.tut-help-no{ color:var(--ink-dim); background:var(--glass-fill); border:1px solid var(--glass-stroke); }
 
 .tut-tabs{ display:flex; gap:4px; }
 .tut-tab{

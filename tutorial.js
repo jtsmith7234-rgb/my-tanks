@@ -54,6 +54,19 @@
     `);
   }
 
+  function snapBeginner(){
+    return deviceFrame(`
+      <div class="tut-ui-head"><span class="tut-ui-back">‹</span><span class="tut-ui-title">New tank</span><span></span></div>
+      <div class="tut-help-prompt">
+        <div class="tut-help-q">Need help setting up<br>this tank?</div>
+        <div class="tut-help-opts">
+          <div class="tut-help-yes">Yes, guide me</div>
+          <div class="tut-help-no">No thanks</div>
+        </div>
+      </div>
+    `);
+  }
+
   function snapAddTank(){
     return deviceFrame(`
       <div class="tut-ui-head"><span class="tut-ui-back">‹</span><span class="tut-ui-title">New tank</span><span></span></div>
@@ -122,6 +135,12 @@
       snap: snapHome,
       title: "Welcome to My Tanks",
       body: "Your simple home base for keeping every aquarium healthy — all in one place."
+    },
+    {
+      label: "New here?",
+      snap: snapBeginner,
+      title: "First tank? We can help",
+      body: "My Tanks guides you through the basics, step by step, as you set up your first tank."
     },
     {
       label: "Step 1",
@@ -269,10 +288,10 @@
 
   // Show automatically on first launch for brand-new users only.
   // Caller passes a guard so we never stack on top of another sheet.
-  function maybeShowFirstRun(){
+  function maybeShowFirstRun(opts){
     if (seenTutorial()) return false;
     if (document.querySelector(".modal-backdrop")) return false; // another sheet is up
-    openTutorial({ markSeen: true });
+    openTutorial(Object.assign({ markSeen: true }, opts || {}));
     return true;
   }
 

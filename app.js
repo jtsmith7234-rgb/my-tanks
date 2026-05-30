@@ -2105,7 +2105,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // First-run onboarding: auto-show the tutorial for brand-new users only,
   // and only when no other startup sheet/modal is already open.
   if (window.TUTORIAL) {
-    try { window.TUTORIAL.maybeShowFirstRun(); } catch(e){ console.warn("tutorial first-run failed", e); }
+    try { window.TUTORIAL.maybeShowFirstRun({ onFinish: handleAddTankTap }); } catch(e){ console.warn("tutorial first-run failed", e); }
   }
 });
 
@@ -2466,7 +2466,7 @@ function openSettingsSheet(){
     const tutBtn = $("#settings-tutorial");
     if (tutBtn) tutBtn.addEventListener("click", () => {
       closeModal();
-      if (window.TUTORIAL) window.TUTORIAL.openTutorial({ markSeen: false });
+      if (window.TUTORIAL) window.TUTORIAL.openTutorial({ markSeen: false, onFinish: handleAddTankTap });
     });
     const helpBtn = $("#settings-help");
     if (helpBtn) helpBtn.addEventListener("click", () => {
