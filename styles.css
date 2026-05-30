@@ -12,7 +12,7 @@
    variable token sets + a lightweight animated background — no
    image assets, videos, or canvases. Each theme gets a DISTINCT
    motion: reef + tropical = rising motes/bubbles, planted = slow
-   swaying plant silhouettes, koi = drifting pond ripple sheen.
+   nodding broad-leaf plants, koi = drifting lily pads + pond ripple.
    ============================================================ */
 
 :root{
@@ -246,14 +246,16 @@ html[data-theme="koi"]{ --shimmer: rgba(255,190,140,.20); }
    Each effect layer lives in .petals (fixed, behind content, no clicks).
    Only its owning theme reveals it, so the four themes never share the
    same animation. Reef + Tropical = rising .petal motes (above);
-   Planted = swaying plants; Koi = drifting pond ripple. */
+   Planted = nodding broad-leaf plants; Koi = lily pads + pond ripple. */
 .fx-plants, .fx-ripple{ display:none; position:absolute; inset:0; pointer-events:none; }
 
-/* PLANTED: a soft bed of Vallisneria (jungle val / tape grass) — the
-   classic tall freshwater background plant. Each .blade is a thin
-   ribbon-like leaf rooted at the tank floor (transform-origin bottom)
-   so only the tips drift left/right, swaying with the current. Pure
-   CSS, no assets. A faint floor glow grounds the planted bed. */
+/* PLANTED: a soft bed of broad-leaf freshwater plants — Amazon sword /
+   Cryptocoryne style. Each .blade is a long lance/oval leaf riding the
+   top of a slender stem, rooted at the tank floor (transform-origin
+   bottom) so the whole leaf nods gently with the current. The leaf is
+   the element body; a thin stem and bright midrib are drawn with
+   pseudo-elements. Pure CSS, no assets. A faint floor glow grounds the
+   planted bed. */
 html[data-theme="planted"] .fx-plants{ display:block; overflow:hidden; }
 /* Soft green substrate glow rising from the tank floor. */
 html[data-theme="planted"] .fx-plants::after{
@@ -265,53 +267,107 @@ html[data-theme="planted"] .fx-plants::after{
 }
 html[data-theme="planted"] .fx-plants .blade{
   position:absolute; bottom:-3vh; transform-origin:50% 100%;
-  width:var(--bw,14px); height:var(--bh,52vh);
-  /* Ribbon leaf: vertical green gradient, brighter midrib, fades to tip. */
-  background:
-    linear-gradient(180deg,
-      rgba(70,170,110,0) 0%,
-      rgba(58,150,96,.30) 12%,
-      rgba(42,128,80,.50) 45%,
-      rgba(30,104,62,.62) 100%);
-  /* Tapered ribbon: narrow rounded tip, wider rooted base. */
-  border-radius:48% 52% 6% 6% / 18% 18% 2% 2%;
-  filter: blur(.6px);
+  /* --bw now sets the broad leaf width; --bh the full leaf+stem height. */
+  width:var(--bw,46px); height:var(--bh,52vh);
+  filter: blur(.5px);
   opacity:var(--bo,.85);
   animation: plant-sway var(--sd,11s) ease-in-out infinite alternate;
   animation-delay: var(--del, 0s);
   will-change: transform;
 }
-/* A slim highlight midrib down each leaf adds living-plant definition. */
+/* Slender stem rising from the substrate to the base of the leaf. */
 html[data-theme="planted"] .fx-plants .blade::before{
-  content:""; position:absolute; left:50%; top:6%; bottom:0;
-  width:2px; transform:translateX(-50%);
+  content:""; position:absolute; left:50%; bottom:0;
+  width:3px; height:42%; transform:translateX(-50%);
   background:linear-gradient(180deg,
-    rgba(150,225,175,0) 0%, rgba(150,225,175,.45) 40%, rgba(120,205,150,.55) 100%);
+    rgba(70,170,110,0) 0%, rgba(46,134,84,.55) 60%, rgba(34,116,70,.70) 100%);
   border-radius:2px;
 }
+/* Broad lance/oval leaf blade sitting atop the stem, with a bright
+   central midrib for living-plant definition. */
+html[data-theme="planted"] .fx-plants .blade::after{
+  content:""; position:absolute; left:50%; top:0;
+  width:100%; height:64%; transform:translateX(-50%);
+  background:
+    linear-gradient(90deg,
+      rgba(150,225,175,0) 47%, rgba(170,235,190,.55) 50%, rgba(150,225,175,0) 53%),
+    linear-gradient(165deg,
+      rgba(96,190,130,.62) 0%,
+      rgba(58,150,96,.58) 45%,
+      rgba(34,116,70,.66) 100%);
+  /* Pointed-tip, rounded-belly leaf (lance/oval blend). */
+  border-radius:50% 50% 50% 50% / 72% 72% 28% 28%;
+}
 @keyframes plant-sway{
-  0%   { transform: rotate(-5deg)  skewX(2deg)  scaleY(.99); }
-  100% { transform: rotate(5deg)   skewX(-2deg) scaleY(1.01); }
+  0%   { transform: rotate(-4deg)  scaleY(.99); }
+  100% { transform: rotate(4deg)   scaleY(1.01); }
 }
 
-/* KOI: a slow, wide pond ripple sheen drifting across the warm water.
-   Soft concentric light bands, no particles. */
+/* KOI: a serene zen koi pond. The base is a slow, wide pond-ripple sheen
+   on warm cream water; floating on it are soft lily-pad silhouettes that
+   drift and rotate almost imperceptibly, plus one gentle concentric ripple
+   ring spreading from a single point — as if a koi just rose to the
+   surface. No particles, no cartoon fish; calm and minimal. */
 html[data-theme="koi"] .fx-ripple{ display:block; }
+/* Warm water sheen base. */
 html[data-theme="koi"] .fx-ripple::before{
   content:""; position:absolute; inset:-25%;
   background:
-    radial-gradient(ellipse 55% 40% at 30% 35%, rgba(255,205,160,.22) 0%, rgba(255,205,160,0) 55%),
-    radial-gradient(ellipse 45% 35% at 72% 62%, rgba(255,150,95,.16) 0%, rgba(255,150,95,0) 55%),
-    repeating-radial-gradient(circle at 50% 60%,
-      rgba(255,255,255,.07) 0px, rgba(255,255,255,.07) 2px,
-      rgba(255,255,255,0) 22px, rgba(255,255,255,0) 44px);
-  animation: koi-ripple 22s ease-in-out infinite alternate;
+    radial-gradient(ellipse 55% 40% at 30% 35%, rgba(255,205,160,.20) 0%, rgba(255,205,160,0) 55%),
+    radial-gradient(ellipse 45% 35% at 72% 62%, rgba(255,150,95,.14) 0%, rgba(255,150,95,0) 55%);
+  animation: koi-sheen 26s ease-in-out infinite alternate;
   will-change: transform, opacity;
 }
-@keyframes koi-ripple{
-  0%   { transform: translate3d(-2%, -1%, 0) scale(1.0);  opacity:.85; }
+/* A single expanding pond ripple ring — one koi-rise, on a long loop. */
+html[data-theme="koi"] .fx-ripple::after{
+  content:""; position:absolute;
+  left:var(--rx,68%); top:var(--ry,30%);
+  width:38vmin; height:38vmin; margin:-19vmin 0 0 -19vmin;
+  border-radius:50%;
+  border:1.5px solid rgba(255,255,255,.18);
+  box-shadow:
+    0 0 0 6px rgba(255,255,255,.05),
+    0 0 0 14px rgba(255,180,130,.05);
+  opacity:0;
+  animation: koi-rise 14s ease-out infinite;
+  will-change: transform, opacity;
+}
+/* Floating lily pads: soft rounded silhouettes with the classic single
+   notch (a wedge cut out via a conic-gradient mask-like overlay). They
+   barely drift and rotate, like pads resting on still water. */
+html[data-theme="koi"] .fx-ripple .pad{
+  position:absolute; width:var(--pw,90px); height:var(--pw,90px);
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 38% 34%, rgba(120,180,120,.34) 0%, rgba(86,150,96,.30) 46%, rgba(60,120,74,.30) 100%);
+  /* The lily-pad notch: a transparent wedge from the centre outward. */
+  -webkit-mask: conic-gradient(from var(--notch,20deg), transparent 0 26deg, #000 26deg 360deg);
+          mask: conic-gradient(from var(--notch,20deg), transparent 0 26deg, #000 26deg 360deg);
+  filter: blur(.4px);
+  opacity:var(--po,.55);
+  animation: koi-drift var(--pd,30s) ease-in-out infinite alternate;
+  animation-delay: var(--pdel,0s);
+  will-change: transform;
+}
+/* Faint rim highlight to lift the pad off the water. */
+html[data-theme="koi"] .fx-ripple .pad::before{
+  content:""; position:absolute; inset:0; border-radius:50%;
+  box-shadow: inset 0 2px 6px rgba(190,235,195,.30);
+}
+@keyframes koi-sheen{
+  0%   { transform: translate3d(-2%, -1%, 0) scale(1.0);  opacity:.9; }
   50%  { opacity:1; }
-  100% { transform: translate3d(2%, 1.5%, 0) scale(1.05); opacity:.85; }
+  100% { transform: translate3d(2%, 1.5%, 0) scale(1.04); opacity:.9; }
+}
+@keyframes koi-drift{
+  0%   { transform: translate3d(-1.5%, 0, 0) rotate(-6deg); }
+  100% { transform: translate3d(1.5%, -1%, 0) rotate(6deg); }
+}
+@keyframes koi-rise{
+  0%   { transform: scale(.2); opacity:0; }
+  8%   { opacity:.5; }
+  70%  { opacity:.12; }
+  100% { transform: scale(1); opacity:0; }
 }
 
 /* Respect reduced-motion: kill all theme movement, keep the look. */
@@ -320,6 +376,8 @@ html[data-theme="koi"] .fx-ripple::before{
   .petals::before{ animation: none }
   .fx-plants .blade{ animation: none }
   .fx-ripple::before{ animation: none }
+  .fx-ripple::after{ animation: none; opacity:0 }
+  .fx-ripple .pad{ animation: none }
 }
 
 /* App shell: locks the viewport, flex column with single scroll area. */
@@ -1902,7 +1960,9 @@ input[type=time].input{ font-family:inherit }
 }
 .theme-preview-koi {
   background:
-    radial-gradient(ellipse 65% 45% at 80% 8%, rgba(255,130,80,.45) 0%, rgba(255,130,80,0) 58%),
+    radial-gradient(circle 13px at 32% 64%, rgba(86,150,96,.70) 0%, rgba(86,150,96,.70) 70%, rgba(86,150,96,0) 73%),
+    radial-gradient(circle 9px at 66% 40%, rgba(86,150,96,.55) 0%, rgba(86,150,96,.55) 70%, rgba(86,150,96,0) 73%),
+    radial-gradient(ellipse 65% 45% at 80% 8%, rgba(255,130,80,.40) 0%, rgba(255,130,80,0) 58%),
     linear-gradient(180deg, #fdf6ec 0%, #f0cfa6 40%, #cf8a52 100%);
 }
 .theme-meta { flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }

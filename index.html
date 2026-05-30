@@ -40,30 +40,36 @@
     <span class="petal p2" style="left:70%; animation-duration:20s; animation-delay:-10s"></span>
     <span class="petal"    style="left:84%; animation-duration:15s; animation-delay:-2s"></span>
     <span class="petal p3" style="left:93%; animation-duration:24s; animation-delay:-16s"></span>
-    <!-- Planted: Vallisneria (tape grass) ribbon leaves in loose clumps,
-         swaying slowly with the current. Shown only by the planted theme. -->
+    <!-- Planted: broad-leaf freshwater plants (Amazon sword / Cryptocoryne
+         style) in loose rooted clumps, nodding slowly with the current.
+         --bw = leaf width, --bh = leaf+stem height. Shown only by the
+         planted theme. -->
     <div class="fx-plants">
       <!-- left clump -->
-      <span class="blade" style="left:4%;  --bw:13px; --bh:54vh; --bo:.80; --sd:12s;  --del:0s"></span>
-      <span class="blade" style="left:7%;  --bw:11px; --bh:46vh; --bo:.70; --sd:10s;  --del:-3s"></span>
-      <span class="blade" style="left:10%; --bw:15px; --bh:58vh; --bo:.86; --sd:13.5s;--del:-6s"></span>
-      <span class="blade" style="left:13%; --bw:10px; --bh:40vh; --bo:.64; --sd:9.5s; --del:-1s"></span>
-      <!-- mid-left clump -->
-      <span class="blade" style="left:29%; --bw:14px; --bh:50vh; --bo:.78; --sd:11.5s;--del:-4s"></span>
-      <span class="blade" style="left:32%; --bw:12px; --bh:44vh; --bo:.70; --sd:13s;  --del:-7s"></span>
-      <span class="blade" style="left:35%; --bw:16px; --bh:60vh; --bo:.88; --sd:14.5s;--del:-2s"></span>
-      <!-- mid-right clump -->
-      <span class="blade" style="left:60%; --bw:13px; --bh:48vh; --bo:.76; --sd:10.5s;--del:-5s"></span>
-      <span class="blade" style="left:63%; --bw:15px; --bh:56vh; --bo:.84; --sd:12.5s;--del:-8s"></span>
-      <span class="blade" style="left:66%; --bw:11px; --bh:42vh; --bo:.66; --sd:9s;   --del:-3s"></span>
+      <span class="blade" style="left:3%;  --bw:54px; --bh:50vh; --bo:.80; --sd:12s;  --del:0s"></span>
+      <span class="blade" style="left:9%;  --bw:42px; --bh:42vh; --bo:.70; --sd:10s;  --del:-3s"></span>
+      <span class="blade" style="left:14%; --bw:62px; --bh:56vh; --bo:.86; --sd:13.5s;--del:-6s"></span>
+      <span class="blade" style="left:19%; --bw:38px; --bh:36vh; --bo:.64; --sd:9.5s; --del:-1s"></span>
+      <!-- mid clump -->
+      <span class="blade" style="left:38%; --bw:50px; --bh:46vh; --bo:.78; --sd:11.5s;--del:-4s"></span>
+      <span class="blade" style="left:44%; --bw:44px; --bh:40vh; --bo:.70; --sd:13s;  --del:-7s"></span>
+      <span class="blade" style="left:50%; --bw:64px; --bh:58vh; --bo:.88; --sd:14.5s;--del:-2s"></span>
+      <span class="blade" style="left:56%; --bw:40px; --bh:38vh; --bo:.66; --sd:9s;   --del:-3s"></span>
       <!-- right clump -->
-      <span class="blade" style="left:85%; --bw:15px; --bh:58vh; --bo:.86; --sd:13s;  --del:-6s"></span>
-      <span class="blade" style="left:88%; --bw:12px; --bh:46vh; --bo:.72; --sd:11s;  --del:-2s"></span>
-      <span class="blade" style="left:91%; --bw:14px; --bh:52vh; --bo:.80; --sd:14s;  --del:-9s"></span>
-      <span class="blade" style="left:94%; --bw:10px; --bh:38vh; --bo:.62; --sd:10s;  --del:-4s"></span>
+      <span class="blade" style="left:80%; --bw:60px; --bh:54vh; --bo:.86; --sd:13s;  --del:-6s"></span>
+      <span class="blade" style="left:86%; --bw:44px; --bh:44vh; --bo:.72; --sd:11s;  --del:-2s"></span>
+      <span class="blade" style="left:92%; --bw:52px; --bh:50vh; --bo:.80; --sd:14s;  --del:-9s"></span>
+      <span class="blade" style="left:97%; --bw:38px; --bh:34vh; --bo:.62; --sd:10s;  --del:-4s"></span>
     </div>
-    <!-- Koi: slow drifting pond ripple sheen (shown only by koi) -->
-    <div class="fx-ripple"></div>
+    <!-- Koi: zen pond — warm sheen base + a single koi-rise ripple ring,
+         with soft lily pads drifting on the surface (shown only by koi). -->
+    <div class="fx-ripple">
+      <span class="pad" style="left:12%; top:22%; --pw:96px;  --po:.50; --notch:200deg; --pd:34s; --pdel:0s"></span>
+      <span class="pad" style="left:74%; top:16%; --pw:70px;  --po:.42; --notch:40deg;  --pd:30s; --pdel:-8s"></span>
+      <span class="pad" style="left:60%; top:70%; --pw:120px; --po:.55; --notch:300deg; --pd:38s; --pdel:-5s"></span>
+      <span class="pad" style="left:22%; top:78%; --pw:82px;  --po:.46; --notch:120deg; --pd:32s; --pdel:-14s"></span>
+      <span class="pad" style="left:86%; top:58%; --pw:64px;  --po:.40; --notch:250deg; --pd:36s; --pdel:-3s"></span>
+    </div>
   </div>
   <div id="app">
     <header class="topbar">
