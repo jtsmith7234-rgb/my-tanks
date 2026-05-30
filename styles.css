@@ -165,46 +165,58 @@ html[data-theme="planted"] body{
    silhouettes (.fx-plants) below, not bubbles. Hide any .petal here. */
 html[data-theme="planted"] .petal{ display:none; }
 
-/* ---------- THEME: KOI POND (dark, zen) ----------
-   A serene Japanese koi pond seen from above: dark reflective slate/ink
-   water, muted moss & sage greens, warm stone neutrals, and a
-   single koi-orange accent. Deliberately distinct from every other
-   theme — no bright aqua, no cream, no planted-green dominance.
-   Distinct motion: subtle spreading pond ripples + one koi glimmer. */
+/* ---------- THEME: KOI POND (dark, zen) — full rebuild ----------
+   A still Japanese koi pond seen from above at dusk. The water is deep
+   INK / SLATE BLUE-GRAY — reflective, glassy, a little mysterious — NOT
+   the green-charcoal of a planted tank and NOT the cool reef navy. Its
+   one warm note is a koi-orange glow rising from beneath the surface;
+   muted sage/moss appears only as a restrained supporting accent, never
+   as the dominant tone. Text is a warm cream so it sits cleanly on the
+   dark water. The signature motion is slow concentric pond RIPPLES from
+   one or two koi-rise points — no bubbles, no drifting motes, no plants.
+   If it can be mistaken for another theme at a glance, it has failed. */
 html[data-theme="koi"]{
-  --pond-0: #1a2420;
-  --pond-1: #232f2a;
-  --pond-2: #0e1613;
+  /* Ink/slate reflective pond — blue-gray charcoal, deliberately cool
+     and desaturated so it never reads as green or navy reef. */
+  --pond-0: #141b24;
+  --pond-1: #1b2530;
+  --pond-2: #0a0e14;
 
-  --glass-fill:        rgba(38,52,46,.52);
-  --glass-fill-strong: rgba(48,66,58,.70);
-  --glass-stroke:      rgba(150, 200, 175, .20);
-  --glass-stroke-soft: rgba(150, 200, 175, .10);
-  --glass-highlight:   rgba(205, 235, 215, .40);
-  --glass-shadow:      0 18px 50px rgba(0, 12, 8, .60), 0 1px 0 rgba(190,235,210,.07) inset;
-  --glass-shadow-sm:   0 8px 24px rgba(0, 12, 8, .42), 0 1px 0 rgba(190,235,210,.07) inset;
+  /* Cards: slightly lifted slate glass over the ink water. */
+  --glass-fill:        rgba(33,44,58,.54);
+  --glass-fill-strong: rgba(44,58,76,.72);
+  --glass-stroke:      rgba(190, 205, 220, .18);
+  --glass-stroke-soft: rgba(190, 205, 220, .09);
+  --glass-highlight:   rgba(225, 232, 240, .38);
+  --glass-shadow:      0 18px 50px rgba(0, 4, 10, .64), 0 1px 0 rgba(220,228,238,.06) inset;
+  --glass-shadow-sm:   0 8px 24px rgba(0, 4, 10, .46), 0 1px 0 rgba(220,228,238,.06) inset;
 
-  --ink:      #ecf3ee;   /* soft cream-white on dark water */
-  --ink-dim:  #aec4ba;   /* muted sage text */
-  --ink-soft: #7c948a;   /* stone-sage secondary */
+  --ink:      #eef0ea;   /* warm cream-white text on dark water */
+  --ink-dim:  #b3bcc4;   /* cool slate-stone secondary text */
+  --ink-soft: #788692;   /* muted slate tertiary */
 
-  --sakura:      #8fae9b;   /* sage / informational (no orange info noise) */
-  --sakura-soft: #b6d0c0;
-  --sakura-deep: #5e7a6b;
-  --koi:         #ef6a2e;   /* signature koi-orange brand action */
-  --koi-soft:    #f59461;
+  /* Informational tone = restrained slate (no green-info noise, no aqua). */
+  --sakura:      #8aa0ac;   /* slate-stone / informational */
+  --sakura-soft: #b6c6cf;
+  --sakura-deep: #5a6e7a;
+  --koi:         #f0682a;   /* signature koi-orange brand action */
+  --koi-soft:    #f79a64;
   --gold:        #d9a64a;
-  --jade:        #4cb38a;
+  --jade:        #6f9c83;   /* muted moss/sage supporting accent */
   --warn:        #e0a23c;
   --bad:         #e06a5a;
 }
 html[data-theme="koi"] body{
   min-height:100vh;
+  /* Dark ink/slate water with depth: a faint cool reflection at the top
+     of the surface, a single warm koi-orange glow rising from below the
+     waterline (lower third), and a barely-there sage pond accent low and
+     to one side. The base gradient is pure ink/slate blue-gray. */
   background:
-    radial-gradient(ellipse 90% 50% at 50% -10%, rgba(120,170,140,.16) 0%, rgba(120,170,140,0) 60%),
-    radial-gradient(ellipse 55% 40% at 78% 90%, rgba(239,106,46,.10) 0%, rgba(239,106,46,0) 60%),
-    radial-gradient(ellipse 60% 45% at 14% 8%, rgba(90,140,110,.16) 0%, rgba(90,140,110,0) 62%),
-    linear-gradient(180deg, #1f2a25 0%, #18221e 40%, #111914 74%, #0a100d 100%);
+    radial-gradient(ellipse 92% 46% at 50% -12%, rgba(150,176,196,.12) 0%, rgba(150,176,196,0) 58%),
+    radial-gradient(ellipse 64% 50% at 62% 108%, rgba(240,104,42,.13) 0%, rgba(240,104,42,0) 62%),
+    radial-gradient(ellipse 48% 38% at 14% 96%, rgba(95,135,115,.10) 0%, rgba(95,135,115,0) 60%),
+    linear-gradient(180deg, #1a2330 0%, #131b26 42%, #0c121b 76%, #060a10 100%);
   background-attachment: fixed, fixed, fixed, fixed;
   overflow-x:hidden;
 }
@@ -238,7 +250,7 @@ html,body{ height:100%; max-width:100%; overflow:hidden; overscroll-behavior:non
 html[data-theme="midnight-reef"]{ --shimmer: rgba(90,200,225,.14); }
 html[data-theme="tropical-pop"]{ --shimmer: rgba(255,255,255,.22); }
 html[data-theme="planted"]{ --shimmer: rgba(170,235,185,.18); }
-html[data-theme="koi"]{ --shimmer: rgba(150,195,165,.12); }
+html[data-theme="koi"]{ --shimmer: rgba(165,190,210,.10); }
 @keyframes reef-drift{
   0%   { transform: translate3d(-3%, -2%, 0) scale(1.02); }
   100% { transform: translate3d(3%, 2%, 0)  scale(1.06); }
@@ -306,87 +318,90 @@ html[data-theme="planted"] .fx-plants .blade::after{
   100% { transform: rotate(4deg)   scaleY(1.01); }
 }
 
-/* KOI: a serene zen koi pond seen from above. The water is DARK and
-   reflective (deep slate/ink), not cream. The signature motion is
-   subtle POND RIPPLES — slow concentric rings spreading from one or two
-   fixed points, as if a koi just brushed the surface. Behind them sits a
-   reflective moonlit sheen and a single soft koi-orange under-water
-   glimmer — the only warm note. No bubbles, no drifting circles, no
-   cartoon fish; calm, minimal, premium. */
+/* KOI — RIPPLE-FIRST IDENTITY. The signature, theme-defining motion is
+   slow concentric POND RIPPLES spreading from one or two koi-rise points
+   on still, dark ink/slate water. Everything else is backdrop that exists
+   only to support the ripples: a faint under-surface koi-orange glow, a
+   still reflection band, and a soft cool sheen. No bubbles, no drifting
+   circles, no plants, no fish. The rings are intentionally larger and a
+   touch more visible than a generic dark-mode glow so the pond reads
+   immediately — yet still low-opacity so cards stay perfectly readable. */
 html[data-theme="koi"] .fx-ripple{ display:block; overflow:hidden; }
-/* Reflective dark-water sheen: cool moonlit highlights drifting on the
-   surface plus one slow koi-orange under-water glimmer. Pure backdrop —
-   the ripple rings (the .drop sources below) carry the real motion. */
+/* Backdrop: a warm koi-orange glow pooling just beneath the waterline
+   (lower-centre) plus two cool slate sheens drifting slowly on the
+   surface. Supports the ripples; never competes with them. */
 html[data-theme="koi"] .fx-ripple::before{
   content:""; position:absolute; inset:-25%;
   background:
-    radial-gradient(ellipse 58% 40% at 26% 30%, rgba(170,210,185,.12) 0%, rgba(170,210,185,0) 56%),
-    radial-gradient(ellipse 50% 36% at 76% 68%, rgba(120,160,140,.10) 0%, rgba(120,160,140,0) 56%),
-    radial-gradient(ellipse 30% 18% at 60% 52%, rgba(239,106,46,.14) 0%, rgba(239,106,46,0) 62%);
-  animation: koi-sheen 34s ease-in-out infinite alternate;
+    radial-gradient(ellipse 52% 34% at 60% 100%, rgba(240,104,42,.16) 0%, rgba(240,104,42,0) 60%),
+    radial-gradient(ellipse 56% 40% at 24% 26%, rgba(170,196,216,.10) 0%, rgba(170,196,216,0) 56%),
+    radial-gradient(ellipse 48% 34% at 80% 60%, rgba(120,150,175,.08) 0%, rgba(120,150,175,0) 56%);
+  animation: koi-sheen 38s ease-in-out infinite alternate;
   will-change: transform, opacity;
 }
-/* A faint moonlit reflection band across the upper water, giving the
-   pond its still, glassy quality. Static — calm, not busy. */
+/* A still, glassy reflection band across the upper water — the calm,
+   mirror-like surface of the pond. Static; the ripples carry motion. */
 html[data-theme="koi"] .fx-ripple::after{
-  content:""; position:absolute; left:-10%; right:-10%; top:8%; height:32%;
+  content:""; position:absolute; left:-10%; right:-10%; top:6%; height:30%;
   background:
     linear-gradient(180deg,
-      rgba(190,222,200,.07) 0%, rgba(190,222,200,.03) 45%, rgba(190,222,200,0) 100%);
-  filter: blur(6px);
-  opacity:.8;
+      rgba(200,216,230,.08) 0%, rgba(200,216,230,.03) 48%, rgba(200,216,230,0) 100%);
+  filter: blur(7px);
+  opacity:.85;
 }
-/* RIPPLE SOURCE: each .drop is a fixed point on the pond from which slow
-   concentric rings expand and fade — the koi-rise. The element body is
-   the leading ring; ::before and ::after are two trailing rings on the
-   same loop (staggered) so one source reads as a real spreading ripple.
-   Pale moonlit rim with a whisper of koi-orange so it sits on dark
-   water without ever fighting the content above it. */
+/* RIPPLE SOURCE: each .drop is a fixed koi-rise point. The element body
+   is the leading ring; ::before and ::after are two trailing rings on the
+   same loop (time-staggered) so a single source reads as one ripple that
+   keeps spreading outward. Slightly elliptical (scaleY < 1) for a viewed-
+   from-a-low-angle pond feel. Cool moonlit-cream rim with a whisper of
+   koi-orange inside, sitting on dark water without fighting content. */
 html[data-theme="koi"] .fx-ripple .drop,
 html[data-theme="koi"] .fx-ripple .drop::before,
 html[data-theme="koi"] .fx-ripple .drop::after{
   position:absolute; left:0; top:0;
-  width:var(--rw,46vmin); height:var(--rw,46vmin);
-  margin:calc(var(--rw,46vmin) / -2) 0 0 calc(var(--rw,46vmin) / -2);
+  width:var(--rw,58vmin); height:var(--rw,58vmin);
+  margin:calc(var(--rw,58vmin) / -2) 0 0 calc(var(--rw,58vmin) / -2);
   border-radius:50%;
-  border:1.5px solid rgba(205,235,215,.20);
+  border:1.5px solid rgba(214,228,240,.26);
   box-shadow:
-    0 0 0 1px rgba(239,106,46,.05) inset,
-    0 0 14px rgba(205,235,215,.05);
+    0 0 0 1px rgba(240,104,42,.07) inset,
+    0 0 18px rgba(206,222,238,.07);
   opacity:0;
   will-change: transform, opacity;
 }
 html[data-theme="koi"] .fx-ripple .drop{
   left:var(--dx,50%); top:var(--dy,40%);
-  animation: koi-ripple var(--ds,15s) ease-out infinite;
+  animation: koi-ripple var(--ds,16s) ease-out infinite;
   animation-delay: var(--ddel,0s);
 }
 html[data-theme="koi"] .fx-ripple .drop::before,
 html[data-theme="koi"] .fx-ripple .drop::after{
   content:""; left:50%; top:50%;
-  animation: koi-ripple var(--ds,15s) ease-out infinite;
+  animation: koi-ripple var(--ds,16s) ease-out infinite;
 }
-/* Trailing rings: same loop, offset in time so the ripple looks like it
-   keeps spreading outward rather than pulsing as one ring. */
+/* Trailing rings: same loop, offset in time so the source emits a steady
+   train of expanding rings rather than one pulsing circle. */
 html[data-theme="koi"] .fx-ripple .drop::before{
-  animation-delay: calc(var(--ddel,0s) + var(--ds,15s) / 3);
+  animation-delay: calc(var(--ddel,0s) + var(--ds,16s) / 3);
 }
 html[data-theme="koi"] .fx-ripple .drop::after{
-  animation-delay: calc(var(--ddel,0s) + var(--ds,15s) / 3 * 2);
+  animation-delay: calc(var(--ddel,0s) + var(--ds,16s) / 3 * 2);
 }
 @keyframes koi-sheen{
-  0%   { transform: translate3d(-3%, -1%, 0) scale(1.0);  opacity:.85; }
+  0%   { transform: translate3d(-3%, -1%, 0) scale(1.0);  opacity:.8; }
   50%  { opacity:1; }
-  100% { transform: translate3d(3%, 2%, 0) scale(1.05);  opacity:.85; }
+  100% { transform: translate3d(3%, 2%, 0) scale(1.05);  opacity:.8; }
 }
-/* One ripple ring: born small and faint at the source, spreading outward
-   while softening, gone before it reaches the edges. Slow and low-opacity
-   so it never competes with the cards. */
+/* One ripple ring: born tiny at the koi-rise, spreading outward while
+   softening, slightly flattened vertically (elliptical) for perspective,
+   gone before it reaches the edges. Peaks a touch brighter than before so
+   the ripple clearly defines the theme, then fades low so cards stay
+   readable. Slow — a single ring takes the full --ds to cross the pond. */
 @keyframes koi-ripple{
-  0%   { transform: scale(.12); opacity:0; }
-  12%  { opacity:.42; }
-  60%  { opacity:.14; }
-  100% { transform: scale(1); opacity:0; }
+  0%   { transform: scale(.10) scaleY(.86); opacity:0; }
+  10%  { opacity:.55; }
+  55%  { opacity:.20; }
+  100% { transform: scale(1) scaleY(.86); opacity:0; }
 }
 
 /* Respect reduced-motion: kill all theme movement, keep the look. */
@@ -470,10 +485,10 @@ html[data-skin="dark"] .topbar h1{
   -webkit-text-fill-color:transparent;
   text-shadow: 0 1px 0 rgba(0,0,0,.3);
 }
-/* Koi is a dark theme but its identity is warm koi-orange on sage water,
-   not reef cyan — give it a cream→koi-orange title instead. */
+/* Koi is a dark theme but its identity is warm koi-orange on ink/slate
+   water, not reef cyan — give it a cream→koi-orange title instead. */
 html[data-theme="koi"] .topbar h1{
-  background:linear-gradient(180deg, #f3efe6 0%, #f59461 100%);
+  background:linear-gradient(180deg, #f1efe8 0%, #f79a64 100%);
 }
 
 .ghost-btn{
@@ -1097,19 +1112,19 @@ html[data-skin="dark"] #storage-banner.warn{
   border:1px solid rgba(245,181,107,.50);
   color:#ffe7c8;
 }
-/* Koi: override the reef rose/coral banner with sage-water + koi-orange. */
+/* Koi: override the reef rose/coral banner with slate-water + koi-orange. */
 html[data-theme="koi"] #storage-banner{
-  background:linear-gradient(160deg, rgba(120,160,140,.22), rgba(239,106,46,.10));
-  border:1px solid rgba(150,190,165,.42);
-  color:#e6efe8;
+  background:linear-gradient(160deg, rgba(120,142,165,.22), rgba(240,104,42,.10));
+  border:1px solid rgba(170,192,212,.40);
+  color:#e7ecf0;
 }
 html[data-theme="koi"] #storage-banner.ok{
-  background:linear-gradient(160deg, rgba(120,170,140,.24), rgba(120,160,140,.10));
-  border:1px solid rgba(140,190,160,.42);
-  color:#e6f1ea;
+  background:linear-gradient(160deg, rgba(111,156,131,.24), rgba(120,142,165,.10));
+  border:1px solid rgba(140,184,160,.40);
+  color:#e7f0ea;
 }
 html[data-theme="koi"] #storage-banner.warn{
-  background:linear-gradient(160deg, rgba(224,162,60,.22), rgba(239,106,46,.12));
+  background:linear-gradient(160deg, rgba(224,162,60,.22), rgba(240,104,42,.12));
   border:1px solid rgba(224,162,60,.50);
   color:#f4e6cc;
 }
@@ -1999,15 +2014,16 @@ input[type=time].input{ font-family:inherit }
     radial-gradient(ellipse 60% 45% at 15% 105%, rgba(34,120,70,.45) 0%, rgba(34,120,70,0) 60%),
     linear-gradient(180deg, #eef8ef 0%, #bfe6c8 40%, #2c6a45 100%);
 }
-/* Koi swatch: dark reflective pond water with two concentric ripple
-   rings (the signature motion) and a single warm koi-orange centre. */
+/* Koi swatch: dark ink/slate pond water with concentric ripple rings
+   (the signature motion) spreading from a warm koi-orange koi-rise, plus
+   a smaller secondary ripple. Cool moonlit-cream rings, slate base. */
 .theme-preview-koi {
   background:
-    radial-gradient(circle 3px at 40% 44%, rgba(239,106,46,.90) 0%, rgba(239,106,46,.5) 70%, rgba(239,106,46,0) 100%),
-    radial-gradient(circle 9px  at 40% 44%, rgba(205,235,215,0) 64%, rgba(205,235,215,.40) 70%, rgba(205,235,215,0) 76%),
-    radial-gradient(circle 17px at 40% 44%, rgba(205,235,215,0) 78%, rgba(150,195,165,.26) 84%, rgba(150,195,165,0) 90%),
-    radial-gradient(circle 8px  at 74% 70%, rgba(205,235,215,0) 60%, rgba(150,195,165,.24) 68%, rgba(150,195,165,0) 76%),
-    linear-gradient(180deg, #243029 0%, #18221e 45%, #0c130f 100%);
+    radial-gradient(circle 3px at 40% 44%, rgba(240,104,42,.92) 0%, rgba(240,104,42,.5) 70%, rgba(240,104,42,0) 100%),
+    radial-gradient(circle 9px  at 40% 44%, rgba(214,228,240,0) 64%, rgba(214,228,240,.42) 70%, rgba(214,228,240,0) 76%),
+    radial-gradient(circle 17px at 40% 44%, rgba(214,228,240,0) 78%, rgba(170,196,216,.26) 84%, rgba(170,196,216,0) 90%),
+    radial-gradient(circle 8px  at 74% 70%, rgba(214,228,240,0) 60%, rgba(170,196,216,.24) 68%, rgba(170,196,216,0) 76%),
+    linear-gradient(180deg, #1c2734 0%, #141c28 45%, #090e15 100%);
 }
 .theme-meta { flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }
 .theme-meta strong { font-size:15px; }
