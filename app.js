@@ -2063,8 +2063,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     render();
   });
   $("#add-tank-btn").addEventListener("click", handleAddTankTap);
-  $("#backup-btn").addEventListener("click", openBackupModal);
-  $("#share-btn").addEventListener("click", openShareModal);
   { const sb = $("#settings-btn"); if (sb) sb.addEventListener("click", openSettingsSheet); }
   $("#import-file").addEventListener("change", handleImportFile);
 
@@ -2399,6 +2397,9 @@ function openSettingsSheet(){
 
       <section class="settings-group">
         <h4 class="settings-group-title">App</h4>
+        <button class="settings-action" id="settings-share" type="button">
+          <span class="settings-label">Share My Tanks</span><span class="settings-chev">›</span>
+        </button>
         <div class="settings-row">
           <span class="settings-label">Version</span>
           <span class="settings-value">${APP_VERSION}</span>
@@ -2431,6 +2432,7 @@ function openSettingsSheet(){
 
     $("#settings-export").addEventListener("click", downloadBackup);
     $("#settings-import").addEventListener("click", () => $("#import-file").click());
+    $("#settings-share").addEventListener("click", () => { closeModal(); openShareModal(); });
 
     $("#settings-clear").addEventListener("click", () => {
       if (!confirm("Clear all tanks, fish, water changes, and tests on this device? This can't be undone. Export a backup first if you want to keep anything.")) return;

@@ -193,11 +193,18 @@ html,body{ height:100%; max-width:100%; overflow:hidden; overscroll-behavior:non
   background:linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
   pointer-events:none;
 }
+/* Equal-width side zones keep the title optically centered regardless of
+   how many buttons sit on either side. */
+.topbar-side{
+  display:flex;align-items:center;gap:8px;
+  flex:1 1 0;min-width:0;
+}
+.topbar-right{justify-content:flex-end;}
 .topbar h1{
   font-family: var(--font-display);
   font-weight:700;letter-spacing:.3px;
   font-size:22px;margin:0;
-  flex:1;text-align:center;
+  flex:0 1 auto;text-align:center;
   min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   color: var(--ink);
 }
@@ -224,7 +231,12 @@ html[data-theme="koi"] .topbar h1{
 }
 .ghost-btn:hover{background:var(--glass-fill-strong);border-color:var(--sakura)}
 .ghost-btn:active{transform:scale(.92)}
-.ghost-btn[hidden]{visibility:hidden}
+.ghost-btn[hidden]{display:none}
+/* Friendlier, slightly larger primary header actions (settings / add). */
+.ghost-btn-lg{
+  width:46px;height:46px;border-radius:16px;
+  font-size:22px;line-height:1;
+}
 
 /* ============================================================
    FOOTER (floating ink bar)

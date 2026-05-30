@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700;900&family=Inter:wght@400;500;600;700&display=swap" />
-  <link rel="stylesheet" href="styles.css?v=20260530c" />
+  <link rel="stylesheet" href="styles.css?v=20260530d" />
   <script>
     /* Apply saved theme as early as possible so the very first paint is correct. */
     try {
@@ -37,12 +37,14 @@
   </div>
   <div id="app">
     <header class="topbar">
-      <button id="back-btn" class="ghost-btn" hidden>&larr;</button>
+      <div class="topbar-side topbar-left">
+        <button id="back-btn" class="ghost-btn ghost-btn-lg" hidden>&larr;</button>
+        <button id="settings-btn" class="ghost-btn ghost-btn-lg" title="Settings" aria-label="Settings">⚙</button>
+      </div>
       <h1 id="title">My Tanks</h1>
-      <button id="settings-btn" class="ghost-btn" title="Settings" aria-label="Settings">⚙</button>
-      <button id="backup-btn" class="ghost-btn" title="Backup">⤓</button>
-      <button id="share-btn" class="ghost-btn" title="Share with a friend">↗</button>
-      <button id="add-tank-btn" class="ghost-btn" title="Add tank">+</button>
+      <div class="topbar-side topbar-right">
+        <button id="add-tank-btn" class="ghost-btn ghost-btn-lg" title="Add tank" aria-label="Add tank">+</button>
+      </div>
     </header>
 
     <div id="storage-banner" hidden></div>
@@ -56,14 +58,14 @@
     </footer>
   </div>
 
-  <script src="data.js?v=20260530c"></script>
-  <script src="cloud.js?v=20260530c"></script>
-  <script src="advisor.js?v=20260530c"></script>
-  <script src="reminders.js?v=20260530c"></script>
-  <script src="graphs.js?v=20260530c"></script>
-  <script src="fishdb.js?v=20260530c"></script>
-  <script src="chemicals.js?v=20260530c"></script>
-  <script src="firsttank.js?v=20260530c"></script>
-  <script src="app.js?v=20260530c"></script>
+  <script src="data.js?v=20260530d"></script>
+  <script src="cloud.js?v=20260530d"></script>
+  <script src="advisor.js?v=20260530d"></script>
+  <script src="reminders.js?v=20260530d"></script>
+  <script src="graphs.js?v=20260530d"></script>
+  <script src="fishdb.js?v=20260530d"></script>
+  <script src="chemicals.js?v=20260530d"></script>
+  <script src="firsttank.js?v=20260530d"></script>
+  <script src="app.js?v=20260530d"></script>
 </body>
 </html>
