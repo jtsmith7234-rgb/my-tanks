@@ -54,16 +54,27 @@ function getPref(k, fallback){
   const p = getPrefs();
   return (k in p) ? p[k] : fallback;
 }
+const DEFAULT_THEME = "midnight-reef";
 const THEMES = {
-  aquarium: { id:"aquarium", label:"Clean Aquarium", desc:"Bright modern frosted glass on aqua water (default)" },
-  koi:      { id:"koi",      label:"Japanese Koi",   desc:"Original sumi-e koi pond with cherry blossoms" }
+  "midnight-reef": { id:"midnight-reef", skin:"dark",  label:"Midnight Reef",      desc:"Deep navy reef with cyan highlights (default)" },
+  "tropical-pop":  { id:"tropical-pop",  skin:"light", label:"Tropical Pop",       desc:"Bright aqua, crisp white, coral accents" },
+  "planted":       { id:"planted",       skin:"light", label:"Planted Freshwater", desc:"Lush green planted-tank vibe, natural and calm" }
 };
+// Map legacy stored values to the new theme set.
+const LEGACY_THEME_MAP = { aquarium:"midnight-reef", koi:"tropical-pop" };
+function normalizeTheme(id){
+  if (THEMES[id]) return id;
+  if (LEGACY_THEME_MAP[id]) return LEGACY_THEME_MAP[id];
+  return DEFAULT_THEME;
+}
 function getTheme(){
-  try { return store.get(KEY_THEME) || "aquarium"; } catch(_) { return "aquarium"; }
+  try { return normalizeTheme(store.get(KEY_THEME)); } catch(_) { return DEFAULT_THEME; }
 }
 function applyTheme(id){
-  const t = THEMES[id] ? id : "aquarium";
-  document.documentElement.dataset.theme = t;
+  const t = normalizeTheme(id);
+  const root = document.documentElement;
+  root.dataset.theme = t;
+  root.dataset.skin = THEMES[t].skin;
   try { store.set(KEY_THEME, t); } catch(_){}
 }
 // apply immediately so there is no flash of unstyled background
@@ -2361,7 +2372,7 @@ function openBackupModal(){
 const APP_VERSION = "1.0";
 
 function openSettingsSheet(){
-  const shortLabel = { aquarium: "Aquarium", koi: "Koi" };
+  const shortLabel = { "midnight-reef": "Midnight", "tropical-pop": "Tropical", "planted": "Planted" };
   const themeBtns = Object.values(THEMES).map(t =>
     `<button class="seg-btn" data-theme-id="${t.id}" type="button">${escapeHTML(shortLabel[t.id] || t.label)}</button>`
   ).join("");
@@ -2375,9 +2386,9 @@ function openSettingsSheet(){
 
       <section class="settings-group">
         <h4 class="settings-group-title">Appearance</h4>
-        <div class="settings-row">
+        <div class="settings-row settings-row-stack">
           <span class="settings-label">Theme</span>
-          <div class="seg" id="settings-theme">${themeBtns}</div>
+          <div class="seg seg-fill" id="settings-theme">${themeBtns}</div>
         </div>
       </section>
 

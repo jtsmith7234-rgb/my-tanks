@@ -1,9 +1,16 @@
 /* ============================================================
    THEMES
-   Two themes ship with the app, toggled via data-theme on <html>:
-     data-theme="koi"      — Original Japanese sumi-e / koi pond look
-     data-theme="aquarium" — Modern clean aquarium (default)
+   Three global themes ship with the app, toggled via data-theme
+   on <html>. A companion data-skin attribute ("light"/"dark")
+   groups shared surface styling so per-theme rules stay minimal:
+     data-theme="midnight-reef"  data-skin="dark"   — deep navy reef (default)
+     data-theme="tropical-pop"   data-skin="light"  — bright aqua / coral
+     data-theme="planted"        data-skin="light"  — green planted freshwater
    Switch in JS by setting document.documentElement.dataset.theme
+   (applyTheme() also sets dataset.skin). Themes are pure CSS
+   variable token sets + a lightweight animated background — no
+   image assets, videos, or canvases. Adding a new theme = one
+   token block + one body-background rule + one motion layer.
    ============================================================ */
 
 :root{
@@ -11,127 +18,163 @@
   --radius:22px;
   --radius-sm:14px;
   --font-body: -apple-system, "SF Pro Text", system-ui, "Inter", "Segoe UI", Roboto, sans-serif;
-}
-
-/* ---------- THEME: JAPANESE KOI (original, preserved) ---------- */
-html[data-theme="koi"]{
-  /* Base / pond */
-  --pond-0: #050810;
-  --pond-1: #0a0f1a;
-  --pond-2: #131a2b;
-
-  /* Glass */
-  --glass-fill:        rgba(20,18,30,.42);
-  --glass-fill-strong: rgba(28,24,42,.62);
-  --glass-stroke:      rgba(255, 200, 215, .18);
-  --glass-stroke-soft: rgba(255, 200, 215, .10);
-  --glass-highlight:   rgba(255, 220, 230, .40);
-  --glass-shadow:      0 18px 50px rgba(0,0,0,.65), 0 1px 0 rgba(255,255,255,.06) inset;
-  --glass-shadow-sm:   0 8px 24px rgba(0,0,0,.45), 0 1px 0 rgba(255,255,255,.06) inset;
-
-  /* Ink */
-  --ink:#fbeef0;
-  --ink-dim:#d4b8c0;
-  --ink-soft:#9a8088;
-
-  /* Accents */
-  --sakura:      #ff9bbe;
-  --sakura-soft: #ffc6d8;
-  --sakura-deep: #d65f8a;
-  --koi:         #ff7a4a;
-  --koi-soft:    #ffae87;
-  --gold:        #e8c878;
-  --jade:        #7fc9a8;
-  --warn:        #f5b56b;
-  --bad:         #ff7a8a;
-
-  /* Display font: Japanese calligraphy */
-  --font-display: "Noto Serif JP", "Hiragino Mincho ProN", "YuMincho", "Yu Mincho", "Georgia", serif;
-}
-html[data-theme="koi"] body{
-  min-height:100vh;
-  background:
-    linear-gradient(180deg, rgba(5,8,16,.55) 0%, rgba(5,8,16,.35) 35%, rgba(5,8,16,.55) 75%, rgba(5,8,16,.85) 100%),
-    url("bg-koi.png") center top / cover no-repeat fixed,
-    linear-gradient(180deg, var(--pond-0) 0%, #02040a 100%);
-  background-attachment: fixed, fixed, fixed;
-}
-html[data-theme="koi"] .petal{
-  width:14px;height:14px;
-  background: radial-gradient(ellipse at 50% 40%, #ffd6e2 0%, #ff9bbe 70%, rgba(255,155,190,.4) 100%);
-  border-radius: 60% 0% 60% 0%;
-  opacity:.75;
-  filter: drop-shadow(0 0 4px rgba(255,155,190,.4));
-  animation: petal-fall linear infinite;
-}
-html[data-theme="koi"] .petal.p2{ width:11px;height:11px;opacity:.6 }
-html[data-theme="koi"] .petal.p3{ width:18px;height:18px;opacity:.85 }
-@keyframes petal-fall{
-  0%   { transform: translate(0, -10vh) rotate(0deg); opacity:0 }
-  10%  { opacity:.8 }
-  100% { transform: translate(15vw, 110vh) rotate(540deg); opacity:.2 }
-}
-
-/* ---------- THEME: CLEAN AQUARIUM (new default) ---------- */
-html[data-theme="aquarium"]{
-  /* Base / water */
-  --pond-0: #e9f7fb;   /* soft sky */
-  --pond-1: #b6e3ee;   /* mid water */
-  --pond-2: #2b6f8a;   /* deep teal */
-
-  /* Glass (bright frosted) */
-  --glass-fill:        rgba(255,255,255,.42);
-  --glass-fill-strong: rgba(255,255,255,.60);
-  --glass-stroke:      rgba(255,255,255,.55);
-  --glass-stroke-soft: rgba(255,255,255,.28);
-  --glass-highlight:   rgba(255,255,255,.85);
-  --glass-shadow:      0 16px 40px rgba(20, 60, 90, .18), 0 1px 0 rgba(255,255,255,.85) inset;
-  --glass-shadow-sm:   0 6px 18px rgba(20, 60, 90, .14), 0 1px 0 rgba(255,255,255,.85) inset;
-
-  /* Ink (dark text on bright bg) */
-  --ink:      #0d2a3a;   /* deep teal text */
-  --ink-dim:  #2f5566;
-  --ink-soft: #6b8896;
-
-  /* Accents — keep orange as brand action color, add teal-aqua family */
-  --sakura:      #19a2c2;   /* aqua / informational */
-  --sakura-soft: #66cee0;
-  --sakura-deep: #0d7a93;
-  --koi:         #ff7a4a;   /* orange stays */
-  --koi-soft:    #ffae87;
-  --gold:        #f4b740;
-  --jade:        #2bb673;
-  --warn:        #e89422;
-  --bad:         #e0455c;
-
-  /* Display font: clean modern sans (system) */
   --font-display: -apple-system, "SF Pro Display", system-ui, "Inter", "Segoe UI", Roboto, sans-serif;
 }
-html[data-theme="aquarium"] body{
+
+/* ---------- THEME: MIDNIGHT REEF (dark, default) ----------
+   Deep navy aquarium, cyan/teal highlights, calm + premium. */
+html[data-theme="midnight-reef"]{
+  --pond-0: #060b18;
+  --pond-1: #0a1426;
+  --pond-2: #122842;
+
+  --glass-fill:        rgba(16,30,52,.46);
+  --glass-fill-strong: rgba(22,42,70,.66);
+  --glass-stroke:      rgba(120, 220, 235, .20);
+  --glass-stroke-soft: rgba(120, 220, 235, .10);
+  --glass-highlight:   rgba(170, 240, 250, .42);
+  --glass-shadow:      0 18px 50px rgba(0,8,20,.65), 0 1px 0 rgba(180,240,255,.08) inset;
+  --glass-shadow-sm:   0 8px 24px rgba(0,8,20,.45), 0 1px 0 rgba(180,240,255,.08) inset;
+
+  --ink:      #eaf7fb;
+  --ink-dim:  #a9c6d4;
+  --ink-soft: #6f8a99;
+
+  --sakura:      #2bd4e8;   /* cyan / informational */
+  --sakura-soft: #7eeaf5;
+  --sakura-deep: #1399b0;
+  --koi:         #ff7a4a;   /* warm brand action color stays */
+  --koi-soft:    #ffae87;
+  --gold:        #e8c878;
+  --jade:        #2fd6a6;
+  --warn:        #f5b56b;
+  --bad:         #ff7a8a;
+}
+html[data-theme="midnight-reef"] body{
   min-height:100vh;
   background:
-    /* surface light beam from top */
-    radial-gradient(ellipse 90% 55% at 50% -10%, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 60%),
-    /* depth gradient */
-    linear-gradient(180deg, #d6f0f6 0%, #9cd6e3 35%, #4ea4be 75%, #1e5d76 100%);
+    radial-gradient(ellipse 80% 50% at 50% -8%, rgba(60,170,205,.22) 0%, rgba(60,170,205,0) 60%),
+    linear-gradient(180deg, #0b1830 0%, #081326 38%, #060d1c 72%, #03070f 100%);
   background-attachment: fixed, fixed;
   overflow-x:hidden;
 }
-/* Bubbles (replaces petals) */
-html[data-theme="aquarium"] .petal{
+/* Drifting cyan motes */
+html[data-theme="midnight-reef"] .petal{
+  width:13px;height:13px;top:auto;bottom:-10vh;
+  background: radial-gradient(circle at 35% 35%, rgba(190,245,255,.9) 0%, rgba(110,220,235,.4) 45%, rgba(110,220,235,.04) 75%);
+  border-radius:50%;
+  opacity:.55;
+  filter: drop-shadow(0 0 5px rgba(120,225,240,.45));
+  animation: bubble-rise linear infinite;
+}
+html[data-theme="midnight-reef"] .petal.p2{ width:8px;height:8px;opacity:.4 }
+html[data-theme="midnight-reef"] .petal.p3{ width:18px;height:18px;opacity:.65 }
+
+/* ---------- THEME: TROPICAL POP (light) ----------
+   Bright aqua, crisp white, coral accents. Fresh + energetic. */
+html[data-theme="tropical-pop"]{
+  --pond-0: #ecfbff;
+  --pond-1: #bdeef4;
+  --pond-2: #2fa6c2;
+
+  --glass-fill:        rgba(255,255,255,.46);
+  --glass-fill-strong: rgba(255,255,255,.64);
+  --glass-stroke:      rgba(255,255,255,.60);
+  --glass-stroke-soft: rgba(255,255,255,.30);
+  --glass-highlight:   rgba(255,255,255,.90);
+  --glass-shadow:      0 16px 40px rgba(20, 90, 110, .18), 0 1px 0 rgba(255,255,255,.9) inset;
+  --glass-shadow-sm:   0 6px 18px rgba(20, 90, 110, .14), 0 1px 0 rgba(255,255,255,.9) inset;
+
+  --ink:      #0c3340;
+  --ink-dim:  #2d6072;
+  --ink-soft: #6d97a4;
+
+  --sakura:      #12b5cf;   /* aqua / informational */
+  --sakura-soft: #6fdcec;
+  --sakura-deep: #0b8499;
+  --koi:         #ff6f61;   /* coral brand action */
+  --koi-soft:    #ffa193;
+  --gold:        #f6b73c;
+  --jade:        #16c08a;
+  --warn:        #ef9a2c;
+  --bad:         #e84a5f;
+}
+html[data-theme="tropical-pop"] body{
+  min-height:100vh;
+  background:
+    radial-gradient(ellipse 95% 55% at 50% -10%, rgba(255,255,255,.65) 0%, rgba(255,255,255,0) 60%),
+    radial-gradient(ellipse 70% 40% at 85% 0%, rgba(255,160,140,.20) 0%, rgba(255,160,140,0) 55%),
+    linear-gradient(180deg, #ecfbff 0%, #aee9f1 36%, #4fc0d6 74%, #1f8aa6 100%);
+  background-attachment: fixed, fixed, fixed;
+  overflow-x:hidden;
+}
+/* Crisp white bubbles */
+html[data-theme="tropical-pop"] .petal{
   width:14px;height:14px;top:auto;bottom:-10vh;
-  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.95) 0%, rgba(255,255,255,.45) 40%, rgba(255,255,255,.05) 75%);
-  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.96) 0%, rgba(255,255,255,.45) 40%, rgba(255,255,255,.05) 75%);
+  border-radius:50%;
   opacity:.7;
-  filter: drop-shadow(0 0 4px rgba(255,255,255,.5));
+  filter: drop-shadow(0 0 4px rgba(255,255,255,.55));
   animation: bubble-rise linear infinite;
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.45);
 }
-html[data-theme="aquarium"] .petal.p2{ width:9px;height:9px;opacity:.55 }
-html[data-theme="aquarium"] .petal.p3{ width:18px;height:18px;opacity:.85 }
+html[data-theme="tropical-pop"] .petal.p2{ width:9px;height:9px;opacity:.55 }
+html[data-theme="tropical-pop"] .petal.p3{ width:18px;height:18px;opacity:.85 }
+
+/* ---------- THEME: PLANTED FRESHWATER (light) ----------
+   Green planted-tank vibe, natural + relaxing. */
+html[data-theme="planted"]{
+  --pond-0: #eef8ef;
+  --pond-1: #c7e8cf;
+  --pond-2: #2f7d52;
+
+  --glass-fill:        rgba(255,255,255,.44);
+  --glass-fill-strong: rgba(255,255,255,.62);
+  --glass-stroke:      rgba(255,255,255,.58);
+  --glass-stroke-soft: rgba(255,255,255,.28);
+  --glass-highlight:   rgba(255,255,255,.88);
+  --glass-shadow:      0 16px 40px rgba(20, 70, 45, .18), 0 1px 0 rgba(255,255,255,.88) inset;
+  --glass-shadow-sm:   0 6px 18px rgba(20, 70, 45, .14), 0 1px 0 rgba(255,255,255,.88) inset;
+
+  --ink:      #12331f;
+  --ink-dim:  #356048;
+  --ink-soft: #6f9079;
+
+  --sakura:      #2aa37a;   /* green / informational */
+  --sakura-soft: #6fd0a6;
+  --sakura-deep: #1c7a57;
+  --koi:         #ef7a3d;   /* warm shrimp/leaf accent */
+  --koi-soft:    #f6ab7d;
+  --gold:        #e7b53a;
+  --jade:        #2bb673;
+  --warn:        #df9626;
+  --bad:         #d9534f;
+}
+html[data-theme="planted"] body{
+  min-height:100vh;
+  background:
+    radial-gradient(ellipse 95% 55% at 50% -10%, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 60%),
+    radial-gradient(ellipse 60% 45% at 15% 105%, rgba(34,120,70,.22) 0%, rgba(34,120,70,0) 60%),
+    linear-gradient(180deg, #eef8ef 0%, #bfe6c8 36%, #5aa777 74%, #2c6a45 100%);
+  background-attachment: fixed, fixed, fixed;
+  overflow-x:hidden;
+}
+/* Slow drifting leaf/oxygen motes */
+html[data-theme="planted"] .petal{
+  width:12px;height:12px;top:auto;bottom:-10vh;
+  background: radial-gradient(circle at 35% 30%, rgba(235,255,240,.92) 0%, rgba(120,205,150,.4) 45%, rgba(120,205,150,.04) 78%);
+  border-radius:60% 0 60% 0;
+  opacity:.6;
+  filter: drop-shadow(0 0 4px rgba(120,205,150,.4));
+  animation: bubble-rise linear infinite;
+}
+html[data-theme="planted"] .petal.p2{ width:9px;height:9px;opacity:.45 }
+html[data-theme="planted"] .petal.p3{ width:17px;height:17px;opacity:.7 }
+
+/* Shared rising-particle motion used by all themes */
 @keyframes bubble-rise{
   0%   { transform: translate(0, 0) scale(.95); opacity:0 }
-  10%  { opacity:.7 }
+  10%  { opacity:var(--petal-peak, .7) }
   100% { transform: translate(2vw, -120vh) scale(1.05); opacity:0 }
 }
 
@@ -139,10 +182,31 @@ html[data-theme="aquarium"] .petal.p3{ width:18px;height:18px;opacity:.85 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;color:var(--ink);font-family:var(--font-body);-webkit-font-smoothing:antialiased}
 html,body{ height:100%; max-width:100%; overflow:hidden; overscroll-behavior:none; }
+
+/* Background motion layer: faint slow-drifting light wash behind everything.
+   Pure CSS, no assets, pointer-events:none so it never captures clicks. */
 .petals{ position:fixed;inset:0;pointer-events:none;z-index:-1;overflow:hidden; }
+.petals::before{
+  content:""; position:absolute; inset:-20%;
+  background:
+    radial-gradient(ellipse 40% 30% at 25% 30%, var(--shimmer, rgba(255,255,255,.10)) 0%, transparent 60%),
+    radial-gradient(ellipse 35% 28% at 75% 65%, var(--shimmer, rgba(255,255,255,.08)) 0%, transparent 60%);
+  opacity:.8;
+  animation: reef-drift 26s ease-in-out infinite alternate;
+}
+html[data-theme="midnight-reef"]{ --shimmer: rgba(90,200,225,.14); }
+html[data-theme="tropical-pop"]{ --shimmer: rgba(255,255,255,.22); }
+html[data-theme="planted"]{ --shimmer: rgba(170,235,185,.18); }
+@keyframes reef-drift{
+  0%   { transform: translate3d(-3%, -2%, 0) scale(1.02); }
+  100% { transform: translate3d(3%, 2%, 0)  scale(1.06); }
+}
 .petal{ position:absolute; }
+
+/* Respect reduced-motion: kill all theme movement, keep the look. */
 @media (prefers-reduced-motion: reduce){
   .petal{ animation: none; display:none }
+  .petals::before{ animation: none }
 }
 
 /* App shell: locks the viewport, flex column with single scroll area. */
@@ -208,12 +272,12 @@ html,body{ height:100%; max-width:100%; overflow:hidden; overscroll-behavior:non
   min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   color: var(--ink);
 }
-/* Koi keeps its dramatic pink gradient title; aquarium uses flat dark teal */
-html[data-theme="koi"] .topbar h1{
-  background:linear-gradient(180deg, #fff5f7 0%, #ffc6d8 100%);
+/* Dark themes get a cool cyan gradient title; light themes use flat ink. */
+html[data-skin="dark"] .topbar h1{
+  background:linear-gradient(180deg, #eafcff 0%, #7eeaf5 100%);
   -webkit-background-clip:text;background-clip:text;
   -webkit-text-fill-color:transparent;
-  text-shadow: 0 1px 0 rgba(0,0,0,.25);
+  text-shadow: 0 1px 0 rgba(0,0,0,.3);
 }
 
 .ghost-btn{
@@ -411,7 +475,7 @@ html[data-theme="koi"] .topbar h1{
   border:1px solid rgba(255,155,190,.45);
   box-shadow:0 1px 0 rgba(255,255,255,.15) inset, 0 4px 14px rgba(255,155,190,.25);
 }
-html[data-theme="aquarium"] .tab.active{
+html[data-skin="light"] .tab.active{
   background:linear-gradient(180deg, rgba(25,162,194,.20), rgba(25,162,194,.08));
   color:#0d2a3a;
   border:1px solid rgba(25,162,194,.45);
@@ -537,7 +601,7 @@ label.field span{display:block;font-size:11px;color:var(--sakura);margin-bottom:
   box-shadow:0 1px 0 rgba(255,255,255,.10) inset;
   text-shadow:none;
 }
-html[data-theme="aquarium"] .btn.danger{
+html[data-skin="light"] .btn.danger{
   background:linear-gradient(180deg, #e0455c 0%, #b8313f 100%);
   border:1px solid rgba(184,49,63,.65);
   color:#fff;
@@ -545,7 +609,7 @@ html[data-theme="aquarium"] .btn.danger{
   text-shadow:0 1px 0 rgba(0,0,0,.10);
   font-weight:700;
 }
-html[data-theme="aquarium"] .btn.danger:hover{
+html[data-skin="light"] .btn.danger:hover{
   background:linear-gradient(180deg, #e85a6f 0%, #c2384a 100%);
 }
 .btn.small{padding:7px 12px;font-size:13px;border-radius:11px}
@@ -566,7 +630,7 @@ html[data-theme="aquarium"] .btn.danger:hover{
   box-shadow:var(--glass-shadow-sm);
   overflow:hidden;
 }
-html[data-theme="aquarium"] .dose-card{
+html[data-skin="light"] .dose-card{
   border:1px solid rgba(255,255,255,.70);
   background:linear-gradient(160deg, rgba(255,255,255,.60), rgba(230,245,250,.45));
 }
@@ -584,7 +648,7 @@ html[data-theme="aquarium"] .dose-card{
   -webkit-background-clip:text;background-clip:text;
   -webkit-text-fill-color:transparent;
 }
-html[data-theme="aquarium"] .dose-card .big{
+html[data-skin="light"] .dose-card .big{
   /* solid dark color — no gradient text on bright bg */
   background:none;
   -webkit-text-fill-color:var(--ink);
@@ -592,7 +656,7 @@ html[data-theme="aquarium"] .dose-card .big{
   text-shadow:0 1px 0 rgba(255,255,255,.55);
 }
 .dose-card .big .unit{font-size:14px;font-weight:600;color:var(--ink-dim);margin-left:4px;-webkit-text-fill-color:var(--ink-dim)}
-html[data-theme="aquarium"] .dose-card .big .unit{color:var(--ink-dim);-webkit-text-fill-color:var(--ink-dim)}
+html[data-skin="light"] .dose-card .big .unit{color:var(--ink-dim);-webkit-text-fill-color:var(--ink-dim)}
 .dose-card .sub{margin-top:4px;font-size:12.5px;color:var(--ink-dim)}
 
 /* ============================================================
@@ -642,15 +706,15 @@ html[data-theme="aquarium"] .dose-card .big .unit{color:var(--ink-dim);-webkit-t
   animation: sheet-up .3s cubic-bezier(.2,.9,.25,1);
   color:var(--ink);
 }
-html[data-theme="aquarium"] .modal{
+html[data-skin="light"] .modal{
   background:linear-gradient(180deg, rgba(255,255,255,.78) 0%, rgba(225,240,247,.78) 100%);
   border:1px solid rgba(255,255,255,.65);
   box-shadow:0 -20px 60px rgba(20,60,90,.35), 0 1px 0 rgba(255,255,255,.85) inset;
 }
-html[data-theme="aquarium"] .modal::before{
+html[data-skin="light"] .modal::before{
   background:rgba(13,42,58,.30);
 }
-html[data-theme="aquarium"] .modal-backdrop{
+html[data-skin="light"] .modal-backdrop{
   background:rgba(15,60,90,.45);
 }
 @keyframes sheet-up{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
@@ -727,6 +791,11 @@ html[data-theme="aquarium"] .modal-backdrop{
   background:var(--glass-fill-strong);color:var(--ink);
   box-shadow:0 1px 4px rgba(0,0,0,.18);
 }
+/* Stacked variant: label on top, full-width equal-width segment row.
+   Used by the Theme selector so three options never overflow on phones. */
+.settings-row-stack{ flex-direction:column; align-items:stretch; gap:10px; }
+.seg-fill{ display:flex; max-width:none; width:100%; }
+.seg-fill .seg-btn{ flex:1 1 0; text-align:center; padding:8px 6px; }
 
 /* ============================================================
    READING CHIPS
@@ -756,13 +825,13 @@ html[data-theme="aquarium"] .modal-backdrop{
   border-color:rgba(255,155,190,.50);
   box-shadow:0 1px 0 rgba(255,255,255,.15) inset;
 }
-html[data-theme="aquarium"] .chip.active{
+html[data-skin="light"] .chip.active{
   background:linear-gradient(180deg, rgba(25,162,194,.22), rgba(25,162,194,.08));
   color:#0d2a3a;
   border-color:rgba(25,162,194,.50);
   box-shadow:0 1px 0 rgba(255,255,255,.55) inset;
 }
-html[data-theme="aquarium"] .chip:hover{border-color:rgba(25,162,194,.55);color:#0d2a3a}
+html[data-skin="light"] .chip:hover{border-color:rgba(25,162,194,.55);color:#0d2a3a}
 
 /* ============================================================
    EVENT TIMELINE
@@ -816,35 +885,35 @@ html[data-theme="aquarium"] .chip:hover{border-color:rgba(25,162,194,.55);color:
 #storage-banner .row{margin-top:8px;gap:6px}
 
 /* Koi theme: warm rose/sakura tint */
-html[data-theme="koi"] #storage-banner{
+html[data-skin="dark"] #storage-banner{
   background:linear-gradient(160deg, rgba(255,122,138,.22), rgba(245,181,107,.10));
   border:1px solid rgba(255,122,138,.45);
   color:#ffd9da;
 }
-html[data-theme="koi"] #storage-banner b{color:#fff}
-html[data-theme="koi"] #storage-banner.ok{
+html[data-skin="dark"] #storage-banner b{color:#fff}
+html[data-skin="dark"] #storage-banner.ok{
   background:linear-gradient(160deg, rgba(255,155,190,.22), rgba(255,122,74,.10));
   border:1px solid rgba(255,155,190,.40);
   color:#ffe2ec;
 }
-html[data-theme="koi"] #storage-banner.warn{
+html[data-skin="dark"] #storage-banner.warn{
   background:linear-gradient(160deg, rgba(245,181,107,.20), rgba(255,122,138,.10));
   border:1px solid rgba(245,181,107,.50);
   color:#ffe7c8;
 }
 
 /* Aquarium theme: clean aqua tint with dark readable ink */
-html[data-theme="aquarium"] #storage-banner{
+html[data-skin="light"] #storage-banner{
   background:linear-gradient(160deg, rgba(255,255,255,.62), rgba(25,162,194,.10));
   border:1px solid rgba(25,162,194,.35);
   color:#0d2a3a;
 }
-html[data-theme="aquarium"] #storage-banner.ok{
+html[data-skin="light"] #storage-banner.ok{
   background:linear-gradient(160deg, rgba(255,255,255,.65), rgba(43,182,115,.12));
   border:1px solid rgba(43,182,115,.40);
   color:#0d2a3a;
 }
-html[data-theme="aquarium"] #storage-banner.warn{
+html[data-skin="light"] #storage-banner.warn{
   background:linear-gradient(160deg, rgba(255,240,210,.70), rgba(245,181,107,.18));
   border:1px solid rgba(220,150,60,.50);
   color:#3d2a0d;
@@ -862,7 +931,7 @@ html[data-theme="aquarium"] #storage-banner.warn{
   -webkit-backdrop-filter:blur(12px);
           backdrop-filter:blur(12px);
 }
-html[data-theme="aquarium"] .backup-block{
+html[data-skin="light"] .backup-block{
   background:rgba(255,255,255,.45);
   border:1px solid rgba(255,255,255,.65);
 }
@@ -968,7 +1037,7 @@ button:focus-visible, .tab:focus-visible, .chip:focus-visible{
   background:rgba(255,255,255,.55);
   border:1px solid var(--glass-stroke);
 }
-html[data-theme="koi"] .upn-icon{ background:rgba(255,255,255,.08) }
+html[data-skin="dark"] .upn-icon{ background:rgba(255,255,255,.08) }
 .upn-body{ display:flex; flex-direction:column; gap:2px; min-width:0 }
 .upn-title{ font-weight:700; font-size:15px; color:var(--ink); letter-spacing:.1px }
 .upn-sub{ font-size:13px; font-weight:600; color:var(--ink-dim) }
@@ -984,8 +1053,8 @@ html[data-theme="koi"] .upn-icon{ background:rgba(255,255,255,.08) }
 /* Status accents */
 .upn-due-now{ border-color:rgba(224,69,92,.45); box-shadow:0 0 0 3px rgba(224,69,92,.08) }
 .upn-snoozed{ border-color:rgba(232,148,34,.45) }
-html[data-theme="aquarium"] .upn-due-now{ background:linear-gradient(160deg, rgba(255,255,255,.65), rgba(224,69,92,.10)) }
-html[data-theme="aquarium"] .upn-snoozed{ background:linear-gradient(160deg, rgba(255,255,255,.62), rgba(232,148,34,.08)) }
+html[data-skin="light"] .upn-due-now{ background:linear-gradient(160deg, rgba(255,255,255,.65), rgba(224,69,92,.10)) }
+html[data-skin="light"] .upn-snoozed{ background:linear-gradient(160deg, rgba(255,255,255,.62), rgba(232,148,34,.08)) }
 
 /* ============================================================
    REMINDERS — settings UI in tank Details tab
@@ -1703,15 +1772,20 @@ input[type=time].input{ font-family:inherit }
   border: 1px solid rgba(255,255,255,.4);
   box-shadow: 0 4px 10px rgba(0,0,0,.18);
 }
-.theme-preview-aquarium {
+.theme-preview-midnight-reef {
   background:
-    radial-gradient(ellipse 90% 55% at 50% -10%, rgba(255,255,255,.55) 0%, rgba(255,255,255,0) 60%),
-    linear-gradient(180deg, #d6f0f6 0%, #9cd6e3 35%, #4ea4be 75%, #1e5d76 100%);
+    radial-gradient(ellipse 80% 50% at 50% -8%, rgba(60,170,205,.5) 0%, rgba(60,170,205,0) 60%),
+    linear-gradient(180deg, #0b1830 0%, #081326 45%, #03070f 100%);
 }
-.theme-preview-koi {
+.theme-preview-tropical-pop {
   background:
-    linear-gradient(180deg, rgba(5,8,16,.45), rgba(5,8,16,.85)),
-    linear-gradient(180deg, #2a1a2c, #050810);
+    radial-gradient(ellipse 70% 40% at 85% 0%, rgba(255,120,100,.35) 0%, rgba(255,120,100,0) 55%),
+    linear-gradient(180deg, #ecfbff 0%, #aee9f1 40%, #2f9fbb 100%);
+}
+.theme-preview-planted {
+  background:
+    radial-gradient(ellipse 60% 45% at 15% 105%, rgba(34,120,70,.45) 0%, rgba(34,120,70,0) 60%),
+    linear-gradient(180deg, #eef8ef 0%, #bfe6c8 40%, #2c6a45 100%);
 }
 .theme-meta { flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }
 .theme-meta strong { font-size:15px; }
