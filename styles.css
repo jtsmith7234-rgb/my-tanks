@@ -1850,3 +1850,203 @@ input[type=time].input{ font-family:inherit }
   font-weight:700; opacity:0; transition: opacity .15s ease;
 }
 .theme-card.selected .theme-check { opacity:1; }
+
+/* ============================================================
+   ONBOARDING TUTORIAL + HELP
+   Shares modal/sheet infra and theme tokens. The tutorial card
+   carousel uses scroll-snap so swiping is native + smooth; dots
+   and the Next button stay in sync via JS.
+   ============================================================ */
+.modal.modal-tut{
+  padding:0;
+  overflow:hidden;
+  max-width:480px;
+}
+.tut{ position:relative; display:flex; flex-direction:column; }
+.tut-skip{
+  position:absolute; top:14px; right:14px; z-index:3;
+  appearance:none; cursor:pointer; font:inherit;
+  border:0; background:transparent; color:var(--ink-dim);
+  font-size:14px; font-weight:600; padding:6px 8px;
+  border-radius:10px; transition:background .18s ease, color .18s ease;
+}
+.tut-skip:hover{ background:var(--glass-fill); color:var(--ink); }
+
+/* Horizontal swipeable track */
+.tut-track{
+  display:flex; flex-wrap:nowrap;
+  overflow-x:auto; overflow-y:hidden;
+  scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.tut-track::-webkit-scrollbar{ display:none; }
+.tut-card-slide{
+  flex:0 0 100%; width:100%;
+  scroll-snap-align:center; scroll-snap-stop:always;
+  box-sizing:border-box;
+  padding:46px 24px 8px;
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+}
+.tut-card-label{
+  font-size:12px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase;
+  color:var(--sakura); margin-bottom:16px;
+}
+.tut-snap{ margin-bottom:22px; }
+.tut-headline{
+  margin:0 0 8px; font-family:var(--font-display);
+  font-size:23px; font-weight:700; letter-spacing:.2px; color:var(--ink);
+  line-height:1.2;
+}
+.tut-support{
+  margin:0; font-size:15px; line-height:1.5; color:var(--ink-dim);
+  max-width:30ch;
+}
+.tut-cta{ margin-top:22px; max-width:320px; }
+
+/* Footer: dots + Next */
+.tut-footer{
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  padding:16px 24px calc(16px + env(safe-area-inset-bottom));
+}
+.tut-dots{ display:flex; align-items:center; gap:8px; }
+.tut-dot{
+  width:7px; height:7px; border-radius:999px;
+  background:var(--ink-soft); opacity:.45;
+  transition:width .28s cubic-bezier(.2,.9,.25,1), opacity .25s ease, background .25s ease;
+}
+.tut-dot.active{ width:22px; opacity:1; background:var(--koi); }
+.tut-next{ flex:none; min-width:96px; }
+
+/* ---------- Device frame + screen mockups ---------- */
+.tut-device{
+  position:relative; width:194px; margin:0 auto;
+  border-radius:30px; padding:9px;
+  background:linear-gradient(160deg, rgba(255,255,255,.18), rgba(0,0,0,.20));
+  border:1px solid var(--glass-stroke);
+  box-shadow:var(--glass-shadow), 0 2px 0 rgba(255,255,255,.18) inset;
+}
+.tut-device-notch{
+  position:absolute; top:10px; left:50%; transform:translateX(-50%);
+  width:54px; height:6px; border-radius:999px;
+  background:rgba(0,0,0,.28); z-index:2;
+}
+.tut-screen{
+  border-radius:23px; overflow:hidden;
+  background:linear-gradient(180deg, var(--pond-0), var(--pond-1));
+  padding:16px 10px 12px;
+  min-height:300px;
+  display:flex; flex-direction:column; gap:8px;
+  text-align:left; color:var(--ink);
+  box-shadow:0 1px 0 rgba(255,255,255,.25) inset;
+}
+.tut-callout{
+  position:absolute; bottom:-10px; left:50%; transform:translateX(-50%);
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--koi); color:#fff;
+  font-size:11.5px; font-weight:700; white-space:nowrap;
+  padding:5px 11px; border-radius:999px;
+  box-shadow:0 6px 16px rgba(0,0,0,.28);
+}
+.tut-callout-dot{ width:7px; height:7px; border-radius:50%; background:#fff; }
+
+/* Generic mini-UI primitives used by the mockups */
+.tut-ui-head{
+  display:flex; align-items:center; justify-content:space-between;
+  font-size:11px; color:var(--ink-dim); padding:0 2px 4px;
+}
+.tut-ui-title{ font-weight:700; font-size:12.5px; color:var(--ink); }
+.tut-ui-gear,.tut-ui-add,.tut-ui-back{ font-size:14px; opacity:.8; }
+.tut-card{
+  border-radius:12px; padding:9px 10px;
+  background:var(--glass-fill); border:1px solid var(--glass-stroke);
+}
+.tut-card-top{ display:flex; align-items:center; justify-content:space-between; gap:6px; }
+.tut-card-top b{ font-size:12px; }
+.tut-card-sub{ font-size:10px; color:var(--ink-dim); margin-top:3px; }
+.tut-pill{ font-size:9px; font-weight:700; white-space:nowrap; }
+.tut-pill-ok{ color:var(--jade); }
+.tut-pill-soon{ color:var(--warn); }
+.tut-card.tut-ok{ border-left:3px solid var(--jade); }
+.tut-card.tut-soon{ border-left:3px solid var(--warn); }
+
+.tut-field{ display:flex; flex-direction:column; gap:3px; }
+.tut-field label{ font-size:9px; font-weight:700; color:var(--ink-dim); letter-spacing:.4px; text-transform:uppercase; }
+.tut-input{
+  font-size:11px; padding:7px 9px; border-radius:9px;
+  background:var(--glass-fill-strong); border:1px solid var(--glass-stroke);
+}
+.tut-field-row{ display:flex; gap:8px; }
+.tut-field-row .tut-field{ flex:1; }
+.tut-btn-primary{
+  margin-top:4px; text-align:center; font-size:11px; font-weight:700; color:#fff;
+  padding:8px; border-radius:10px;
+  background:linear-gradient(180deg, var(--koi) 0%, #d65a32 100%);
+  box-shadow:0 4px 12px rgba(255,122,74,.30);
+}
+
+.tut-tabs{ display:flex; gap:4px; }
+.tut-tab{
+  flex:1; text-align:center; font-size:10px; font-weight:600;
+  padding:5px 0; border-radius:8px; color:var(--ink-dim);
+  background:var(--glass-fill);
+}
+.tut-tab.active{ background:var(--glass-fill-strong); color:var(--ink); }
+.tut-log,.tut-remind{ display:flex; flex-direction:column; gap:6px; }
+.tut-log-row,.tut-remind-row{
+  display:flex; align-items:center; gap:7px; font-size:10.5px;
+  padding:7px 8px; border-radius:10px;
+  background:var(--glass-fill); border:1px solid var(--glass-stroke-soft);
+}
+.tut-log-row span:nth-child(2),.tut-remind-row span:nth-child(2){ flex:1; }
+.tut-log-ico{ font-size:12px; }
+.tut-log-when{ font-size:9px; color:var(--ink-dim); }
+
+.tut-compat-pair{ display:flex; align-items:center; justify-content:center; gap:8px; font-size:11px; font-weight:600; }
+.tut-fish{ padding:4px 8px; border-radius:999px; background:var(--glass-fill); border:1px solid var(--glass-stroke); }
+.tut-vs{ color:var(--ink-dim); font-weight:700; }
+.tut-compat-result{ text-align:center; font-size:11px; font-weight:700; padding:5px; border-radius:9px; }
+.tut-compat-ok{ color:var(--jade); background:rgba(45,180,130,.16); }
+.tut-compat-warn{ color:var(--warn); background:rgba(240,160,40,.16); }
+.tut-compat-note{ font-size:9.5px; color:var(--ink-dim); text-align:center; line-height:1.4; margin:-2px 0 2px; }
+
+.tut-graph{ color:var(--sakura); height:48px; padding:4px 2px; }
+.tut-graph svg{ width:100%; height:100%; display:block; }
+
+.tut-ready{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; }
+.tut-ready-mark{
+  width:56px; height:56px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; font-size:28px;
+  background:var(--glass-fill-strong); border:1px solid var(--glass-stroke);
+  box-shadow:var(--glass-shadow-sm);
+}
+.tut-ready-tank{ width:100%; }
+
+/* ---------- Help sheet ---------- */
+.help-sheet{ display:flex; flex-direction:column; gap:8px; }
+.help-list{ display:flex; flex-direction:column; gap:6px; }
+.help-item{
+  appearance:none; cursor:pointer; width:100%; font:inherit; text-align:left;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:13px 14px; min-height:48px;
+  background:var(--glass-fill); border:1px solid var(--glass-stroke);
+  border-radius:14px; color:var(--ink);
+  transition:background .2s ease, transform .12s ease;
+}
+.help-item:hover{ background:var(--glass-fill-strong); }
+.help-item:active{ transform:scale(.99); }
+.help-item.open{ background:var(--glass-fill-strong); border-bottom-left-radius:6px; border-bottom-right-radius:6px; }
+.help-q{ font-size:15px; font-weight:500; }
+.help-chev{ font-size:20px; color:var(--ink-dim); flex:none; line-height:1; transition:transform .2s ease; }
+.help-item.open .help-chev{ transform:rotate(90deg); }
+.help-a{
+  padding:2px 15px 13px; margin-top:-4px;
+  background:var(--glass-fill); border:1px solid var(--glass-stroke); border-top:0;
+  border-radius:0 0 14px 14px;
+}
+.help-a p{ margin:0; font-size:13.5px; line-height:1.55; color:var(--ink-dim); }
+
+@media (prefers-reduced-motion: reduce){
+  .tut-track{ scroll-behavior:auto; }
+  .tut-dot{ transition:none; }
+}

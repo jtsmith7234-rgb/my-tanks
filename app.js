@@ -2101,6 +2101,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (window.REMINDERS) {
     try { window.REMINDERS.scheduleAllReminders(); } catch(e){ console.warn("reminder schedule failed", e); }
   }
+
+  // First-run onboarding: auto-show the tutorial for brand-new users only,
+  // and only when no other startup sheet/modal is already open.
+  if (window.TUTORIAL) {
+    try { window.TUTORIAL.maybeShowFirstRun(); } catch(e){ console.warn("tutorial first-run failed", e); }
+  }
 });
 
 /* ============================================================
@@ -2419,6 +2425,17 @@ function openSettingsSheet(){
       </section>
 
       <section class="settings-group">
+        <h4 class="settings-group-title">Help &amp; Guides</h4>
+        <button class="settings-action" id="settings-tutorial" type="button">
+          <span class="settings-label">Tutorial</span><span class="settings-chev">›</span>
+        </button>
+        <button class="settings-action" id="settings-help" type="button">
+          <span class="settings-label">Help</span><span class="settings-chev">›</span>
+        </button>
+        <p class="settings-note">New here? Replay the walkthrough, or open Help for quick how-to answers.</p>
+      </section>
+
+      <section class="settings-group">
         <h4 class="settings-group-title">Support</h4>
         <div class="settings-row">
           <span class="settings-label">Contact support</span>
@@ -2445,6 +2462,17 @@ function openSettingsSheet(){
     $("#settings-export").addEventListener("click", downloadBackup);
     $("#settings-import").addEventListener("click", () => $("#import-file").click());
     $("#settings-share").addEventListener("click", () => { closeModal(); openShareModal(); });
+
+    const tutBtn = $("#settings-tutorial");
+    if (tutBtn) tutBtn.addEventListener("click", () => {
+      closeModal();
+      if (window.TUTORIAL) window.TUTORIAL.openTutorial({ markSeen: false });
+    });
+    const helpBtn = $("#settings-help");
+    if (helpBtn) helpBtn.addEventListener("click", () => {
+      closeModal();
+      if (window.TUTORIAL) window.TUTORIAL.openHelp();
+    });
 
     $("#settings-clear").addEventListener("click", () => {
       if (!confirm("Clear all tanks, fish, water changes, and tests on this device? This can't be undone. Export a backup first if you want to keep anything.")) return;
