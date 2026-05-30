@@ -54,10 +54,10 @@ function getPref(k, fallback){
   const p = getPrefs();
   return (k in p) ? p[k] : fallback;
 }
-const DEFAULT_THEME = "midnight-reef";
+const DEFAULT_THEME = "tropical-pop";
 const THEMES = {
-  "midnight-reef": { id:"midnight-reef", skin:"dark",  label:"Midnight Reef",      desc:"Deep navy reef with cyan highlights (default)" },
-  "tropical-pop":  { id:"tropical-pop",  skin:"light", label:"Tropical Pop",       desc:"Bright aqua, crisp white, coral accents" },
+  "midnight-reef": { id:"midnight-reef", skin:"dark",  label:"Midnight Reef",      desc:"Deep navy reef with cyan highlights" },
+  "tropical-pop":  { id:"tropical-pop",  skin:"light", label:"Tropical Pop",       desc:"Bright aqua, crisp white, coral accents (default)" },
   "planted":       { id:"planted",       skin:"light", label:"Planted Freshwater", desc:"Lush green planted-tank vibe, swaying background plants" },
   "koi":           { id:"koi",           skin:"light", label:"Koi",                desc:"Warm koi pond, soft ripple, orange/coral accents" }
 };
