@@ -14,12 +14,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700;900&family=Inter:wght@400;500;600;700&display=swap" />
-  <link rel="stylesheet" href="styles.css?v=20260530m" />
+  <link rel="stylesheet" href="styles.css?v=20260530n" />
   <script>
     /* Apply saved theme as early as possible so the very first paint is correct.
-       Maps legacy values (aquarium/koi) onto the current theme set. */
+       Maps legacy values (aquarium) and any removed theme onto the current set. */
     try {
-      var SKIN = { "midnight-reef":"dark", "tropical-pop":"light", "planted":"light", "koi":"dark" };
+      var SKIN = { "midnight-reef":"dark", "tropical-pop":"light", "planted":"light" };
       var LEGACY = { aquarium:"midnight-reef" };
       var t = localStorage.getItem("tm.theme.v1");
       if (LEGACY[t]) t = LEGACY[t];
@@ -61,17 +61,6 @@
       <span class="blade" style="left:92%; --bw:52px; --bh:50vh; --bo:.80; --sd:14s;  --del:-9s"></span>
       <span class="blade" style="left:97%; --bw:38px; --bh:34vh; --bo:.62; --sd:10s;  --del:-4s"></span>
     </div>
-    <!-- Koi: zen pond on dark ink/slate water. The theme-defining motion
-         is slow concentric ripples from two intentional koi-rise points
-         (a primary upper-left rise and a smaller, slower secondary lower-
-         right), on long offset loops so the pond is never still but never
-         busy. A koi-orange under-surface glow and a still reflection band
-         sit behind them. No lily pads, no bubbles, no drifting circles,
-         no fish. Shown only by koi. -->
-    <div class="fx-ripple">
-      <span class="drop" style="--dx:34%; --dy:32%; --rw:62vmin; --ds:18s; --ddel:0s"></span>
-      <span class="drop" style="--dx:74%; --dy:66%; --rw:46vmin; --ds:24s; --ddel:-11s"></span>
-    </div>
   </div>
   <div id="app">
     <header class="topbar">
@@ -104,6 +93,6 @@
   <script src="fishdb.js?v=20260530f"></script>
   <script src="chemicals.js?v=20260530f"></script>
   <script src="firsttank.js?v=20260530f"></script>
-  <script src="app.js?v=20260530h"></script>
+  <script src="app.js?v=20260530i"></script>
 </body>
 </html>
