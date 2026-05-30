@@ -6,7 +6,7 @@
      data-theme="midnight-reef"  data-skin="dark"   — deep navy reef (default)
      data-theme="tropical-pop"   data-skin="light"  — bright aqua / coral
      data-theme="planted"        data-skin="light"  — green planted freshwater
-     data-theme="koi"            data-skin="light"  — warm koi pond (favorite)
+     data-theme="koi"            data-skin="dark"   — zen koi pond (dark reflective water)
    Switch in JS by setting document.documentElement.dataset.theme
    (applyTheme() also sets dataset.skin). Themes are pure CSS
    variable token sets + a lightweight animated background — no
@@ -165,43 +165,46 @@ html[data-theme="planted"] body{
    silhouettes (.fx-plants) below, not bubbles. Hide any .petal here. */
 html[data-theme="planted"] .petal{ display:none; }
 
-/* ---------- THEME: KOI POND (light) ----------
-   Warm cream water, soft koi orange/coral light. User favorite.
-   Distinct motion: a slow pond ripple sheen, no rising bubbles. */
+/* ---------- THEME: KOI POND (dark, zen) ----------
+   A serene Japanese koi pond seen from above: dark reflective slate/ink
+   water, muted moss & sage lily-pad greens, warm stone neutrals, and a
+   single koi-orange accent. Deliberately distinct from every other
+   theme — no bright aqua, no cream, no planted-green dominance.
+   Distinct motion: a slow pond ripple + drifting pads + one koi glimmer. */
 html[data-theme="koi"]{
-  --pond-0: #fdf6ec;
-  --pond-1: #f6e3cf;
-  --pond-2: #c9824f;
+  --pond-0: #1a2420;
+  --pond-1: #232f2a;
+  --pond-2: #0e1613;
 
-  --glass-fill:        rgba(255,252,246,.50);
-  --glass-fill-strong: rgba(255,252,246,.68);
-  --glass-stroke:      rgba(255,255,255,.62);
-  --glass-stroke-soft: rgba(255,255,255,.32);
-  --glass-highlight:   rgba(255,255,255,.92);
-  --glass-shadow:      0 16px 40px rgba(120, 60, 20, .16), 0 1px 0 rgba(255,255,255,.9) inset;
-  --glass-shadow-sm:   0 6px 18px rgba(120, 60, 20, .12), 0 1px 0 rgba(255,255,255,.9) inset;
+  --glass-fill:        rgba(38,52,46,.52);
+  --glass-fill-strong: rgba(48,66,58,.70);
+  --glass-stroke:      rgba(150, 200, 175, .20);
+  --glass-stroke-soft: rgba(150, 200, 175, .10);
+  --glass-highlight:   rgba(205, 235, 215, .40);
+  --glass-shadow:      0 18px 50px rgba(0, 12, 8, .60), 0 1px 0 rgba(190,235,210,.07) inset;
+  --glass-shadow-sm:   0 8px 24px rgba(0, 12, 8, .42), 0 1px 0 rgba(190,235,210,.07) inset;
 
-  --ink:      #3a2415;
-  --ink-dim:  #6a4a32;
-  --ink-soft: #9a7d63;
+  --ink:      #ecf3ee;   /* soft cream-white on dark water */
+  --ink-dim:  #aec4ba;   /* muted sage text */
+  --ink-soft: #7c948a;   /* stone-sage secondary */
 
-  --sakura:      #e8893f;   /* koi orange / informational */
-  --sakura-soft: #f6b681;
-  --sakura-deep: #b9622a;
-  --koi:         #ff6f3d;   /* signature koi brand action */
-  --koi-soft:    #ffa87f;
-  --gold:        #e8b54a;
-  --jade:        #3aa885;
-  --warn:        #df9626;
-  --bad:         #d9534f;
+  --sakura:      #8fae9b;   /* sage / informational (no orange info noise) */
+  --sakura-soft: #b6d0c0;
+  --sakura-deep: #5e7a6b;
+  --koi:         #ef6a2e;   /* signature koi-orange brand action */
+  --koi-soft:    #f59461;
+  --gold:        #d9a64a;
+  --jade:        #4cb38a;
+  --warn:        #e0a23c;
+  --bad:         #e06a5a;
 }
 html[data-theme="koi"] body{
   min-height:100vh;
   background:
-    radial-gradient(ellipse 90% 55% at 50% -10%, rgba(255,255,255,.6) 0%, rgba(255,255,255,0) 60%),
-    radial-gradient(ellipse 65% 45% at 80% 8%, rgba(255,130,80,.20) 0%, rgba(255,130,80,0) 58%),
-    radial-gradient(ellipse 60% 45% at 12% 100%, rgba(220,140,70,.18) 0%, rgba(220,140,70,0) 60%),
-    linear-gradient(180deg, #fdf6ec 0%, #f4ddc4 38%, #e7b483 74%, #cf8a52 100%);
+    radial-gradient(ellipse 90% 50% at 50% -10%, rgba(120,170,140,.16) 0%, rgba(120,170,140,0) 60%),
+    radial-gradient(ellipse 55% 40% at 78% 90%, rgba(239,106,46,.10) 0%, rgba(239,106,46,0) 60%),
+    radial-gradient(ellipse 60% 45% at 14% 8%, rgba(90,140,110,.16) 0%, rgba(90,140,110,0) 62%),
+    linear-gradient(180deg, #1f2a25 0%, #18221e 40%, #111914 74%, #0a100d 100%);
   background-attachment: fixed, fixed, fixed, fixed;
   overflow-x:hidden;
 }
@@ -235,7 +238,7 @@ html,body{ height:100%; max-width:100%; overflow:hidden; overscroll-behavior:non
 html[data-theme="midnight-reef"]{ --shimmer: rgba(90,200,225,.14); }
 html[data-theme="tropical-pop"]{ --shimmer: rgba(255,255,255,.22); }
 html[data-theme="planted"]{ --shimmer: rgba(170,235,185,.18); }
-html[data-theme="koi"]{ --shimmer: rgba(255,190,140,.20); }
+html[data-theme="koi"]{ --shimmer: rgba(150,195,165,.12); }
 @keyframes reef-drift{
   0%   { transform: translate3d(-3%, -2%, 0) scale(1.02); }
   100% { transform: translate3d(3%, 2%, 0)  scale(1.06); }
@@ -303,43 +306,48 @@ html[data-theme="planted"] .fx-plants .blade::after{
   100% { transform: rotate(4deg)   scaleY(1.01); }
 }
 
-/* KOI: a serene zen koi pond. The base is a slow, wide pond-ripple sheen
-   on warm cream water; floating on it are soft lily-pad silhouettes that
-   drift and rotate almost imperceptibly, plus one gentle concentric ripple
-   ring spreading from a single point — as if a koi just rose to the
-   surface. No particles, no cartoon fish; calm and minimal. */
-html[data-theme="koi"] .fx-ripple{ display:block; }
-/* Warm water sheen base. */
+/* KOI: a serene zen koi pond seen from above. The water is DARK and
+   reflective (deep slate/ink), not cream. Floating on it are muted
+   moss/sage lily pads that drift and rotate almost imperceptibly; a
+   single pale concentric ripple ring spreads from one point — as if a
+   koi just rose to the surface — and one soft koi-orange glimmer glides
+   slowly beneath the surface, the only warm note in the scene. No
+   particles, no cartoon fish; calm, minimal, premium. */
+html[data-theme="koi"] .fx-ripple{ display:block; overflow:hidden; }
+/* Reflective dark-water sheen: cool moonlit highlights on the surface
+   plus one slow koi-orange under-water glimmer that drifts across. */
 html[data-theme="koi"] .fx-ripple::before{
   content:""; position:absolute; inset:-25%;
   background:
-    radial-gradient(ellipse 55% 40% at 30% 35%, rgba(255,205,160,.20) 0%, rgba(255,205,160,0) 55%),
-    radial-gradient(ellipse 45% 35% at 72% 62%, rgba(255,150,95,.14) 0%, rgba(255,150,95,0) 55%);
-  animation: koi-sheen 26s ease-in-out infinite alternate;
+    radial-gradient(ellipse 55% 38% at 28% 32%, rgba(170,210,185,.14) 0%, rgba(170,210,185,0) 55%),
+    radial-gradient(ellipse 48% 34% at 74% 66%, rgba(120,160,140,.12) 0%, rgba(120,160,140,0) 55%),
+    radial-gradient(ellipse 26% 16% at 50% 55%, rgba(239,106,46,.16) 0%, rgba(239,106,46,0) 60%);
+  animation: koi-sheen 30s ease-in-out infinite alternate;
   will-change: transform, opacity;
 }
-/* A single expanding pond ripple ring — one koi-rise, on a long loop. */
+/* A single expanding pond ripple ring — one koi-rise, on a long loop.
+   Pale moonlit rim so it reads on the dark water. */
 html[data-theme="koi"] .fx-ripple::after{
   content:""; position:absolute;
   left:var(--rx,68%); top:var(--ry,30%);
-  width:38vmin; height:38vmin; margin:-19vmin 0 0 -19vmin;
+  width:40vmin; height:40vmin; margin:-20vmin 0 0 -20vmin;
   border-radius:50%;
-  border:1.5px solid rgba(255,255,255,.18);
+  border:1.5px solid rgba(205,235,215,.22);
   box-shadow:
-    0 0 0 6px rgba(255,255,255,.05),
-    0 0 0 14px rgba(255,180,130,.05);
+    0 0 0 6px rgba(205,235,215,.06),
+    0 0 0 15px rgba(239,106,46,.05);
   opacity:0;
-  animation: koi-rise 14s ease-out infinite;
+  animation: koi-rise 16s ease-out infinite;
   will-change: transform, opacity;
 }
-/* Floating lily pads: soft rounded silhouettes with the classic single
-   notch (a wedge cut out via a conic-gradient mask-like overlay). They
-   barely drift and rotate, like pads resting on still water. */
+/* Floating lily pads: soft rounded moss/sage silhouettes with the classic
+   single notch (a wedge cut from the centre outward via a conic mask).
+   They barely drift and rotate, like pads resting on still dark water. */
 html[data-theme="koi"] .fx-ripple .pad{
   position:absolute; width:var(--pw,90px); height:var(--pw,90px);
   border-radius:50%;
   background:
-    radial-gradient(circle at 38% 34%, rgba(120,180,120,.34) 0%, rgba(86,150,96,.30) 46%, rgba(60,120,74,.30) 100%);
+    radial-gradient(circle at 38% 34%, rgba(122,168,132,.40) 0%, rgba(78,124,92,.36) 46%, rgba(46,80,58,.36) 100%);
   /* The lily-pad notch: a transparent wedge from the centre outward. */
   -webkit-mask: conic-gradient(from var(--notch,20deg), transparent 0 26deg, #000 26deg 360deg);
           mask: conic-gradient(from var(--notch,20deg), transparent 0 26deg, #000 26deg 360deg);
@@ -349,15 +357,15 @@ html[data-theme="koi"] .fx-ripple .pad{
   animation-delay: var(--pdel,0s);
   will-change: transform;
 }
-/* Faint rim highlight to lift the pad off the water. */
+/* Faint cool rim highlight to lift the pad off the dark water. */
 html[data-theme="koi"] .fx-ripple .pad::before{
   content:""; position:absolute; inset:0; border-radius:50%;
-  box-shadow: inset 0 2px 6px rgba(190,235,195,.30);
+  box-shadow: inset 0 2px 7px rgba(190,225,200,.28);
 }
 @keyframes koi-sheen{
-  0%   { transform: translate3d(-2%, -1%, 0) scale(1.0);  opacity:.9; }
+  0%   { transform: translate3d(-3%, -1%, 0) scale(1.0);  opacity:.85; }
   50%  { opacity:1; }
-  100% { transform: translate3d(2%, 1.5%, 0) scale(1.04); opacity:.9; }
+  100% { transform: translate3d(3%, 2%, 0) scale(1.05);  opacity:.85; }
 }
 @keyframes koi-drift{
   0%   { transform: translate3d(-1.5%, 0, 0) rotate(-6deg); }
@@ -449,6 +457,11 @@ html[data-skin="dark"] .topbar h1{
   -webkit-background-clip:text;background-clip:text;
   -webkit-text-fill-color:transparent;
   text-shadow: 0 1px 0 rgba(0,0,0,.3);
+}
+/* Koi is a dark theme but its identity is warm koi-orange on sage water,
+   not reef cyan — give it a cream→koi-orange title instead. */
+html[data-theme="koi"] .topbar h1{
+  background:linear-gradient(180deg, #f3efe6 0%, #f59461 100%);
 }
 
 .ghost-btn{
@@ -1055,7 +1068,7 @@ html[data-skin="light"] .chip:hover{border-color:rgba(25,162,194,.55);color:#0d2
 #storage-banner b{color:var(--ink);font-weight:700}
 #storage-banner .row{margin-top:8px;gap:6px}
 
-/* Koi theme: warm rose/sakura tint */
+/* Dark-skin banner tint (Midnight Reef): warm rose/coral */
 html[data-skin="dark"] #storage-banner{
   background:linear-gradient(160deg, rgba(255,122,138,.22), rgba(245,181,107,.10));
   border:1px solid rgba(255,122,138,.45);
@@ -1071,6 +1084,22 @@ html[data-skin="dark"] #storage-banner.warn{
   background:linear-gradient(160deg, rgba(245,181,107,.20), rgba(255,122,138,.10));
   border:1px solid rgba(245,181,107,.50);
   color:#ffe7c8;
+}
+/* Koi: override the reef rose/coral banner with sage-water + koi-orange. */
+html[data-theme="koi"] #storage-banner{
+  background:linear-gradient(160deg, rgba(120,160,140,.22), rgba(239,106,46,.10));
+  border:1px solid rgba(150,190,165,.42);
+  color:#e6efe8;
+}
+html[data-theme="koi"] #storage-banner.ok{
+  background:linear-gradient(160deg, rgba(120,170,140,.24), rgba(120,160,140,.10));
+  border:1px solid rgba(140,190,160,.42);
+  color:#e6f1ea;
+}
+html[data-theme="koi"] #storage-banner.warn{
+  background:linear-gradient(160deg, rgba(224,162,60,.22), rgba(239,106,46,.12));
+  border:1px solid rgba(224,162,60,.50);
+  color:#f4e6cc;
 }
 
 /* Aquarium theme: clean aqua tint with dark readable ink */
@@ -1960,10 +1989,10 @@ input[type=time].input{ font-family:inherit }
 }
 .theme-preview-koi {
   background:
-    radial-gradient(circle 13px at 32% 64%, rgba(86,150,96,.70) 0%, rgba(86,150,96,.70) 70%, rgba(86,150,96,0) 73%),
-    radial-gradient(circle 9px at 66% 40%, rgba(86,150,96,.55) 0%, rgba(86,150,96,.55) 70%, rgba(86,150,96,0) 73%),
-    radial-gradient(ellipse 65% 45% at 80% 8%, rgba(255,130,80,.40) 0%, rgba(255,130,80,0) 58%),
-    linear-gradient(180deg, #fdf6ec 0%, #f0cfa6 40%, #cf8a52 100%);
+    radial-gradient(circle 6px at 52% 52%, rgba(239,106,46,.85) 0%, rgba(239,106,46,.55) 60%, rgba(239,106,46,0) 100%),
+    radial-gradient(circle 13px at 30% 66%, rgba(108,156,120,.85) 0%, rgba(78,124,92,.85) 70%, rgba(78,124,92,0) 73%),
+    radial-gradient(circle 9px at 68% 36%, rgba(108,156,120,.70) 0%, rgba(78,124,92,.70) 70%, rgba(78,124,92,0) 73%),
+    linear-gradient(180deg, #243029 0%, #18221e 45%, #0c130f 100%);
 }
 .theme-meta { flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }
 .theme-meta strong { font-size:15px; }

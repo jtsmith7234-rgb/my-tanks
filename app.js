@@ -59,7 +59,7 @@ const THEMES = {
   "midnight-reef": { id:"midnight-reef", skin:"dark",  label:"Midnight Reef",      desc:"Deep navy reef with cyan highlights" },
   "tropical-pop":  { id:"tropical-pop",  skin:"light", label:"Tropical Pop",       desc:"Bright aqua, crisp white, coral accents (default)" },
   "planted":       { id:"planted",       skin:"light", label:"Planted Freshwater", desc:"Lush green planted-tank vibe, swaying background plants" },
-  "koi":           { id:"koi",           skin:"light", label:"Koi",                desc:"Warm koi pond, soft ripple, orange/coral accents" }
+  "koi":           { id:"koi",           skin:"dark",  label:"Koi",                desc:"Zen koi pond — dark reflective water, lily pads, koi-orange accent" }
 };
 // Map legacy stored values to the current theme set. `koi` is now a real
 // theme, so stored `koi` resolves directly via THEMES (kept out of this map).

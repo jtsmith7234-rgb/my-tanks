@@ -14,12 +14,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700;900&family=Inter:wght@400;500;600;700&display=swap" />
-  <link rel="stylesheet" href="styles.css?v=20260530j" />
+  <link rel="stylesheet" href="styles.css?v=20260530k" />
   <script>
     /* Apply saved theme as early as possible so the very first paint is correct.
        Maps legacy values (aquarium/koi) onto the current theme set. */
     try {
-      var SKIN = { "midnight-reef":"dark", "tropical-pop":"light", "planted":"light", "koi":"light" };
+      var SKIN = { "midnight-reef":"dark", "tropical-pop":"light", "planted":"light", "koi":"dark" };
       var LEGACY = { aquarium:"midnight-reef" };
       var t = localStorage.getItem("tm.theme.v1");
       if (LEGACY[t]) t = LEGACY[t];
@@ -61,8 +61,9 @@
       <span class="blade" style="left:92%; --bw:52px; --bh:50vh; --bo:.80; --sd:14s;  --del:-9s"></span>
       <span class="blade" style="left:97%; --bw:38px; --bh:34vh; --bo:.62; --sd:10s;  --del:-4s"></span>
     </div>
-    <!-- Koi: zen pond — warm sheen base + a single koi-rise ripple ring,
-         with soft lily pads drifting on the surface (shown only by koi). -->
+    <!-- Koi: zen pond — dark reflective water with a single koi-rise ripple
+         ring, a slow koi-orange under-surface glimmer, and soft moss/sage
+         lily pads drifting on the surface (shown only by koi). -->
     <div class="fx-ripple">
       <span class="pad" style="left:12%; top:22%; --pw:96px;  --po:.50; --notch:200deg; --pd:34s; --pdel:0s"></span>
       <span class="pad" style="left:74%; top:16%; --pw:70px;  --po:.42; --notch:40deg;  --pd:30s; --pdel:-8s"></span>
@@ -102,6 +103,6 @@
   <script src="fishdb.js?v=20260530f"></script>
   <script src="chemicals.js?v=20260530f"></script>
   <script src="firsttank.js?v=20260530f"></script>
-  <script src="app.js?v=20260530g"></script>
+  <script src="app.js?v=20260530h"></script>
 </body>
 </html>
