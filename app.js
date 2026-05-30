@@ -1067,12 +1067,13 @@ function renderFish(t){
     </div>
 
     <div class="section">
-      <h2>Species browser</h2>
-      <p class="muted" style="margin-top:0">Reference for ${window.FISHDB_API ? window.FISHDB_API.all.length : 60}+ popular freshwater species. Sources: Aqueon, SeriouslyFish, Aquarium Co-Op.</p>
-      <label class="field"><span>Search the database</span>
-        <input class="input" id="db-search" placeholder="e.g. tetra, shrimp, gourami" autocomplete="off" />
+      <h2>Species compatibility</h2>
+      <p class="muted" style="margin-top:0">Search to see if a fish is a good fit for this tank.</p>
+      <label class="field compat-field">
+        <input class="input" id="compat-search" placeholder="Search fish or species" autocomplete="off" />
+        <div id="compat-suggest" class="species-suggest" hidden></div>
       </label>
-      <div id="db-results"></div>
+      <div id="compat-result"></div>
     </div>
   `;
 }
@@ -1125,28 +1126,62 @@ function bindFish(t){
     });
   }
 
-  // ----- Species browser search -----
-  const dbSearch = $("#db-search");
-  const dbResults = $("#db-results");
-  function renderDbResults(q){
-    if (!window.FISHDB_API){ dbResults.innerHTML = ""; return; }
-    if (!q || !q.trim()){
-      // Show a curated default sample so it doesn't look empty
-      const sample = window.FISHDB_API.all.slice(0, 5);
-      dbResults.innerHTML = `<p class="muted small" style="margin:8px 0">Showing 5 of ${window.FISHDB_API.all.length}. Type to filter.</p>` +
-        sample.map(f => window.FISHDB_API.card(f)).join("");
-      return;
-    }
-    const results = window.FISHDB_API.search(q, 12);
-    if (!results.length){
-      dbResults.innerHTML = `<p class="muted" style="margin:8px 0">No matches. Try a shorter search.</p>`;
-      return;
-    }
-    dbResults.innerHTML = results.map(f => window.FISHDB_API.card(f)).join("");
+  // ----- Species compatibility -----
+  const compatSearch  = $("#compat-search");
+  const compatSuggest = $("#compat-suggest");
+  const compatResult  = $("#compat-result");
+
+  function showCompatResult(name){
+    if (!window.FISHDB_API){ compatResult.innerHTML = ""; return; }
+    const f = window.FISHDB_API.byName(name);
+    if (!f){ compatResult.innerHTML = ""; return; }
+    const c = window.FISHDB_API.compatibility(f, t);
+    if (!c){ compatResult.innerHTML = ""; return; }
+    const reasons = c.reasons.map(r => `<li>${escapeHTML(r)}</li>`).join("");
+    compatResult.innerHTML = `
+      <div class="compat-card compat-${c.level}">
+        <div class="compat-head">
+          <span class="compat-dot"></span>
+          <div>
+            <div class="compat-fish">${escapeHTML(f.name)}</div>
+            <div class="compat-label">${c.label}</div>
+          </div>
+        </div>
+        <div class="compat-why">Why this result</div>
+        <ul class="compat-reasons">${reasons}</ul>
+      </div>
+    `;
   }
-  if (dbSearch){
-    dbSearch.addEventListener("input", () => renderDbResults(dbSearch.value));
-    renderDbResults("");
+
+  function showCompatSuggestions(q){
+    if (!window.FISHDB_API){ return; }
+    const results = window.FISHDB_API.search(q, 6);
+    if (!results.length){ compatSuggest.hidden = true; compatSuggest.innerHTML = ""; return; }
+    compatSuggest.innerHTML = results.map(f => `
+      <button type="button" class="species-suggest-row" data-name="${escapeHTML(f.name)}">
+        <span class="species-suggest-name">${escapeHTML(f.name)}</span>
+        <span class="species-suggest-meta">${f.minGal} gal · ${f.adult}" adult · ${f.tempLo}-${f.tempHi}°F</span>
+      </button>
+    `).join("");
+    compatSuggest.hidden = false;
+    $$(".species-suggest-row", compatSuggest).forEach(b => b.addEventListener("click", () => {
+      compatSearch.value = b.dataset.name;
+      compatSuggest.hidden = true;
+      showCompatResult(b.dataset.name);
+    }));
+  }
+
+  if (compatSearch){
+    compatSearch.addEventListener("input", () => {
+      const v = compatSearch.value.trim();
+      showCompatSuggestions(v);
+      // Show result immediately if the text exactly matches a species.
+      const f = window.FISHDB_API && window.FISHDB_API.byName(v);
+      if (f) showCompatResult(v); else compatResult.innerHTML = "";
+    });
+    compatSearch.addEventListener("blur", () => {
+      setTimeout(() => { compatSuggest.hidden = true; }, 150);
+    });
   }
 
   $("#add-fish-btn").addEventListener("click", () => {
