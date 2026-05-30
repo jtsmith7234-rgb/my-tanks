@@ -1066,6 +1066,9 @@ input[type=time].input{ font-family:inherit }
    FISH DB / SPECIES BROWSER
    ============================================================ */
 .species-field{ position:relative }
+/* Let the suggestion dropdown escape the card instead of being clipped by
+   the section's overflow:hidden. */
+.section:has(.species-suggest){ overflow:visible }
 .species-suggest{
   position:absolute;
   top:calc(100% + 2px);
@@ -1074,9 +1077,10 @@ input[type=time].input{ font-family:inherit }
   border:1px solid var(--glass-stroke, rgba(255,255,255,.12));
   border-radius:8px;
   padding:4px;
-  max-height:240px;
+  /* ~5 rows tall; scroll for the rest. Row ≈ 46px + 4px padding. */
+  max-height:234px;
   overflow-y:auto;
-  z-index:10;
+  z-index:30;
   box-shadow: 0 4px 16px rgba(0,0,0,.4);
 }
 .species-suggest-row{

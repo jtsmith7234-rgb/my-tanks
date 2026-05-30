@@ -1085,7 +1085,7 @@ function bindFish(t){
 
   function showSuggestions(q){
     if (!window.FISHDB_API) return;
-    const results = window.FISHDB_API.search(q, 6);
+    const results = window.FISHDB_API.search(q, 5);
     if (!results.length){ spSugg.hidden = true; spSugg.innerHTML = ""; return; }
     spSugg.innerHTML = results.map(f => `
       <button type="button" class="species-suggest-row" data-name="${escapeHTML(f.name)}">
