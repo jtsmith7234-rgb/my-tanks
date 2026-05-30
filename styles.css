@@ -249,25 +249,49 @@ html[data-theme="koi"]{ --shimmer: rgba(255,190,140,.20); }
    Planted = swaying plants; Koi = drifting pond ripple. */
 .fx-plants, .fx-ripple{ display:none; position:absolute; inset:0; pointer-events:none; }
 
-/* PLANTED: distant aquatic plants that sway slowly with the current.
-   Pure CSS leaf blades anchored to the bottom, rooted (transform-origin
-   bottom) so only the tips drift left/right — like background plants. */
+/* PLANTED: a soft bed of Vallisneria (jungle val / tape grass) — the
+   classic tall freshwater background plant. Each .blade is a thin
+   ribbon-like leaf rooted at the tank floor (transform-origin bottom)
+   so only the tips drift left/right, swaying with the current. Pure
+   CSS, no assets. A faint floor glow grounds the planted bed. */
 html[data-theme="planted"] .fx-plants{ display:block; overflow:hidden; }
-html[data-theme="planted"] .fx-plants .blade{
-  position:absolute; bottom:-4vh; transform-origin:50% 100%;
-  width:var(--bw,46px); height:var(--bh,40vh);
+/* Soft green substrate glow rising from the tank floor. */
+html[data-theme="planted"] .fx-plants::after{
+  content:""; position:absolute; left:0; right:0; bottom:0; height:34vh;
   background:
-    radial-gradient(ellipse 60% 90% at 50% 100%,
-      rgba(36,110,68,.34) 0%, rgba(36,110,68,.16) 45%, rgba(36,110,68,0) 80%);
-  border-radius:50% 50% 0 0 / 80% 80% 0 0;
-  filter: blur(1px);
+    radial-gradient(ellipse 120% 100% at 50% 100%,
+      rgba(30,104,62,.30) 0%, rgba(30,104,62,.12) 45%, rgba(30,104,62,0) 78%);
+  pointer-events:none;
+}
+html[data-theme="planted"] .fx-plants .blade{
+  position:absolute; bottom:-3vh; transform-origin:50% 100%;
+  width:var(--bw,14px); height:var(--bh,52vh);
+  /* Ribbon leaf: vertical green gradient, brighter midrib, fades to tip. */
+  background:
+    linear-gradient(180deg,
+      rgba(70,170,110,0) 0%,
+      rgba(58,150,96,.30) 12%,
+      rgba(42,128,80,.50) 45%,
+      rgba(30,104,62,.62) 100%);
+  /* Tapered ribbon: narrow rounded tip, wider rooted base. */
+  border-radius:48% 52% 6% 6% / 18% 18% 2% 2%;
+  filter: blur(.6px);
+  opacity:var(--bo,.85);
   animation: plant-sway var(--sd,11s) ease-in-out infinite alternate;
   animation-delay: var(--del, 0s);
   will-change: transform;
 }
+/* A slim highlight midrib down each leaf adds living-plant definition. */
+html[data-theme="planted"] .fx-plants .blade::before{
+  content:""; position:absolute; left:50%; top:6%; bottom:0;
+  width:2px; transform:translateX(-50%);
+  background:linear-gradient(180deg,
+    rgba(150,225,175,0) 0%, rgba(150,225,175,.45) 40%, rgba(120,205,150,.55) 100%);
+  border-radius:2px;
+}
 @keyframes plant-sway{
-  0%   { transform: rotate(-4deg) scaleY(.99); }
-  100% { transform: rotate(4deg)  scaleY(1.01); }
+  0%   { transform: rotate(-5deg)  skewX(2deg)  scaleY(.99); }
+  100% { transform: rotate(5deg)   skewX(-2deg) scaleY(1.01); }
 }
 
 /* KOI: a slow, wide pond ripple sheen drifting across the warm water.

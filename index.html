@@ -14,7 +14,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;700;900&family=Inter:wght@400;500;600;700&display=swap" />
-  <link rel="stylesheet" href="styles.css?v=20260530h" />
+  <link rel="stylesheet" href="styles.css?v=20260530i" />
   <script>
     /* Apply saved theme as early as possible so the very first paint is correct.
        Maps legacy values (aquarium/koi) onto the current theme set. */
@@ -40,14 +40,27 @@
     <span class="petal p2" style="left:70%; animation-duration:20s; animation-delay:-10s"></span>
     <span class="petal"    style="left:84%; animation-duration:15s; animation-delay:-2s"></span>
     <span class="petal p3" style="left:93%; animation-duration:24s; animation-delay:-16s"></span>
-    <!-- Planted: distant swaying plant silhouettes (shown only by planted) -->
+    <!-- Planted: Vallisneria (tape grass) ribbon leaves in loose clumps,
+         swaying slowly with the current. Shown only by the planted theme. -->
     <div class="fx-plants">
-      <span class="blade" style="left:6%;  --bw:54px; --bh:46vh; --sd:12s;  --del:0s"></span>
-      <span class="blade" style="left:18%; --bw:38px; --bh:34vh; --sd:9.5s; --del:-3s"></span>
-      <span class="blade" style="left:33%; --bw:48px; --bh:40vh; --sd:13s;  --del:-6s"></span>
-      <span class="blade" style="left:62%; --bw:42px; --bh:37vh; --sd:10.5s;--del:-2s"></span>
-      <span class="blade" style="left:78%; --bw:56px; --bh:48vh; --sd:14s;  --del:-7s"></span>
-      <span class="blade" style="left:91%; --bw:36px; --bh:31vh; --sd:11s;  --del:-4s"></span>
+      <!-- left clump -->
+      <span class="blade" style="left:4%;  --bw:13px; --bh:54vh; --bo:.80; --sd:12s;  --del:0s"></span>
+      <span class="blade" style="left:7%;  --bw:11px; --bh:46vh; --bo:.70; --sd:10s;  --del:-3s"></span>
+      <span class="blade" style="left:10%; --bw:15px; --bh:58vh; --bo:.86; --sd:13.5s;--del:-6s"></span>
+      <span class="blade" style="left:13%; --bw:10px; --bh:40vh; --bo:.64; --sd:9.5s; --del:-1s"></span>
+      <!-- mid-left clump -->
+      <span class="blade" style="left:29%; --bw:14px; --bh:50vh; --bo:.78; --sd:11.5s;--del:-4s"></span>
+      <span class="blade" style="left:32%; --bw:12px; --bh:44vh; --bo:.70; --sd:13s;  --del:-7s"></span>
+      <span class="blade" style="left:35%; --bw:16px; --bh:60vh; --bo:.88; --sd:14.5s;--del:-2s"></span>
+      <!-- mid-right clump -->
+      <span class="blade" style="left:60%; --bw:13px; --bh:48vh; --bo:.76; --sd:10.5s;--del:-5s"></span>
+      <span class="blade" style="left:63%; --bw:15px; --bh:56vh; --bo:.84; --sd:12.5s;--del:-8s"></span>
+      <span class="blade" style="left:66%; --bw:11px; --bh:42vh; --bo:.66; --sd:9s;   --del:-3s"></span>
+      <!-- right clump -->
+      <span class="blade" style="left:85%; --bw:15px; --bh:58vh; --bo:.86; --sd:13s;  --del:-6s"></span>
+      <span class="blade" style="left:88%; --bw:12px; --bh:46vh; --bo:.72; --sd:11s;  --del:-2s"></span>
+      <span class="blade" style="left:91%; --bw:14px; --bh:52vh; --bo:.80; --sd:14s;  --del:-9s"></span>
+      <span class="blade" style="left:94%; --bw:10px; --bh:38vh; --bo:.62; --sd:10s;  --del:-4s"></span>
     </div>
     <!-- Koi: slow drifting pond ripple sheen (shown only by koi) -->
     <div class="fx-ripple"></div>
