@@ -1,16 +1,18 @@
 /* ============================================================
    THEMES
-   Three global themes ship with the app, toggled via data-theme
+   Four global themes ship with the app, toggled via data-theme
    on <html>. A companion data-skin attribute ("light"/"dark")
    groups shared surface styling so per-theme rules stay minimal:
      data-theme="midnight-reef"  data-skin="dark"   — deep navy reef (default)
      data-theme="tropical-pop"   data-skin="light"  — bright aqua / coral
      data-theme="planted"        data-skin="light"  — green planted freshwater
+     data-theme="koi"            data-skin="light"  — warm koi pond (favorite)
    Switch in JS by setting document.documentElement.dataset.theme
    (applyTheme() also sets dataset.skin). Themes are pure CSS
    variable token sets + a lightweight animated background — no
-   image assets, videos, or canvases. Adding a new theme = one
-   token block + one body-background rule + one motion layer.
+   image assets, videos, or canvases. Each theme gets a DISTINCT
+   motion: reef + tropical = rising motes/bubbles, planted = slow
+   swaying plant silhouettes, koi = drifting pond ripple sheen.
    ============================================================ */
 
 :root{
@@ -159,19 +161,55 @@ html[data-theme="planted"] body{
   background-attachment: fixed, fixed, fixed;
   overflow-x:hidden;
 }
-/* Slow drifting leaf/oxygen motes */
-html[data-theme="planted"] .petal{
-  width:12px;height:12px;top:auto;bottom:-10vh;
-  background: radial-gradient(circle at 35% 30%, rgba(235,255,240,.92) 0%, rgba(120,205,150,.4) 45%, rgba(120,205,150,.04) 78%);
-  border-radius:60% 0 60% 0;
-  opacity:.6;
-  filter: drop-shadow(0 0 4px rgba(120,205,150,.4));
-  animation: bubble-rise linear infinite;
-}
-html[data-theme="planted"] .petal.p2{ width:9px;height:9px;opacity:.45 }
-html[data-theme="planted"] .petal.p3{ width:17px;height:17px;opacity:.7 }
+/* Planted uses no rising particles — its motion is the swaying plant
+   silhouettes (.fx-plants) below, not bubbles. Hide any .petal here. */
+html[data-theme="planted"] .petal{ display:none; }
 
-/* Shared rising-particle motion used by all themes */
+/* ---------- THEME: KOI POND (light) ----------
+   Warm cream water, soft koi orange/coral light. User favorite.
+   Distinct motion: a slow pond ripple sheen, no rising bubbles. */
+html[data-theme="koi"]{
+  --pond-0: #fdf6ec;
+  --pond-1: #f6e3cf;
+  --pond-2: #c9824f;
+
+  --glass-fill:        rgba(255,252,246,.50);
+  --glass-fill-strong: rgba(255,252,246,.68);
+  --glass-stroke:      rgba(255,255,255,.62);
+  --glass-stroke-soft: rgba(255,255,255,.32);
+  --glass-highlight:   rgba(255,255,255,.92);
+  --glass-shadow:      0 16px 40px rgba(120, 60, 20, .16), 0 1px 0 rgba(255,255,255,.9) inset;
+  --glass-shadow-sm:   0 6px 18px rgba(120, 60, 20, .12), 0 1px 0 rgba(255,255,255,.9) inset;
+
+  --ink:      #3a2415;
+  --ink-dim:  #6a4a32;
+  --ink-soft: #9a7d63;
+
+  --sakura:      #e8893f;   /* koi orange / informational */
+  --sakura-soft: #f6b681;
+  --sakura-deep: #b9622a;
+  --koi:         #ff6f3d;   /* signature koi brand action */
+  --koi-soft:    #ffa87f;
+  --gold:        #e8b54a;
+  --jade:        #3aa885;
+  --warn:        #df9626;
+  --bad:         #d9534f;
+}
+html[data-theme="koi"] body{
+  min-height:100vh;
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -10%, rgba(255,255,255,.6) 0%, rgba(255,255,255,0) 60%),
+    radial-gradient(ellipse 65% 45% at 80% 8%, rgba(255,130,80,.20) 0%, rgba(255,130,80,0) 58%),
+    radial-gradient(ellipse 60% 45% at 12% 100%, rgba(220,140,70,.18) 0%, rgba(220,140,70,0) 60%),
+    linear-gradient(180deg, #fdf6ec 0%, #f4ddc4 38%, #e7b483 74%, #cf8a52 100%);
+  background-attachment: fixed, fixed, fixed, fixed;
+  overflow-x:hidden;
+}
+/* Koi uses no rising particles — its motion is the pond ripple sheen
+   (.fx-ripple) below. Hide any .petal here. */
+html[data-theme="koi"] .petal{ display:none; }
+
+/* Shared rising-particle motion (reef + tropical only) */
 @keyframes bubble-rise{
   0%   { transform: translate(0, 0) scale(.95); opacity:0 }
   10%  { opacity:var(--petal-peak, .7) }
@@ -197,16 +235,67 @@ html,body{ height:100%; max-width:100%; overflow:hidden; overscroll-behavior:non
 html[data-theme="midnight-reef"]{ --shimmer: rgba(90,200,225,.14); }
 html[data-theme="tropical-pop"]{ --shimmer: rgba(255,255,255,.22); }
 html[data-theme="planted"]{ --shimmer: rgba(170,235,185,.18); }
+html[data-theme="koi"]{ --shimmer: rgba(255,190,140,.20); }
 @keyframes reef-drift{
   0%   { transform: translate3d(-3%, -2%, 0) scale(1.02); }
   100% { transform: translate3d(3%, 2%, 0)  scale(1.06); }
 }
 .petal{ position:absolute; }
 
+/* ---------- PER-THEME DYNAMIC LAYERS ----------
+   Each effect layer lives in .petals (fixed, behind content, no clicks).
+   Only its owning theme reveals it, so the four themes never share the
+   same animation. Reef + Tropical = rising .petal motes (above);
+   Planted = swaying plants; Koi = drifting pond ripple. */
+.fx-plants, .fx-ripple{ display:none; position:absolute; inset:0; pointer-events:none; }
+
+/* PLANTED: distant aquatic plants that sway slowly with the current.
+   Pure CSS leaf blades anchored to the bottom, rooted (transform-origin
+   bottom) so only the tips drift left/right — like background plants. */
+html[data-theme="planted"] .fx-plants{ display:block; overflow:hidden; }
+html[data-theme="planted"] .fx-plants .blade{
+  position:absolute; bottom:-4vh; transform-origin:50% 100%;
+  width:var(--bw,46px); height:var(--bh,40vh);
+  background:
+    radial-gradient(ellipse 60% 90% at 50% 100%,
+      rgba(36,110,68,.34) 0%, rgba(36,110,68,.16) 45%, rgba(36,110,68,0) 80%);
+  border-radius:50% 50% 0 0 / 80% 80% 0 0;
+  filter: blur(1px);
+  animation: plant-sway var(--sd,11s) ease-in-out infinite alternate;
+  animation-delay: var(--del, 0s);
+  will-change: transform;
+}
+@keyframes plant-sway{
+  0%   { transform: rotate(-4deg) scaleY(.99); }
+  100% { transform: rotate(4deg)  scaleY(1.01); }
+}
+
+/* KOI: a slow, wide pond ripple sheen drifting across the warm water.
+   Soft concentric light bands, no particles. */
+html[data-theme="koi"] .fx-ripple{ display:block; }
+html[data-theme="koi"] .fx-ripple::before{
+  content:""; position:absolute; inset:-25%;
+  background:
+    radial-gradient(ellipse 55% 40% at 30% 35%, rgba(255,205,160,.22) 0%, rgba(255,205,160,0) 55%),
+    radial-gradient(ellipse 45% 35% at 72% 62%, rgba(255,150,95,.16) 0%, rgba(255,150,95,0) 55%),
+    repeating-radial-gradient(circle at 50% 60%,
+      rgba(255,255,255,.07) 0px, rgba(255,255,255,.07) 2px,
+      rgba(255,255,255,0) 22px, rgba(255,255,255,0) 44px);
+  animation: koi-ripple 22s ease-in-out infinite alternate;
+  will-change: transform, opacity;
+}
+@keyframes koi-ripple{
+  0%   { transform: translate3d(-2%, -1%, 0) scale(1.0);  opacity:.85; }
+  50%  { opacity:1; }
+  100% { transform: translate3d(2%, 1.5%, 0) scale(1.05); opacity:.85; }
+}
+
 /* Respect reduced-motion: kill all theme movement, keep the look. */
 @media (prefers-reduced-motion: reduce){
   .petal{ animation: none; display:none }
   .petals::before{ animation: none }
+  .fx-plants .blade{ animation: none }
+  .fx-ripple::before{ animation: none }
 }
 
 /* App shell: locks the viewport, flex column with single scroll area. */
@@ -1786,6 +1875,11 @@ input[type=time].input{ font-family:inherit }
   background:
     radial-gradient(ellipse 60% 45% at 15% 105%, rgba(34,120,70,.45) 0%, rgba(34,120,70,0) 60%),
     linear-gradient(180deg, #eef8ef 0%, #bfe6c8 40%, #2c6a45 100%);
+}
+.theme-preview-koi {
+  background:
+    radial-gradient(ellipse 65% 45% at 80% 8%, rgba(255,130,80,.45) 0%, rgba(255,130,80,0) 58%),
+    linear-gradient(180deg, #fdf6ec 0%, #f0cfa6 40%, #cf8a52 100%);
 }
 .theme-meta { flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }
 .theme-meta strong { font-size:15px; }

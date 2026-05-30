@@ -58,10 +58,12 @@ const DEFAULT_THEME = "midnight-reef";
 const THEMES = {
   "midnight-reef": { id:"midnight-reef", skin:"dark",  label:"Midnight Reef",      desc:"Deep navy reef with cyan highlights (default)" },
   "tropical-pop":  { id:"tropical-pop",  skin:"light", label:"Tropical Pop",       desc:"Bright aqua, crisp white, coral accents" },
-  "planted":       { id:"planted",       skin:"light", label:"Planted Freshwater", desc:"Lush green planted-tank vibe, natural and calm" }
+  "planted":       { id:"planted",       skin:"light", label:"Planted Freshwater", desc:"Lush green planted-tank vibe, swaying background plants" },
+  "koi":           { id:"koi",           skin:"light", label:"Koi",                desc:"Warm koi pond, soft ripple, orange/coral accents" }
 };
-// Map legacy stored values to the new theme set.
-const LEGACY_THEME_MAP = { aquarium:"midnight-reef", koi:"tropical-pop" };
+// Map legacy stored values to the current theme set. `koi` is now a real
+// theme, so stored `koi` resolves directly via THEMES (kept out of this map).
+const LEGACY_THEME_MAP = { aquarium:"midnight-reef" };
 function normalizeTheme(id){
   if (THEMES[id]) return id;
   if (LEGACY_THEME_MAP[id]) return LEGACY_THEME_MAP[id];
@@ -2372,7 +2374,7 @@ function openBackupModal(){
 const APP_VERSION = "1.0";
 
 function openSettingsSheet(){
-  const shortLabel = { "midnight-reef": "Midnight", "tropical-pop": "Tropical", "planted": "Planted" };
+  const shortLabel = { "midnight-reef": "Midnight", "tropical-pop": "Tropical", "planted": "Planted", "koi": "Koi" };
   const themeBtns = Object.values(THEMES).map(t =>
     `<button class="seg-btn" data-theme-id="${t.id}" type="button">${escapeHTML(shortLabel[t.id] || t.label)}</button>`
   ).join("");
