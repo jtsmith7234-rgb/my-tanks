@@ -1859,7 +1859,8 @@ input[type=time].input{ font-family:inherit }
    ============================================================ */
 .modal.modal-tut{
   padding:0;
-  overflow:hidden;
+  overflow-x:hidden;
+  overflow-y:auto;
   max-width:480px;
 }
 .tut{ position:relative; display:flex; flex-direction:column; }
@@ -1885,14 +1886,14 @@ input[type=time].input{ font-family:inherit }
   flex:0 0 100%; width:100%;
   scroll-snap-align:center; scroll-snap-stop:always;
   box-sizing:border-box;
-  padding:40px 24px 8px;
+  padding:24px 20px 8px;
   display:flex; flex-direction:column; align-items:center; text-align:center;
 }
 .tut-card-label{
   font-size:12px; font-weight:700; letter-spacing:1.2px; text-transform:uppercase;
-  color:var(--sakura); margin-bottom:16px;
+  color:var(--sakura); margin-bottom:12px;
 }
-.tut-snap{ margin-bottom:18px; }
+.tut-snap{ margin-bottom:16px; }
 .tut-headline{
   margin:0 0 8px; font-family:var(--font-display);
   font-size:23px; font-weight:700; letter-spacing:.2px; color:var(--ink);
@@ -1902,12 +1903,12 @@ input[type=time].input{ font-family:inherit }
   margin:0; font-size:15px; line-height:1.5; color:var(--ink-dim);
   max-width:30ch;
 }
-.tut-cta{ margin-top:22px; max-width:320px; }
+.tut-cta{ margin-top:18px; max-width:320px; }
 
 /* Footer: dots + Next */
 .tut-footer{
   display:flex; align-items:center; justify-content:space-between; gap:14px;
-  padding:16px 24px calc(16px + env(safe-area-inset-bottom));
+  padding:12px 24px calc(14px + env(safe-area-inset-bottom));
 }
 .tut-dots{ display:flex; align-items:center; gap:8px; }
 .tut-dot{
@@ -1920,8 +1921,8 @@ input[type=time].input{ font-family:inherit }
 
 /* ---------- Device frame + screen mockups ---------- */
 .tut-device{
-  position:relative; width:230px; margin:0 auto;
-  border-radius:34px; padding:10px;
+  position:relative; width:clamp(258px, 72vw, 300px); margin:0 auto;
+  border-radius:38px; padding:11px;
   background:linear-gradient(160deg, rgba(255,255,255,.18), rgba(0,0,0,.20));
   border:1px solid var(--glass-stroke);
   box-shadow:var(--glass-shadow), 0 2px 0 rgba(255,255,255,.18) inset;
@@ -1932,10 +1933,10 @@ input[type=time].input{ font-family:inherit }
   background:rgba(0,0,0,.28); z-index:2;
 }
 .tut-screen{
-  border-radius:26px; overflow:hidden;
+  border-radius:28px; overflow:hidden;
   background:linear-gradient(180deg, var(--pond-0), var(--pond-1));
-  padding:18px 12px 14px;
-  min-height:352px;
+  padding:18px 13px 14px;
+  min-height:clamp(360px, 46vh, 430px);
   display:flex; flex-direction:column; gap:8px;
   text-align:left; color:var(--ink);
   box-shadow:0 1px 0 rgba(255,255,255,.25) inset;
