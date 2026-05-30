@@ -288,14 +288,6 @@ html[data-theme="koi"] .topbar h1{
   background:linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
   pointer-events:none;
 }
-.tank-card::after{
-  /* soft accent glow in corner */
-  content:"";position:absolute;right:-30%;top:-40%;width:90%;height:90%;
-  background:radial-gradient(closest-side, var(--sakura-soft), transparent 70%);
-  opacity:.22;
-  pointer-events:none;
-  filter:blur(8px);
-}
 .tank-card:hover{background:var(--glass-fill-strong);border-color:var(--glass-stroke);transform:translateY(-2px)}
 .tank-card:active{transform:scale(.985)}
 .tank-card h3{
@@ -362,9 +354,7 @@ html[data-theme="koi"] .topbar h1{
 .tc-status-fyi   { color: rgba(220,180,110,.95); }
 .tc-status-soon  { color: rgba(240,170,100,.95); }
 .tc-status-urgent{ color: rgba(255,130,130,1); }
-/* Subtle left-border tint by status (very quiet) */
-.tank-card.tc-soon   { border-left: 2px solid rgba(240,160,80,.55); }
-.tank-card.tc-urgent { border-left: 2px solid rgba(255,107,107,.65); }
+/* Status is shown only via the badge dot + label — no colored card borders. */
 
 .pill{
   display:inline-flex;align-items:center;gap:6px;
@@ -1641,6 +1631,7 @@ input[type=time].input{ font-family:inherit }
   position: relative;
   z-index: 2;
   width: 100%;
+  height: 100%; /* fill the row so side-by-side cards match height */
   transform: translateX(0); /* explicit rest state so nothing else can drift it */
   transition: transform .22s cubic-bezier(.2,.8,.2,1);
   will-change: transform;
@@ -1659,6 +1650,7 @@ input[type=time].input{ font-family:inherit }
   z-index: 1;
   pointer-events: none;
   opacity: 0;
+  visibility: hidden; /* fully hidden at rest so no colored edge peeks behind the card */
   transition: opacity .15s ease;
 }
 .swipe-actions-left  { left: 0;  }
@@ -1666,7 +1658,7 @@ input[type=time].input{ font-family:inherit }
 .swipe-row.swiping-left  .swipe-actions-right,
 .swipe-row.swiping-right .swipe-actions-left,
 .swipe-row.revealed-left  .swipe-actions-left,
-.swipe-row.revealed-right .swipe-actions-right { opacity: 1; }
+.swipe-row.revealed-right .swipe-actions-right { opacity: 1; visibility: visible; }
 .swipe-row.revealed-left  .swipe-actions-left,
 .swipe-row.revealed-right .swipe-actions-right { pointer-events: auto; }
 
