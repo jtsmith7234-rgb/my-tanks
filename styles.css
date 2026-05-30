@@ -12,7 +12,7 @@
    variable token sets + a lightweight animated background — no
    image assets, videos, or canvases. Each theme gets a DISTINCT
    motion: reef + tropical = rising motes/bubbles, planted = slow
-   nodding broad-leaf plants, koi = drifting lily pads + pond ripple.
+   nodding broad-leaf plants, koi = subtle spreading pond ripples.
    ============================================================ */
 
 :root{
@@ -167,10 +167,10 @@ html[data-theme="planted"] .petal{ display:none; }
 
 /* ---------- THEME: KOI POND (dark, zen) ----------
    A serene Japanese koi pond seen from above: dark reflective slate/ink
-   water, muted moss & sage lily-pad greens, warm stone neutrals, and a
+   water, muted moss & sage greens, warm stone neutrals, and a
    single koi-orange accent. Deliberately distinct from every other
    theme — no bright aqua, no cream, no planted-green dominance.
-   Distinct motion: a slow pond ripple + drifting pads + one koi glimmer. */
+   Distinct motion: subtle spreading pond ripples + one koi glimmer. */
 html[data-theme="koi"]{
   --pond-0: #1a2420;
   --pond-1: #232f2a;
@@ -249,7 +249,7 @@ html[data-theme="koi"]{ --shimmer: rgba(150,195,165,.12); }
    Each effect layer lives in .petals (fixed, behind content, no clicks).
    Only its owning theme reveals it, so the four themes never share the
    same animation. Reef + Tropical = rising .petal motes (above);
-   Planted = nodding broad-leaf plants; Koi = lily pads + pond ripple. */
+   Planted = nodding broad-leaf plants; Koi = spreading pond ripples. */
 .fx-plants, .fx-ripple{ display:none; position:absolute; inset:0; pointer-events:none; }
 
 /* PLANTED: a soft bed of broad-leaf freshwater plants — Amazon sword /
@@ -307,74 +307,85 @@ html[data-theme="planted"] .fx-plants .blade::after{
 }
 
 /* KOI: a serene zen koi pond seen from above. The water is DARK and
-   reflective (deep slate/ink), not cream. Floating on it are muted
-   moss/sage lily pads that drift and rotate almost imperceptibly; a
-   single pale concentric ripple ring spreads from one point — as if a
-   koi just rose to the surface — and one soft koi-orange glimmer glides
-   slowly beneath the surface, the only warm note in the scene. No
-   particles, no cartoon fish; calm, minimal, premium. */
+   reflective (deep slate/ink), not cream. The signature motion is
+   subtle POND RIPPLES — slow concentric rings spreading from one or two
+   fixed points, as if a koi just brushed the surface. Behind them sits a
+   reflective moonlit sheen and a single soft koi-orange under-water
+   glimmer — the only warm note. No bubbles, no drifting circles, no
+   cartoon fish; calm, minimal, premium. */
 html[data-theme="koi"] .fx-ripple{ display:block; overflow:hidden; }
-/* Reflective dark-water sheen: cool moonlit highlights on the surface
-   plus one slow koi-orange under-water glimmer that drifts across. */
+/* Reflective dark-water sheen: cool moonlit highlights drifting on the
+   surface plus one slow koi-orange under-water glimmer. Pure backdrop —
+   the ripple rings (the .drop sources below) carry the real motion. */
 html[data-theme="koi"] .fx-ripple::before{
   content:""; position:absolute; inset:-25%;
   background:
-    radial-gradient(ellipse 55% 38% at 28% 32%, rgba(170,210,185,.14) 0%, rgba(170,210,185,0) 55%),
-    radial-gradient(ellipse 48% 34% at 74% 66%, rgba(120,160,140,.12) 0%, rgba(120,160,140,0) 55%),
-    radial-gradient(ellipse 26% 16% at 50% 55%, rgba(239,106,46,.16) 0%, rgba(239,106,46,0) 60%);
-  animation: koi-sheen 30s ease-in-out infinite alternate;
+    radial-gradient(ellipse 58% 40% at 26% 30%, rgba(170,210,185,.12) 0%, rgba(170,210,185,0) 56%),
+    radial-gradient(ellipse 50% 36% at 76% 68%, rgba(120,160,140,.10) 0%, rgba(120,160,140,0) 56%),
+    radial-gradient(ellipse 30% 18% at 60% 52%, rgba(239,106,46,.14) 0%, rgba(239,106,46,0) 62%);
+  animation: koi-sheen 34s ease-in-out infinite alternate;
   will-change: transform, opacity;
 }
-/* A single expanding pond ripple ring — one koi-rise, on a long loop.
-   Pale moonlit rim so it reads on the dark water. */
+/* A faint moonlit reflection band across the upper water, giving the
+   pond its still, glassy quality. Static — calm, not busy. */
 html[data-theme="koi"] .fx-ripple::after{
-  content:""; position:absolute;
-  left:var(--rx,68%); top:var(--ry,30%);
-  width:40vmin; height:40vmin; margin:-20vmin 0 0 -20vmin;
+  content:""; position:absolute; left:-10%; right:-10%; top:8%; height:32%;
+  background:
+    linear-gradient(180deg,
+      rgba(190,222,200,.07) 0%, rgba(190,222,200,.03) 45%, rgba(190,222,200,0) 100%);
+  filter: blur(6px);
+  opacity:.8;
+}
+/* RIPPLE SOURCE: each .drop is a fixed point on the pond from which slow
+   concentric rings expand and fade — the koi-rise. The element body is
+   the leading ring; ::before and ::after are two trailing rings on the
+   same loop (staggered) so one source reads as a real spreading ripple.
+   Pale moonlit rim with a whisper of koi-orange so it sits on dark
+   water without ever fighting the content above it. */
+html[data-theme="koi"] .fx-ripple .drop,
+html[data-theme="koi"] .fx-ripple .drop::before,
+html[data-theme="koi"] .fx-ripple .drop::after{
+  position:absolute; left:0; top:0;
+  width:var(--rw,46vmin); height:var(--rw,46vmin);
+  margin:calc(var(--rw,46vmin) / -2) 0 0 calc(var(--rw,46vmin) / -2);
   border-radius:50%;
-  border:1.5px solid rgba(205,235,215,.22);
+  border:1.5px solid rgba(205,235,215,.20);
   box-shadow:
-    0 0 0 6px rgba(205,235,215,.06),
-    0 0 0 15px rgba(239,106,46,.05);
+    0 0 0 1px rgba(239,106,46,.05) inset,
+    0 0 14px rgba(205,235,215,.05);
   opacity:0;
-  animation: koi-rise 16s ease-out infinite;
   will-change: transform, opacity;
 }
-/* Floating lily pads: soft rounded moss/sage silhouettes with the classic
-   single notch (a wedge cut from the centre outward via a conic mask).
-   They barely drift and rotate, like pads resting on still dark water. */
-html[data-theme="koi"] .fx-ripple .pad{
-  position:absolute; width:var(--pw,90px); height:var(--pw,90px);
-  border-radius:50%;
-  background:
-    radial-gradient(circle at 38% 34%, rgba(122,168,132,.40) 0%, rgba(78,124,92,.36) 46%, rgba(46,80,58,.36) 100%);
-  /* The lily-pad notch: a transparent wedge from the centre outward. */
-  -webkit-mask: conic-gradient(from var(--notch,20deg), transparent 0 26deg, #000 26deg 360deg);
-          mask: conic-gradient(from var(--notch,20deg), transparent 0 26deg, #000 26deg 360deg);
-  filter: blur(.4px);
-  opacity:var(--po,.55);
-  animation: koi-drift var(--pd,30s) ease-in-out infinite alternate;
-  animation-delay: var(--pdel,0s);
-  will-change: transform;
+html[data-theme="koi"] .fx-ripple .drop{
+  left:var(--dx,50%); top:var(--dy,40%);
+  animation: koi-ripple var(--ds,15s) ease-out infinite;
+  animation-delay: var(--ddel,0s);
 }
-/* Faint cool rim highlight to lift the pad off the dark water. */
-html[data-theme="koi"] .fx-ripple .pad::before{
-  content:""; position:absolute; inset:0; border-radius:50%;
-  box-shadow: inset 0 2px 7px rgba(190,225,200,.28);
+html[data-theme="koi"] .fx-ripple .drop::before,
+html[data-theme="koi"] .fx-ripple .drop::after{
+  content:""; left:50%; top:50%;
+  animation: koi-ripple var(--ds,15s) ease-out infinite;
+}
+/* Trailing rings: same loop, offset in time so the ripple looks like it
+   keeps spreading outward rather than pulsing as one ring. */
+html[data-theme="koi"] .fx-ripple .drop::before{
+  animation-delay: calc(var(--ddel,0s) + var(--ds,15s) / 3);
+}
+html[data-theme="koi"] .fx-ripple .drop::after{
+  animation-delay: calc(var(--ddel,0s) + var(--ds,15s) / 3 * 2);
 }
 @keyframes koi-sheen{
   0%   { transform: translate3d(-3%, -1%, 0) scale(1.0);  opacity:.85; }
   50%  { opacity:1; }
   100% { transform: translate3d(3%, 2%, 0) scale(1.05);  opacity:.85; }
 }
-@keyframes koi-drift{
-  0%   { transform: translate3d(-1.5%, 0, 0) rotate(-6deg); }
-  100% { transform: translate3d(1.5%, -1%, 0) rotate(6deg); }
-}
-@keyframes koi-rise{
-  0%   { transform: scale(.2); opacity:0; }
-  8%   { opacity:.5; }
-  70%  { opacity:.12; }
+/* One ripple ring: born small and faint at the source, spreading outward
+   while softening, gone before it reaches the edges. Slow and low-opacity
+   so it never competes with the cards. */
+@keyframes koi-ripple{
+  0%   { transform: scale(.12); opacity:0; }
+  12%  { opacity:.42; }
+  60%  { opacity:.14; }
   100% { transform: scale(1); opacity:0; }
 }
 
@@ -384,8 +395,9 @@ html[data-theme="koi"] .fx-ripple .pad::before{
   .petals::before{ animation: none }
   .fx-plants .blade{ animation: none }
   .fx-ripple::before{ animation: none }
-  .fx-ripple::after{ animation: none; opacity:0 }
-  .fx-ripple .pad{ animation: none }
+  .fx-ripple .drop,
+  .fx-ripple .drop::before,
+  .fx-ripple .drop::after{ animation: none; opacity:0 }
 }
 
 /* App shell: locks the viewport, flex column with single scroll area. */
@@ -1987,11 +1999,14 @@ input[type=time].input{ font-family:inherit }
     radial-gradient(ellipse 60% 45% at 15% 105%, rgba(34,120,70,.45) 0%, rgba(34,120,70,0) 60%),
     linear-gradient(180deg, #eef8ef 0%, #bfe6c8 40%, #2c6a45 100%);
 }
+/* Koi swatch: dark reflective pond water with two concentric ripple
+   rings (the signature motion) and a single warm koi-orange centre. */
 .theme-preview-koi {
   background:
-    radial-gradient(circle 6px at 52% 52%, rgba(239,106,46,.85) 0%, rgba(239,106,46,.55) 60%, rgba(239,106,46,0) 100%),
-    radial-gradient(circle 13px at 30% 66%, rgba(108,156,120,.85) 0%, rgba(78,124,92,.85) 70%, rgba(78,124,92,0) 73%),
-    radial-gradient(circle 9px at 68% 36%, rgba(108,156,120,.70) 0%, rgba(78,124,92,.70) 70%, rgba(78,124,92,0) 73%),
+    radial-gradient(circle 3px at 40% 44%, rgba(239,106,46,.90) 0%, rgba(239,106,46,.5) 70%, rgba(239,106,46,0) 100%),
+    radial-gradient(circle 9px  at 40% 44%, rgba(205,235,215,0) 64%, rgba(205,235,215,.40) 70%, rgba(205,235,215,0) 76%),
+    radial-gradient(circle 17px at 40% 44%, rgba(205,235,215,0) 78%, rgba(150,195,165,.26) 84%, rgba(150,195,165,0) 90%),
+    radial-gradient(circle 8px  at 74% 70%, rgba(205,235,215,0) 60%, rgba(150,195,165,.24) 68%, rgba(150,195,165,0) 76%),
     linear-gradient(180deg, #243029 0%, #18221e 45%, #0c130f 100%);
 }
 .theme-meta { flex:1; display:flex; flex-direction:column; gap:2px; min-width:0; }
