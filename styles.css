@@ -938,7 +938,7 @@ html[data-skin="light"] .chip:hover{border-color:rgba(25,162,194,.55);color:#0d2
 #storage-banner b{color:var(--ink);font-weight:700}
 #storage-banner .row{margin-top:8px;gap:6px}
 
-/* Dark-skin banner tint (Midnight Reef): warm rose/coral */
+/* Dark-skin banner tint (The Deep): warm rose/coral */
 html[data-skin="dark"] #storage-banner{
   background:linear-gradient(160deg, rgba(255,122,138,.22), rgba(245,181,107,.10));
   border:1px solid rgba(255,122,138,.45);

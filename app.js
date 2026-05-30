@@ -56,7 +56,7 @@ function getPref(k, fallback){
 }
 const DEFAULT_THEME = "tropical-pop";
 const THEMES = {
-  "midnight-reef": { id:"midnight-reef", skin:"dark",  label:"Midnight Reef",      desc:"Deep navy reef with cyan highlights" },
+  "midnight-reef": { id:"midnight-reef", skin:"dark",  label:"The Deep",           desc:"Deep navy reef with cyan highlights" },
   "tropical-pop":  { id:"tropical-pop",  skin:"light", label:"Tropical Pop",       desc:"Bright aqua, crisp white, coral accents (default)" },
   "planted":       { id:"planted",       skin:"light", label:"Planted Freshwater", desc:"Lush green planted-tank vibe, swaying background plants" }
 };
@@ -2373,7 +2373,7 @@ function openBackupModal(){
 const APP_VERSION = "1.0";
 
 function openSettingsSheet(){
-  const shortLabel = { "midnight-reef": "Midnight", "tropical-pop": "Tropical", "planted": "Planted" };
+  const shortLabel = { "midnight-reef": "The Deep", "tropical-pop": "Tropical", "planted": "Planted" };
   const themeBtns = Object.values(THEMES).map(t =>
     `<button class="seg-btn" data-theme-id="${t.id}" type="button">${escapeHTML(shortLabel[t.id] || t.label)}</button>`
   ).join("");
