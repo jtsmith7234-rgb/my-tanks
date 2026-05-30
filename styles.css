@@ -2067,3 +2067,39 @@ input[type=time].input{ font-family:inherit }
   .tut-track{ scroll-behavior:auto; }
   .tut-dot{ transition:none; }
 }
+
+/* ---------- Desktop / tablet: fit card in viewport, keep Next visible ----------
+   On phones the modal is a bottom sheet sized by content (the iPhone look the
+   user likes). On wider screens it's a centered dialog, where a tall mockup +
+   text + footer can exceed the viewport and push Next below the fold. Here we
+   cap the dialog to the viewport, let the swipe track flex/scroll, and pin the
+   footer so dots + Next are always visible without scrolling the page. */
+@media (min-width: 560px){
+  .modal.modal-tut{
+    display:flex; flex-direction:column;
+    max-height:min(90vh, 760px);
+    overflow:hidden;
+  }
+  .tut{ flex:1 1 auto; min-height:0; }
+  .tut-track{ flex:1 1 auto; min-height:0; }
+  .tut-card-slide{
+    overflow-y:auto; scrollbar-width:none;
+    padding-top:20px;
+  }
+  .tut-card-slide::-webkit-scrollbar{ display:none; }
+  .tut-footer{ flex:none; }
+  /* Scale the mockup down so a full card fits a normal MacBook window without
+     scrolling, while staying prominent. Phone sizing above is untouched. */
+  .tut-screen{ min-height:clamp(300px, 40vh, 380px); }
+}
+
+/* Shorter desktop/laptop windows (most MacBook browser heights): trim the
+   device mockup and vertical spacing further so the headline, support copy and
+   footer all clear the fold. Very short windows still fall back to scrolling. */
+@media (min-width: 560px) and (max-height: 820px){
+  .tut-device{ width:clamp(220px, 30vh, 264px); }
+  .tut-screen{ min-height:clamp(240px, 30vh, 320px); }
+  .tut-card-slide{ padding-top:16px; }
+  .tut-snap{ margin-bottom:12px; }
+  .tut-card-label{ margin-bottom:8px; }
+}
