@@ -661,6 +661,72 @@ html[data-theme="aquarium"] .modal-backdrop{
 .modal h3{margin:6px 0 14px;font-family:var(--font-display);font-size:22px;font-weight:700;letter-spacing:.3px}
 
 /* ============================================================
+   SETTINGS SHEET
+   ============================================================ */
+.settings-sheet{display:flex;flex-direction:column;gap:18px}
+.settings-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.settings-head h3{margin:6px 0}
+.settings-x{
+  appearance:none;cursor:pointer;flex:none;
+  width:32px;height:32px;border-radius:999px;
+  border:1px solid var(--glass-stroke);
+  background:rgba(255,255,255,.06);color:var(--ink);
+  font-size:14px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .15s ease, background .2s ease;
+}
+.settings-x:active{transform:scale(.9)}
+.settings-group{display:flex;flex-direction:column;gap:2px}
+.settings-group-title{
+  margin:0 0 6px;padding:0 2px;
+  font-size:12px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;
+  color:var(--ink-dim);
+}
+.settings-row,
+.settings-action{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:13px 14px;min-height:48px;
+  background:var(--glass-fill);
+  border:1px solid var(--glass-stroke);
+  border-radius:14px;
+  color:var(--ink);
+}
+.settings-group > .settings-row + .settings-row,
+.settings-group > .settings-action + .settings-action{margin-top:6px}
+.settings-action{
+  appearance:none;cursor:pointer;width:100%;font:inherit;text-align:left;
+  transition:background .2s ease, transform .12s ease;
+}
+.settings-action:active{transform:scale(.99)}
+.settings-action:hover{background:var(--glass-fill-strong)}
+.settings-action.danger .settings-label{color:var(--bad)}
+.settings-label{font-size:15px;font-weight:500;min-width:0}
+.settings-value{font-size:14px;color:var(--ink-dim);flex:none}
+.settings-value.muted{opacity:.8}
+.settings-chev{font-size:20px;color:var(--ink-dim);flex:none;line-height:1}
+.settings-note{
+  margin:8px 2px 4px;padding:0;
+  font-size:12.5px;line-height:1.45;color:var(--ink-dim);
+}
+.seg{
+  display:inline-flex;flex:none;gap:2px;padding:3px;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--glass-stroke);
+  border-radius:11px;max-width:62%;
+}
+.seg-btn{
+  appearance:none;cursor:pointer;font:inherit;
+  padding:6px 11px;border:0;border-radius:8px;
+  background:transparent;color:var(--ink-dim);
+  font-size:13px;font-weight:500;white-space:nowrap;
+  transition:background .18s ease, color .18s ease;
+}
+.seg-btn.active{
+  background:var(--glass-fill-strong);color:var(--ink);
+  box-shadow:0 1px 4px rgba(0,0,0,.18);
+}
+
+/* ============================================================
    READING CHIPS
    ============================================================ */
 .reading{font-weight:700;padding:3px 10px;border-radius:999px;border:1px solid transparent;font-size:13px}

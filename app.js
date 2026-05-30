@@ -2065,6 +2065,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("#add-tank-btn").addEventListener("click", handleAddTankTap);
   $("#backup-btn").addEventListener("click", openBackupModal);
   $("#share-btn").addEventListener("click", openShareModal);
+  { const sb = $("#settings-btn"); if (sb) sb.addEventListener("click", openSettingsSheet); }
   $("#import-file").addEventListener("change", handleImportFile);
 
   // Wire cloud status to the storage banner so user sees "Syncing… / Synced"
@@ -2353,5 +2354,94 @@ function openBackupModal(){
       }
     });
     $("#close-backup").addEventListener("click", closeModal);
+  });
+}
+
+/* ============================================================
+   SETTINGS SHEET — clean half-screen bottom sheet
+   ============================================================ */
+const APP_VERSION = "1.0";
+
+function openSettingsSheet(){
+  const shortLabel = { aquarium: "Aquarium", koi: "Koi" };
+  const themeBtns = Object.values(THEMES).map(t =>
+    `<button class="seg-btn" data-theme-id="${t.id}" type="button">${escapeHTML(shortLabel[t.id] || t.label)}</button>`
+  ).join("");
+
+  openModal(`
+    <div class="settings-sheet">
+      <div class="settings-head">
+        <h3>Settings</h3>
+        <button class="settings-x" id="settings-close" aria-label="Close">✕</button>
+      </div>
+
+      <section class="settings-group">
+        <h4 class="settings-group-title">Appearance</h4>
+        <div class="settings-row">
+          <span class="settings-label">Theme</span>
+          <div class="seg" id="settings-theme">${themeBtns}</div>
+        </div>
+      </section>
+
+      <section class="settings-group">
+        <h4 class="settings-group-title">Data &amp; Backup</h4>
+        <button class="settings-action" id="settings-export" type="button">
+          <span class="settings-label">Export backup</span><span class="settings-chev">›</span>
+        </button>
+        <button class="settings-action" id="settings-import" type="button">
+          <span class="settings-label">Import backup</span><span class="settings-chev">›</span>
+        </button>
+        <p class="settings-note">Your tank data is stored on this device. It isn't saved anywhere else unless you export a backup.</p>
+        <button class="settings-action danger" id="settings-clear" type="button">
+          <span class="settings-label">Clear local data</span><span class="settings-chev">›</span>
+        </button>
+      </section>
+
+      <section class="settings-group">
+        <h4 class="settings-group-title">App</h4>
+        <div class="settings-row">
+          <span class="settings-label">Version</span>
+          <span class="settings-value">${APP_VERSION}</span>
+        </div>
+      </section>
+
+      <section class="settings-group">
+        <h4 class="settings-group-title">Support</h4>
+        <div class="settings-row">
+          <span class="settings-label">Contact support</span>
+          <span class="settings-value muted">Coming soon</span>
+        </div>
+        <p class="settings-note">Support contact details will be added here soon.</p>
+      </section>
+    </div>
+  `, () => {
+    const refreshTheme = () => {
+      const cur = getTheme();
+      $$("#settings-theme .seg-btn").forEach(b =>
+        b.classList.toggle("active", b.dataset.themeId === cur)
+      );
+    };
+    refreshTheme();
+    $$("#settings-theme .seg-btn").forEach(b => {
+      b.addEventListener("click", () => {
+        applyTheme(b.dataset.themeId);
+        refreshTheme();
+      });
+    });
+
+    $("#settings-export").addEventListener("click", downloadBackup);
+    $("#settings-import").addEventListener("click", () => $("#import-file").click());
+
+    $("#settings-clear").addEventListener("click", () => {
+      if (!confirm("Clear all tanks, fish, water changes, and tests on this device? This can't be undone. Export a backup first if you want to keep anything.")) return;
+      store.del(KEY_TANKS); store.del(KEY_LOGS); store.del(KEY_EVENTS);
+      tanks = []; logs = {}; events = {}; window.events = events;
+      toast("Local data cleared");
+      closeModal();
+      view = { screen:"home", tankId:null, tab:"details" };
+      render();
+    });
+
+    $("#settings-close").addEventListener("click", closeModal);
   });
 }
