@@ -1747,6 +1747,7 @@ const HISTORY_FILTERS = [
   { id: "first_tank",   label: "First Tank"    }
 ];
 let historyFilter = "all";
+let expandedEventId = null;
 
 function renderHistory(t){
   const all = tankEvents(t.id);
@@ -1782,16 +1783,89 @@ function renderEventRow(e){
   const icon = eventIcon(e.type);
   const title = eventTitle(e);
   const detail = eventDetail(e);
+  const full = eventDetailFull(e);
+  const isOpen = expandedEventId === e.id;
   return `
-    <div class="event-row" data-id="${e.id}">
-      <div class="event-icon ${e.type}">${icon}</div>
-      <div class="event-body">
-        <div class="event-title">${title}</div>
-        <div class="event-when">${when}</div>
-        ${detail ? `<div class="event-detail">${detail}</div>` : ""}
+    <div class="event-row${isOpen ? " open" : ""}" data-id="${e.id}">
+      <div class="event-main" data-expand="${e.id}" role="button" tabindex="0" aria-expanded="${isOpen}">
+        <div class="event-icon ${e.type}">${icon}</div>
+        <div class="event-body">
+          <div class="event-title">${title}</div>
+          <div class="event-when">${when}</div>
+          ${detail ? `<div class="event-detail">${detail}</div>` : ""}
+        </div>
+        <svg class="event-chevron" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 10l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
-      <button class="btn small danger" data-del="${e.id}" title="Remove entry">✕</button>
+      <div class="event-expand">
+        <div class="event-expand-inner">
+          ${full || `<div class="event-field"><span class="event-fval muted">No additional details saved.</span></div>`}
+          <button class="btn small danger event-del-btn" data-del="${e.id}">Remove entry</button>
+        </div>
+      </div>
     </div>`;
+}
+
+/* Build the full grouped field list shown when a history row is expanded.
+   Fields are driven by data already stored on each event; missing fields are
+   omitted rather than shown as empty placeholders. */
+function eventDetailFull(e){
+  const d = e.data || {};
+  const rows = [];
+  const add = (label, val) => { if (val != null && val !== "") rows.push({ label, val }); };
+
+  if (e.type === "water_test") {
+    add("pH", d.ph);
+    add("Ammonia (NH₃)", d.ammonia);
+    add("Nitrite (NO₂)", d.nitrite);
+    add("Nitrate (NO₃)", d.nitrate);
+    add("Temperature", d.temp_f != null && d.temp_f !== "" ? `${d.temp_f}°F` : "");
+    add("Test date", d.date);
+    add("Notes", d.notes ? escapeHTML(d.notes) : "");
+  } else if (e.type === "water_change") {
+    add("Amount changed", d.gallons != null ? `${fmt(d.gallons)} gal` : "");
+    add("Change date", d.date);
+    if (Array.isArray(d.doses) && d.doses.length){
+      const lines = d.doses.map(dose =>
+        `${escapeHTML(dose.name)} — ${fmt(dose.amount)} ${escapeHTML(dose.unit || "")}${dose.verified ? " ✓" : ""}`
+      );
+      rows.push({ label: "Doses", val: lines.join("<br>") });
+    } else {
+      if (d.prime_mL != null)     add("Prime", `${fmt(d.prime_mL)} mL`);
+      if (d.stability_mL != null) add("Stability", `${fmt(d.stability_mL)} mL`);
+      if (d.fert_pumps != null)   add("Easy Green", `${fmt(d.fert_pumps)} pumps`);
+    }
+    add("Notes", d.notes ? escapeHTML(d.notes) : "");
+  } else if (e.type === "fish_add" || e.type === "fish_remove") {
+    add("Species", d.species ? escapeHTML(d.species) : "");
+    add("Quantity", d.count);
+    add("Name", d.name ? escapeHTML(d.name) : "");
+  } else if (e.type === "fish_edit" || e.type === "tank_edit") {
+    if (d.species) add("Species", escapeHTML(d.species));
+    if (d.name) add("Name", escapeHTML(d.name));
+    const changes = d.changes || {};
+    Object.keys(changes).forEach(k => {
+      rows.push({ label: k, val: `${escapeHTML(String(changes[k].from ?? "—"))} → ${escapeHTML(String(changes[k].to ?? "—"))}` });
+    });
+  } else if (e.type === "advisor") {
+    const sevLabel = d.sev === "urgent" ? "Urgent" : d.sev === "soon" ? "Soon" : "FYI";
+    add("Severity", sevLabel);
+    add("Details", d.body ? escapeHTML(d.body) : "");
+    add("Triggered by", d.rule ? escapeHTML(d.rule) : "");
+  } else if (e.type === "reminder_fired") {
+    add("Details", d.body ? escapeHTML(d.body) : "");
+  } else if (e.type === "chem_add" || e.type === "chem_verify") {
+    add("Chemical", d.name ? escapeHTML(d.name) : "");
+    add("Source", d.source ? escapeHTML(d.source) : "");
+  } else if (e.type === "first_tank") {
+    add("Update", d.msg ? escapeHTML(d.msg) : "");
+  }
+
+  add("Logged", formatTS(e.ts));
+
+  if (!rows.length) return "";
+  return rows.map(r =>
+    `<div class="event-field"><span class="event-flabel">${escapeHTML(r.label)}</span><span class="event-fval">${r.val}</span></div>`
+  ).join("");
 }
 
 function eventIcon(type){
@@ -1860,13 +1934,32 @@ function eventDetail(e){
 function bindHistory(t){
   $$("[data-filter]").forEach(b => b.addEventListener("click", () => {
     historyFilter = b.dataset.filter;
+    expandedEventId = null;
     render();
   }));
-  $$("[data-del]").forEach(b => b.addEventListener("click", () => {
+  $$("[data-del]").forEach(b => b.addEventListener("click", (ev) => {
+    ev.stopPropagation();
     if(!confirm("Remove this entry from history?")) return;
+    if (expandedEventId === b.dataset.del) expandedEventId = null;
     deleteEvent(t.id, b.dataset.del);
     render();
   }));
+  const toggle = (id) => {
+    const opening = expandedEventId !== id;
+    expandedEventId = opening ? id : null;
+    $$(".event-row").forEach(row => {
+      const open = row.dataset.id === expandedEventId;
+      row.classList.toggle("open", open);
+      const main = row.querySelector(".event-main");
+      if (main) main.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+  };
+  $$("[data-expand]").forEach(m => {
+    m.addEventListener("click", () => toggle(m.dataset.expand));
+    m.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); toggle(m.dataset.expand); }
+    });
+  });
 }
 
 /* ============================================================

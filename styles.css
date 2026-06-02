@@ -891,15 +891,68 @@ html[data-skin="light"] .chip:hover{border-color:rgba(25,162,194,.55);color:#0d2
    EVENT TIMELINE
    ============================================================ */
 .event-row{
-  display:flex;align-items:flex-start;gap:12px;
-  padding:12px 14px;border-radius:14px;
+  border-radius:14px;
   background:rgba(255,255,255,.04);
   border:1px solid var(--glass-stroke-soft);
   -webkit-backdrop-filter:blur(12px);
           backdrop-filter:blur(12px);
-  transition:.15s;
+  transition:background .15s, border-color .15s;
+  overflow:hidden;
 }
-.event-row:hover{background:rgba(255,200,215,.07)}
+.event-row.open{
+  background:rgba(255,200,215,.06);
+  border-color:var(--glass-stroke);
+}
+.event-main{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:12px 14px;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.event-main:hover{background:rgba(255,200,215,.05)}
+.event-chevron{
+  flex:0 0 auto;align-self:center;
+  color:var(--ink-dim);
+  transition:transform .25s ease;
+}
+.event-row.open .event-chevron{transform:rotate(180deg)}
+.event-expand{
+  display:grid;
+  grid-template-rows:0fr;
+  transition:grid-template-rows .26s ease;
+}
+.event-row.open .event-expand{grid-template-rows:1fr}
+.event-expand-inner{
+  overflow:hidden;
+  min-height:0;
+}
+.event-row.open .event-expand-inner{
+  padding:2px 14px 14px;
+  border-top:1px solid var(--glass-stroke-soft);
+  margin-top:2px;
+}
+.event-field{
+  display:flex;gap:10px;align-items:baseline;
+  padding:6px 0;
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+.event-field:last-of-type{border-bottom:none}
+.event-flabel{
+  flex:0 0 38%;max-width:160px;
+  font-size:12.5px;font-weight:600;color:var(--ink-dim);
+  letter-spacing:.1px;
+}
+.event-fval{
+  flex:1;min-width:0;
+  font-size:13.5px;color:var(--ink);line-height:1.5;
+  word-break:break-word;overflow-wrap:anywhere;
+}
+.event-fval.muted{color:var(--ink-dim)}
+.event-del-btn{margin-top:12px}
+@media (prefers-reduced-motion: reduce){
+  .event-expand{transition:none}
+  .event-chevron{transition:none}
+}
 .event-icon{
   flex:0 0 auto;
   width:38px;height:38px;border-radius:12px;
