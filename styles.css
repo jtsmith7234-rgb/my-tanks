@@ -312,12 +312,15 @@ html[data-theme="planted"] .fx-plants .blade::after{
   background:linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
   pointer-events:none;
 }
-/* Equal-width side zones keep the title optically centered regardless of
-   how many buttons sit on either side. */
+/* Side zones flex equally to keep the title optically centered, but they may
+   only GROW (flex-grow:1, flex-shrink:0) so a long title can never squeeze the
+   controls. The buttons themselves never shrink, so back + gear keep their full
+   size and can't collapse into each other or slide under the title. */
 .topbar-side{
   display:flex;align-items:center;gap:8px;
-  flex:1 1 0;min-width:0;
+  flex:1 0 auto;min-width:0;
 }
+.topbar-side > .ghost-btn{ flex:0 0 auto; }
 .topbar-right{justify-content:flex-end;}
 .topbar h1{
   font-family: var(--font-display);
