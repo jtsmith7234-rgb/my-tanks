@@ -816,6 +816,7 @@ html[data-skin="light"] .modal-backdrop{
 }
 .settings-group > .settings-row + .settings-row,
 .settings-group > .settings-action + .settings-action{margin-top:6px}
+.settings-group > .help-list + .settings-action{margin-top:6px}
 .settings-action{
   appearance:none;cursor:pointer;width:100%;font:inherit;text-align:left;
   transition:background .2s ease, transform .12s ease;

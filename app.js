@@ -2556,6 +2556,21 @@ function openSettingsSheet(){
     `<button class="seg-btn" data-theme-id="${t.id}" type="button">${escapeHTML(shortLabel[t.id] || t.label)}</button>`
   ).join("");
 
+  const HELP_TOPICS = [
+    { q: "Add a tank", a: "Create a tank to start tracking livestock, maintenance, reminders, and water quality." },
+    { q: "Reminders", a: "Reminders help you stay on top of water changes, testing, and other routine care." },
+    { q: "Logging tests and maintenance", a: "Log water tests, water changes, dosing, and other care so everything stays in one place." },
+    { q: "History", a: "History shows your past activity. Tap an entry to see the full details for that event." },
+    { q: "Species Compatibility", a: "Check whether a fish may fit your tank, or browse species for quick care basics and trusted references." },
+  ];
+  const helpRows = HELP_TOPICS.map((h, i) => `
+    <button class="help-item" data-help="${i}" type="button" aria-expanded="false" aria-controls="set-help-a-${i}">
+      <span class="help-q">${escapeHTML(h.q)}</span>
+      <span class="help-chev">›</span>
+    </button>
+    <div class="help-a" id="set-help-a-${i}" hidden><p>${escapeHTML(h.a)}</p></div>
+  `).join("");
+
   openModal(`
     <div class="settings-sheet">
       <div class="settings-head">
@@ -2586,6 +2601,29 @@ function openSettingsSheet(){
       </section>
 
       <section class="settings-group">
+        <h4 class="settings-group-title">Help</h4>
+        <p class="settings-note" style="margin-top:0">Quick guidance for the basics. Tap a topic to learn more.</p>
+        <div class="help-list">${helpRows}</div>
+        <button class="settings-action" id="settings-tutorial" type="button">
+          <span class="settings-label">Replay tutorial</span><span class="settings-chev">›</span>
+        </button>
+      </section>
+
+      <section class="settings-group">
+        <h4 class="settings-group-title">Support</h4>
+        <button class="settings-action" id="settings-contact" type="button">
+          <span class="settings-label">Contact support</span><span class="settings-chev">›</span>
+        </button>
+        <button class="settings-action" id="settings-bug" type="button">
+          <span class="settings-label">Report a bug</span><span class="settings-chev">›</span>
+        </button>
+        <button class="settings-action" id="settings-feature" type="button">
+          <span class="settings-label">Suggest a feature</span><span class="settings-chev">›</span>
+        </button>
+        <p class="settings-note">We're a small team setting up support. Direct contact is coming soon — thanks for your patience.</p>
+      </section>
+
+      <section class="settings-group">
         <h4 class="settings-group-title">App</h4>
         <button class="settings-action" id="settings-share" type="button">
           <span class="settings-label">Share My Tanks</span><span class="settings-chev">›</span>
@@ -2594,26 +2632,7 @@ function openSettingsSheet(){
           <span class="settings-label">Version</span>
           <span class="settings-value">${APP_VERSION}</span>
         </div>
-      </section>
-
-      <section class="settings-group">
-        <h4 class="settings-group-title">Help &amp; Guides</h4>
-        <button class="settings-action" id="settings-tutorial" type="button">
-          <span class="settings-label">Tutorial</span><span class="settings-chev">›</span>
-        </button>
-        <button class="settings-action" id="settings-help" type="button">
-          <span class="settings-label">Help</span><span class="settings-chev">›</span>
-        </button>
-        <p class="settings-note">New here? Replay the walkthrough, or open Help for quick how-to answers.</p>
-      </section>
-
-      <section class="settings-group">
-        <h4 class="settings-group-title">Support</h4>
-        <div class="settings-row">
-          <span class="settings-label">Contact support</span>
-          <span class="settings-value muted">Coming soon</span>
-        </div>
-        <p class="settings-note">Support contact details will be added here soon.</p>
+        <p class="settings-note">My Tanks — your simple aquarium companion.</p>
       </section>
     </div>
   `, () => {
@@ -2635,15 +2654,35 @@ function openSettingsSheet(){
     $("#settings-import").addEventListener("click", () => $("#import-file").click());
     $("#settings-share").addEventListener("click", () => { closeModal(); openShareModal(); });
 
+    $$(".help-item").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const i = btn.dataset.help;
+        const panel = $("#set-help-a-" + i);
+        const willOpen = panel.hidden;
+        $$(".help-item").forEach(other => {
+          if (other === btn) return;
+          const oi = other.dataset.help;
+          const op = $("#set-help-a-" + oi);
+          if (op) op.hidden = true;
+          other.setAttribute("aria-expanded", "false");
+          other.classList.remove("open");
+        });
+        panel.hidden = !willOpen;
+        btn.setAttribute("aria-expanded", String(willOpen));
+        btn.classList.toggle("open", willOpen);
+      });
+    });
+
     const tutBtn = $("#settings-tutorial");
     if (tutBtn) tutBtn.addEventListener("click", () => {
       closeModal();
       if (window.TUTORIAL) window.TUTORIAL.openTutorial({ markSeen: false, onFinish: handleAddTankTap });
     });
-    const helpBtn = $("#settings-help");
-    if (helpBtn) helpBtn.addEventListener("click", () => {
-      closeModal();
-      if (window.TUTORIAL) window.TUTORIAL.openHelp();
+
+    const supportMsg = "Support contact details are coming soon. Thanks for using My Tanks!";
+    ["#settings-contact", "#settings-bug", "#settings-feature"].forEach(sel => {
+      const b = $(sel);
+      if (b) b.addEventListener("click", () => toast(supportMsg));
     });
 
     $("#settings-clear").addEventListener("click", () => {
