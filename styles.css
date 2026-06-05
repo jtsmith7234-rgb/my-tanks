@@ -2233,11 +2233,33 @@ input[type=time].input{ font-family:inherit }
 .help-chev{ font-size:20px; color:var(--ink-dim); flex:none; line-height:1; transition:transform .2s ease; }
 .help-item.open .help-chev{ transform:rotate(90deg); }
 .help-a{
-  padding:2px 15px 13px; margin-top:-4px;
+  padding:6px 15px 13px; margin-top:-4px;
   background:var(--glass-fill); border:1px solid var(--glass-stroke); border-top:0;
   border-radius:0 0 14px 14px;
 }
 .help-a p{ margin:0; font-size:13.5px; line-height:1.55; color:var(--ink-dim); }
+
+/* Compact guide card inside each Help topic */
+.help-guide{
+  display:grid; grid-template-columns:auto 1fr; gap:5px 12px;
+  margin:0; align-items:baseline;
+}
+.help-guide dt{
+  font-size:11px; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
+  color:var(--ink-dim); opacity:.75; padding-top:1px;
+}
+.help-guide dd{ margin:0; font-size:13.5px; line-height:1.5; color:var(--ink); }
+.help-action{
+  appearance:none; cursor:pointer; font:inherit; margin-top:11px;
+  display:inline-flex; align-items:center; gap:4px;
+  padding:7px 13px; border-radius:10px;
+  background:var(--glass-fill-strong); border:1px solid var(--glass-stroke);
+  color:var(--sakura); font-size:13px; font-weight:600;
+  transition:background .2s ease, transform .12s ease;
+}
+.help-action:hover{ background:var(--glass-stroke); }
+.help-action:active{ transform:scale(.98); }
+.help-action-chev{ font-size:16px; line-height:1; }
 
 @media (prefers-reduced-motion: reduce){
   .tut-track{ scroll-behavior:auto; }

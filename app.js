@@ -2557,19 +2557,61 @@ function openSettingsSheet(){
   ).join("");
 
   const HELP_TOPICS = [
-    { q: "Add a tank", a: "Create a tank to start tracking livestock, maintenance, reminders, and water quality." },
-    { q: "Reminders", a: "Reminders help you stay on top of water changes, testing, and other routine care." },
-    { q: "Logging tests and maintenance", a: "Log water tests, water changes, dosing, and other care so everything stays in one place." },
-    { q: "History", a: "History shows your past activity. Tap an entry to see the full details for that event." },
-    { q: "Species Compatibility", a: "Check whether a fish may fit your tank, or browse species for quick care basics and trusted references." },
+    {
+      q: "Add a tank",
+      where: "Home screen.",
+      how: "Tap the + button, then choose Start fresh and fill in your tank details.",
+      tip: "Begin with the name, size in gallons, and water type — you can add fish later.",
+      action: { label: "Open Add Tank", id: "addtank" },
+    },
+    {
+      q: "Reminders",
+      where: "Home screen and the top of each tank, where due care is flagged.",
+      how: "Open the flagged item to log it — once logged, the reminder clears and reschedules.",
+      tip: "Reminders track water changes and testing so recurring care doesn't slip.",
+      action: { label: "Go to Home", id: "home" },
+    },
+    {
+      q: "Logging tests and maintenance",
+      where: "Inside a tank, under the Care and Tests tabs.",
+      how: "Open a tank, pick Care for water changes and dosing or Tests for readings, then save.",
+      tip: "Everything you log feeds History and keeps your reminders accurate.",
+      action: { label: "Open a tank", id: "tank-care" },
+    },
+    {
+      q: "History",
+      where: "Inside a tank, under the History tab.",
+      how: "Open a tank and tap History to see past tests, water changes, and fish added.",
+      tip: "Tap any entry to expand its full details.",
+      action: { label: "Open a tank", id: "tank-history" },
+    },
+    {
+      q: "Species Compatibility",
+      where: "Inside a tank, under the Fish tab.",
+      how: "Use Check fit to test a species against this tank, or Browse species for care basics.",
+      tip: "Results draw on trusted references for size, temperature, and pH.",
+      action: { label: "Open a tank", id: "tank-fish" },
+    },
   ];
-  const helpRows = HELP_TOPICS.map((h, i) => `
+  const helpRows = HELP_TOPICS.map((h, i) => {
+    const action = h.action
+      ? `<button class="help-action" data-help-action="${h.action.id}" type="button">${escapeHTML(h.action.label)} <span class="help-action-chev">›</span></button>`
+      : "";
+    return `
     <button class="help-item" data-help="${i}" type="button" aria-expanded="false" aria-controls="set-help-a-${i}">
       <span class="help-q">${escapeHTML(h.q)}</span>
       <span class="help-chev">›</span>
     </button>
-    <div class="help-a" id="set-help-a-${i}" hidden><p>${escapeHTML(h.a)}</p></div>
-  `).join("");
+    <div class="help-a" id="set-help-a-${i}" hidden>
+      <dl class="help-guide">
+        <dt>Where</dt><dd>${escapeHTML(h.where)}</dd>
+        <dt>How</dt><dd>${escapeHTML(h.how)}</dd>
+        <dt>Tip</dt><dd>${escapeHTML(h.tip)}</dd>
+      </dl>
+      ${action}
+    </div>
+  `;
+  }).join("");
 
   openModal(`
     <div class="settings-sheet">
@@ -2607,6 +2649,7 @@ function openSettingsSheet(){
         <button class="settings-action" id="settings-tutorial" type="button">
           <span class="settings-label">Replay tutorial</span><span class="settings-chev">›</span>
         </button>
+        <p class="settings-note" style="margin-top:0">Reopens the guided walkthrough — handy for a quick refresher on the basics.</p>
       </section>
 
       <section class="settings-group">
@@ -2670,6 +2713,29 @@ function openSettingsSheet(){
         panel.hidden = !willOpen;
         btn.setAttribute("aria-expanded", String(willOpen));
         btn.classList.toggle("open", willOpen);
+      });
+    });
+
+    // Help jump actions — only navigate where the current app structure makes it safe.
+    const goToTank = (tab) => {
+      closeModal();
+      if (tanks.length === 1) {
+        view = { screen: "tank", tankId: tanks[0].id, tab };
+      } else {
+        view = { screen: "home", tankId: null, tab: "details" };
+        if (tanks.length === 0) toast("Add a tank first, then open it to find this.");
+      }
+      render();
+    };
+    $$("[data-help-action]").forEach(b => {
+      b.addEventListener("click", () => {
+        switch (b.dataset.helpAction) {
+          case "addtank":      closeModal(); handleAddTankTap(); break;
+          case "home":         closeModal(); view = { screen:"home", tankId:null, tab:"details" }; render(); break;
+          case "tank-care":    goToTank("clean"); break;
+          case "tank-history": goToTank("history"); break;
+          case "tank-fish":    goToTank("fish"); break;
+        }
       });
     });
 
