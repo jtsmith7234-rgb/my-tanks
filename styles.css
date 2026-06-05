@@ -1121,6 +1121,37 @@ button:focus-visible, .tab:focus-visible, .chip:focus-visible{
 }
 .adv-dismiss:hover{ background:rgba(255,200,215,.10); color:var(--ink) }
 
+/* Tappable advisor banner — subtle affordance, no clutter */
+.advisor-banner.adv-clickable{ cursor:pointer; transition:transform .12s ease, box-shadow .12s ease }
+.advisor-banner.adv-clickable:hover{ box-shadow:var(--glass-shadow-sm), 0 4px 16px rgba(0,0,0,.10) }
+.advisor-banner.adv-clickable:active{ transform:scale(.992) }
+.advisor-banner.adv-clickable:focus-visible{ outline:2px solid var(--sakura); outline-offset:2px }
+.adv-hint{
+  display:inline-flex; align-items:center; gap:3px;
+  margin-top:7px;
+  font-size:12px; font-weight:700;
+  color:var(--ink-dim);
+  letter-spacing:.2px;
+}
+.adv-chev{ font-size:14px; line-height:1; transition:transform .12s ease }
+.advisor-banner.adv-clickable:hover .adv-chev{ transform:translateX(2px) }
+.advisor-banner.urgent .adv-hint{ color:var(--bad) }
+.advisor-banner.soon .adv-hint{ color:var(--warn) }
+.advisor-banner.fyi .adv-hint{ color:var(--sakura) }
+
+/* Brief highlight pulse on the control a reminder routes you to */
+@keyframes remFlash{
+  0%   { box-shadow:0 0 0 0 rgba(255,155,190,.0) }
+  20%  { box-shadow:0 0 0 4px rgba(255,155,190,.45) }
+  100% { box-shadow:0 0 0 0 rgba(255,155,190,.0) }
+}
+.rem-flash{ animation:remFlash 1.8s ease-out; border-radius:14px }
+@media (prefers-reduced-motion: reduce){
+  .rem-flash{ animation:none; box-shadow:0 0 0 3px rgba(255,155,190,.35) }
+  .advisor-banner.adv-clickable{ transition:none }
+  .advisor-banner.adv-clickable:active{ transform:none }
+}
+
 /* history row advisor severity colors */
 .event-icon.advisor{ background:rgba(255,155,190,.16) }
 .sev-urgent{ color:var(--bad) }

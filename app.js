@@ -700,12 +700,22 @@ function renderAdvisorBanner(t){
   // Suppress if user dismissed this exact signature this session
   const sig = (adv.title + " | " + adv.rule);
   if (window._advisorDismissed && window._advisorDismissed[t.id] === sig) return "";
+  // Where this reminder can be acted on \u2014 makes the banner tappable
+  const target = (window.ADVISOR.adviceTarget && window.ADVISOR.adviceTarget(adv)) || null;
+  const clickable = !!target;
+  const targetAttrs = clickable
+    ? ` data-target-tab="${escapeHTML(target.tab)}"${target.remType ? ` data-target-rem="${escapeHTML(target.remType)}"` : ""} role="button" tabindex="0" aria-label="${escapeHTML(adv.title)} \u2014 tap to fix"`
+    : "";
+  const hint = clickable
+    ? `<div class="adv-hint">Tap to fix <span class="adv-chev">\u203a</span></div>`
+    : "";
   return `
-    <div class="advisor-banner ${adv.sev}" data-sig="${escapeHTML(sig)}">
+    <div class="advisor-banner ${adv.sev}${clickable ? " adv-clickable" : ""}" data-sig="${escapeHTML(sig)}"${targetAttrs}>
       <div class="adv-icon">${adv.sev === "urgent" ? "\u26a0\ufe0f" : adv.sev === "soon" ? "\ud83d\udd14" : "\ud83c\udf38"}</div>
       <div class="adv-body">
         <div class="adv-title">${escapeHTML(adv.title)}</div>
         <div class="adv-text">${escapeHTML(adv.body)}</div>
+        ${hint}
       </div>
       <button class="adv-dismiss" id="adv-dismiss" aria-label="Dismiss">\u2715</button>
     </div>
@@ -748,7 +758,8 @@ function renderTank(){
   // Wire up advisor dismiss button
   const dismiss = $("#adv-dismiss");
   if (dismiss){
-    dismiss.addEventListener("click", () => {
+    dismiss.addEventListener("click", (e) => {
+      e.stopPropagation();   // never let the dismiss bubble into banner navigation
       const banner = dismiss.closest(".advisor-banner");
       if (!banner) return;
       const sig = banner.getAttribute("data-sig") || "";
@@ -757,6 +768,65 @@ function renderTank(){
       banner.remove();
     });
   }
+
+  // Make the advisor banner tappable: jump to the tab/control that fixes it
+  const banner = $(".advisor-banner.adv-clickable");
+  if (banner){
+    const go = () => {
+      const tab     = banner.getAttribute("data-target-tab");
+      const remType = banner.getAttribute("data-target-rem") || null;
+      openReminderTarget(t, tab, remType);
+    };
+    banner.addEventListener("click", (e) => {
+      if (e.target.closest(".adv-dismiss")) return; // X handled separately
+      go();
+    });
+    banner.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " " || e.key === "Spacebar"){
+        e.preventDefault();
+        go();
+      }
+    });
+  }
+
+  // After a navigation that requested a highlight, scroll to + flash the target
+  _consumeReminderHighlight();
+}
+
+/* ------------------------------------------------------------
+   REMINDER NAVIGATION
+   Clicking a reminder banner routes here. We switch to the tab that
+   holds the action needed to clear the reminder, then (after render)
+   scroll to and briefly highlight the relevant control so the user
+   knows exactly where to act. Clearing still happens through the
+   existing Mark done / Snooze / Skip controls and test logging.
+   ------------------------------------------------------------ */
+function openReminderTarget(t, tab, remType){
+  if (!t) return;
+  const goTab = tab || "details";
+  // Stash what to highlight; consumed by _consumeReminderHighlight() post-render
+  window._reminderHighlight = goTab === "tests"
+    ? { sel: "#tests-log" }
+    : remType
+      ? { sel: `.upn-row[data-rem="${remType}"]` }
+      : { sel: ".upn-list" };
+  view.tab = goTab;
+  render();
+}
+
+function _consumeReminderHighlight(){
+  const h = window._reminderHighlight;
+  if (!h) return;
+  window._reminderHighlight = null;
+  // Wait a frame so the freshly-rendered tab body is laid out
+  requestAnimationFrame(() => {
+    const el = document.querySelector(h.sel) || document.querySelector(".upn-list");
+    if (!el) return;
+    try { el.scrollIntoView({ behavior: "smooth", block: "center" }); }
+    catch { el.scrollIntoView(); }
+    el.classList.add("rem-flash");
+    setTimeout(() => el.classList.remove("rem-flash"), 1800);
+  });
 }
 
 /* ============================================================
@@ -824,7 +894,7 @@ function renderUpNextSection(t){
         <button class="btn small secondary upn-skip" data-type="${it.type}">Skip once</button>
       </div>` : "";
     return `
-      <div class="upn-row upn-${it.status}">
+      <div class="upn-row upn-${it.status}" data-rem="${it.type}">
         <div class="upn-icon">${it.icon}</div>
         <div class="upn-body">
           <div class="upn-title">${escapeHTML(it.label)}</div>
@@ -1709,7 +1779,7 @@ function renderTests(t){
   const recent = tankEvents(t.id).filter(e => e.type === "water_test").slice(0, 6);
   const ld = last ? last.data : null;
   return `
-    <div class="section">
+    <div class="section" id="tests-log">
       <h2>Log a water test</h2>
       <p class="muted" style="margin-top:0">API Master Test Kit values. Leave any field blank if you didn't test it.</p>
       <div class="row">

@@ -339,5 +339,33 @@ function logAdviceIfNew(tank, adv){
   }
 }
 
+/* ------------------------------------------------------------
+   ACTION TARGET
+   Maps a piece of advice to where the user can resolve it, so the
+   banner can be tapped to jump straight to the relevant control.
+   Returns { tab, remType } or null when there's no clear action.
+     • tab     — which tank tab to open ("details" | "tests")
+     • remType — the "Up next" reminder row to highlight, if any
+   Water chemistry + cadence issues are resolved by a water change,
+   whose action lives in "Up next" on the Details tab. Test-related
+   advice routes to the Tests tab where a reading can be logged.
+   ------------------------------------------------------------ */
+function adviceTarget(adv){
+  if (!adv) return null;
+  const title = (adv.title || "").toLowerCase();
+  const rule  = (adv.rule  || "").toLowerCase();
+  // Test-related advice → Tests tab (log a fresh reading there)
+  if (title.includes("water test")
+      || title.includes("test data")
+      || rule.includes("water_test")
+      || rule.includes("last test")) {
+    return { tab: "tests", remType: null };
+  }
+  // Everything else the advisor raises (ammonia, nitrite, nitrate, pH,
+  // temperature, water-change cadence, stocking, dosing) is addressed by
+  // a water change → Details tab, highlight the water_change "Up next" row.
+  return { tab: "details", remType: "water_change" };
+}
+
 /* expose */
-window.ADVISOR = { computeAdvice, logAdviceIfNew };
+window.ADVISOR = { computeAdvice, logAdviceIfNew, adviceTarget };
