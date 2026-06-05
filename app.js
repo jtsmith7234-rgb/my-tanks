@@ -818,15 +818,31 @@ function _consumeReminderHighlight(){
   const h = window._reminderHighlight;
   if (!h) return;
   window._reminderHighlight = null;
-  // Wait a frame so the freshly-rendered tab body is laid out
-  requestAnimationFrame(() => {
-    const el = document.querySelector(h.sel) || document.querySelector(".upn-list");
-    if (!el) return;
-    try { el.scrollIntoView({ behavior: "smooth", block: "center" }); }
-    catch { el.scrollIntoView(); }
-    el.classList.add("rem-flash");
-    setTimeout(() => el.classList.remove("rem-flash"), 1800);
-  });
+  // Two rAFs: gives iOS Safari time to settle after a tab swap before we focus.
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    // Scroll-and-flash a highlight target (if provided)
+    if (h.sel) {
+      const el = document.querySelector(h.sel) || document.querySelector(".upn-list");
+      if (el) {
+        try { el.scrollIntoView({ behavior: "smooth", block: "center" }); }
+        catch { el.scrollIntoView(); }
+        el.classList.add("rem-flash");
+        setTimeout(() => el.classList.remove("rem-flash"), 1800);
+      }
+    }
+    // Auto-focus the most useful first input (if provided)
+    if (h.focusId) {
+      const f = document.getElementById(h.focusId);
+      if (f) {
+        try {
+          f.focus({ preventScroll: false });
+          if (typeof f.select === "function" && (f.type === "number" || f.type === "text")) {
+            try { f.select(); } catch(_){}
+          }
+        } catch(_){}
+      }
+    }
+  }));
 }
 
 /* ============================================================
@@ -866,11 +882,15 @@ function _friendlyShortDate(ts){
   return d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
 }
 
-/* Maps a reminder type to the tab and highlight selector that lets the user act on it.
-   sel: element to scroll into view and flash after tab switch. */
+/* Maps a reminder type to the tab, highlight selector, and auto-focus input ID.
+   tab:    destination tab
+   sel:    element to scroll into view and flash after tab switch (optional)
+   focus:  input ID to auto-focus and select after the tab is rendered (optional)
+   label:  short tab label used in row aria/hint text */
 const UPN_NAV = {
-  water_change: { tab: "clean",  sel: "#wc-section" },
-  water_test:   { tab: "tests",  sel: "#tests-log"  }
+  water_change: { tab: "clean",   sel: "#wc-section", focus: "wc-gallons", label: "Care"    },
+  water_test:   { tab: "tests",   sel: "#tests-log",  focus: "wt-ph",      label: "Tests"   },
+  daily:        { tab: "history", sel: null,          focus: null,         label: "History" }
 };
 
 function renderUpNextSection(t){
@@ -880,7 +900,7 @@ function renderUpNextSection(t){
     return `
       <div class="section">
         <h2>Up next</h2>
-        <p class="muted" style="margin:0">No reminders turned on yet. Scroll down to set up water-change and water-test reminders.</p>
+        <p class="muted" style="margin:0">No reminders turned on yet. Scroll down to set up water-change, water-test, and daily check-in reminders.</p>
       </div>
     `;
   }
@@ -895,30 +915,35 @@ function renderUpNextSection(t){
       ? `Last done ${_friendlyRelative(it.lastDoneTs)}`
       : `Never done yet`;
     const showActions = it.status === "due-now" || it.status === "snoozed";
-    // For due/snoozed: show "Go do it →" shortcut in the header to make the row obviously navigable.
-    // For upcoming: entire row is the tap target with a gentle hint.
+    const navLabel = nav ? nav.label : "";
+    // Daily check-in doesn't have a logging form to land on, so its CTA is "Open history"
+    const goLabel = it.type === "daily" ? "Open history" : "Go do it";
+    // For due/snoozed: show CTA button. For upcoming: gentle hint on the row.
     const goHint = nav
       ? (it.status === "upcoming"
-          ? `<div class="upn-go-hint muted small">Tap to go to ${it.status === "upcoming" ? (it.type === "water_change" ? "Care" : "Tests") : ""} tab ›</div>`
-          : `<button class="upn-go-btn" data-go="${it.type}" type="button">Go do it <span class="upn-go-chev">›</span></button>`)
+          ? `<div class="upn-go-hint muted small">Tap to go to ${navLabel} tab ›</div>`
+          : `<button class="upn-go-btn" data-go="${it.type}" type="button">${goLabel} <span class="upn-go-chev">›</span></button>`)
       : "";
+    // Skip-once doesn't apply to daily (it's already daily — use snooze instead)
+    const showSkip = it.type !== "daily";
     const actions = showActions ? `
       <div class="upn-actions">
         <button class="btn small upn-done" data-type="${it.type}">Mark done</button>
         <button class="btn small secondary upn-snooze" data-type="${it.type}">Snooze 1 day</button>
-        <button class="btn small secondary upn-skip" data-type="${it.type}">Skip once</button>
+        ${showSkip ? `<button class="btn small secondary upn-skip" data-type="${it.type}">Skip once</button>` : ""}
       </div>` : "";
     // Upcoming rows: whole row is a button-like tap target
-    const rowRole = (!showActions && nav) ? ` role="button" tabindex="0" aria-label="${escapeHTML(it.label)} — tap to go to ${it.type === 'water_change' ? 'Care' : 'Tests'} tab"` : "";
+    const rowRole = (!showActions && nav) ? ` role="button" tabindex="0" aria-label="${escapeHTML(it.label)} — tap to go to ${navLabel} tab"` : "";
     const rowClass = `upn-row upn-${it.status}${(!showActions && nav) ? " upn-tappable" : ""}`;
+    const intervalTxt = it.type === "daily" ? "every day" : `every ${it.intervalDays} days`;
     return `
       <div class="${rowClass}" data-rem="${it.type}"${rowRole}>
-        <div class="upn-header upn-nav-target" data-go="${it.type}"${showActions ? ` role="button" tabindex="0" aria-label="${escapeHTML(it.label)} — tap to open ${it.type === 'water_change' ? 'Care' : 'Tests'} tab"` : ""}>
+        <div class="upn-header upn-nav-target" data-go="${it.type}"${showActions ? ` role="button" tabindex="0" aria-label="${escapeHTML(it.label)} — tap to open ${navLabel} tab"` : ""}>
           <div class="upn-icon">${it.icon}</div>
           <div class="upn-body">
             <div class="upn-title">${escapeHTML(it.label)}</div>
             ${sub}
-            <div class="upn-last muted small">${lastTxt} · every ${it.intervalDays} days</div>
+            <div class="upn-last muted small">${lastTxt} · ${intervalTxt}</div>
             ${(!showActions && nav) ? goHint : ""}
           </div>
           ${showActions ? goHint : ""}
@@ -935,11 +960,17 @@ function renderUpNextSection(t){
   `;
 }
 
-/* Navigate to the correct tab and highlight the action area for a reminder type */
+/* Navigate to the correct tab and highlight the action area for a reminder type.
+   Sets a highlight target (used by _consumeReminderHighlight to flash) AND an
+   auto-focus target so mobile users can start typing immediately. */
 function _goToReminderAction(t, type){
   const nav = UPN_NAV[type];
   if (!nav) return;
-  window._reminderHighlight = { sel: nav.sel };
+  window._reminderHighlight = nav.sel ? { sel: nav.sel, focusId: nav.focus || null } : null;
+  // Even when there's no scroll/flash target (daily), still consume focus if any
+  if (!window._reminderHighlight && nav.focus) {
+    window._reminderHighlight = { sel: null, focusId: nav.focus };
+  }
   view.tab = nav.tab;
   render();
 }
@@ -1961,7 +1992,8 @@ const HISTORY_FILTERS = [
   { id: "advisor",      label: "Advisor"       },
   { id: "reminder_fired", label: "Reminders"   },
   { id: "chem_add",     label: "Chemicals"     },
-  { id: "first_tank",   label: "First Tank"    }
+  { id: "first_tank",   label: "First Tank"    },
+  { id: "daily_checkin", label: "Daily check-ins" }
 ];
 let historyFilter = "all";
 let expandedEventId = null;
@@ -2100,6 +2132,7 @@ function eventIcon(type){
   if (type === "reminder_fired") return "🔔";
   if (type === "chem_add")       return "🧪";
   if (type === "first_tank")     return "🌱";
+  if (type === "daily_checkin")  return "👀";
   return "•";
 }
 function eventTitle(e){
@@ -2114,6 +2147,7 @@ function eventTitle(e){
   if (e.type === "reminder_fired") return escapeHTML(d.title || "Reminder");
   if (e.type === "chem_add")     return `Added chemical: ${escapeHTML(d.name || "")}${d.custom ? " (custom)" : ""}`;
   if (e.type === "first_tank")   return `First Tank: ${escapeHTML(d.msg || "updated")}`;
+  if (e.type === "daily_checkin") return `Daily check-in`;
   return e.type;
 }
 function eventDetail(e){

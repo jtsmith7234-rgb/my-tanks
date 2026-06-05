@@ -22,8 +22,9 @@ const DEFAULT_TANK_REMINDERS = {
 
 /* Friendly labels — used by the in-app "Up next" list */
 const REM_META = {
-  water_change: { label: "Water change",  doneEvent: "water_change", icon: "💧" },
-  water_test:   { label: "Water test",    doneEvent: "water_test",   icon: "🧪" }
+  water_change: { label: "Water change",  doneEvent: "water_change",  icon: "💧" },
+  water_test:   { label: "Water test",    doneEvent: "water_test",    icon: "🧪" },
+  daily:        { label: "Daily check-in", doneEvent: "daily_checkin", icon: "👀" }
 };
 
 function loadReminders(){
@@ -292,6 +293,46 @@ function computeDueList(tank){
       snoozedUntil
     });
   });
+  // Daily check-in — appears when enabled and today's window hasn't been logged yet.
+  if (rem.daily && rem.daily.enabled){
+    const meta = REM_META.daily;
+    const last = _lastEventTs(tank.id, meta.doneEvent);
+    const state = getRemState(tank.id, "daily");
+    const hour = (rem.daily.hour != null) ? rem.daily.hour : 9;
+    const minute = (rem.daily.minute != null) ? rem.daily.minute : 0;
+    // Today's scheduled time (local timezone)
+    const todayTarget = new Date();
+    todayTarget.setHours(hour, minute, 0, 0);
+    const todayTargetTs = todayTarget.getTime();
+    // Did we already log a check-in today (after local midnight)?
+    const todayMidnight = new Date(); todayMidnight.setHours(0,0,0,0);
+    const alreadyLoggedToday = last && last >= todayMidnight.getTime();
+    const snoozedUntil = (state.snoozedUntil && state.snoozedUntil > now) ? state.snoozedUntil : null;
+    let status, nextDueTs;
+    if (alreadyLoggedToday){
+      status = "upcoming";
+      nextDueTs = _nextDailyTs(hour, minute);
+    } else if (snoozedUntil){
+      status = "snoozed";
+      nextDueTs = snoozedUntil;
+    } else if (now >= todayTargetTs){
+      status = "due-now";
+      nextDueTs = todayTargetTs;
+    } else {
+      status = "upcoming";
+      nextDueTs = todayTargetTs;
+    }
+    items.push({
+      type: "daily",
+      label: meta.label,
+      icon: meta.icon,
+      intervalDays: 1,
+      lastDoneTs: last || null,
+      nextDueTs,
+      status,
+      snoozedUntil
+    });
+  }
   // Sort: due-now first, then snoozed (earliest), then upcoming (earliest)
   const sevRank = { "due-now": 0, "snoozed": 1, "upcoming": 2 };
   items.sort((a,b) => sevRank[a.status] - sevRank[b.status] || a.nextDueTs - b.nextDueTs);
