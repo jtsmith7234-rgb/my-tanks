@@ -866,6 +866,13 @@ function _friendlyShortDate(ts){
   return d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
 }
 
+/* Maps a reminder type to the tab and highlight selector that lets the user act on it.
+   sel: element to scroll into view and flash after tab switch. */
+const UPN_NAV = {
+  water_change: { tab: "clean",  sel: "#wc-section" },
+  water_test:   { tab: "tests",  sel: "#tests-log"  }
+};
+
 function renderUpNextSection(t){
   if (!window.REMINDERS || !window.REMINDERS.computeDueList) return "";
   const items = window.REMINDERS.computeDueList(t);
@@ -878,6 +885,7 @@ function renderUpNextSection(t){
     `;
   }
   const rows = items.map(it => {
+    const nav = UPN_NAV[it.type];
     const sub = it.status === "due-now"
       ? `<span class="upn-sub bad">Due now</span>`
       : it.status === "snoozed"
@@ -887,19 +895,33 @@ function renderUpNextSection(t){
       ? `Last done ${_friendlyRelative(it.lastDoneTs)}`
       : `Never done yet`;
     const showActions = it.status === "due-now" || it.status === "snoozed";
+    // For due/snoozed: show "Go do it →" shortcut in the header to make the row obviously navigable.
+    // For upcoming: entire row is the tap target with a gentle hint.
+    const goHint = nav
+      ? (it.status === "upcoming"
+          ? `<div class="upn-go-hint muted small">Tap to go to ${it.status === "upcoming" ? (it.type === "water_change" ? "Care" : "Tests") : ""} tab ›</div>`
+          : `<button class="upn-go-btn" data-go="${it.type}" type="button">Go do it <span class="upn-go-chev">›</span></button>`)
+      : "";
     const actions = showActions ? `
       <div class="upn-actions">
         <button class="btn small upn-done" data-type="${it.type}">Mark done</button>
         <button class="btn small secondary upn-snooze" data-type="${it.type}">Snooze 1 day</button>
         <button class="btn small secondary upn-skip" data-type="${it.type}">Skip once</button>
       </div>` : "";
+    // Upcoming rows: whole row is a button-like tap target
+    const rowRole = (!showActions && nav) ? ` role="button" tabindex="0" aria-label="${escapeHTML(it.label)} — tap to go to ${it.type === 'water_change' ? 'Care' : 'Tests'} tab"` : "";
+    const rowClass = `upn-row upn-${it.status}${(!showActions && nav) ? " upn-tappable" : ""}`;
     return `
-      <div class="upn-row upn-${it.status}" data-rem="${it.type}">
-        <div class="upn-icon">${it.icon}</div>
-        <div class="upn-body">
-          <div class="upn-title">${escapeHTML(it.label)}</div>
-          ${sub}
-          <div class="upn-last muted small">${lastTxt} · every ${it.intervalDays} days</div>
+      <div class="${rowClass}" data-rem="${it.type}"${rowRole}>
+        <div class="upn-header upn-nav-target" data-go="${it.type}"${showActions ? ` role="button" tabindex="0" aria-label="${escapeHTML(it.label)} — tap to open ${it.type === 'water_change' ? 'Care' : 'Tests'} tab"` : ""}>
+          <div class="upn-icon">${it.icon}</div>
+          <div class="upn-body">
+            <div class="upn-title">${escapeHTML(it.label)}</div>
+            ${sub}
+            <div class="upn-last muted small">${lastTxt} · every ${it.intervalDays} days</div>
+            ${(!showActions && nav) ? goHint : ""}
+          </div>
+          ${showActions ? goHint : ""}
         </div>
         ${actions}
       </div>
@@ -913,23 +935,69 @@ function renderUpNextSection(t){
   `;
 }
 
+/* Navigate to the correct tab and highlight the action area for a reminder type */
+function _goToReminderAction(t, type){
+  const nav = UPN_NAV[type];
+  if (!nav) return;
+  window._reminderHighlight = { sel: nav.sel };
+  view.tab = nav.tab;
+  render();
+}
+
 function bindUpNext(t){
   if (!window.REMINDERS) return;
-  $$(".upn-done").forEach(b => b.addEventListener("click", () => {
+
+  // "Go do it" buttons on due-now/snoozed rows — navigate to action tab
+  $$(".upn-go-btn").forEach(b => b.addEventListener("click", (e) => {
+    e.stopPropagation();
+    _goToReminderAction(t, b.dataset.go);
+  }));
+
+  // Tap the header area of due-now/snoozed rows to navigate
+  // (Upcoming rows use the whole-row handler below; skip them here)
+  $$(".upn-header.upn-nav-target[role='button']").forEach(hdr => {
+    hdr.addEventListener("click", (e) => {
+      // Ignore clicks on action buttons inside the header (upn-go-btn handled above)
+      if (e.target.closest(".upn-go-btn")) return;
+      _goToReminderAction(t, hdr.dataset.go);
+    });
+    hdr.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+        e.preventDefault();
+        _goToReminderAction(t, hdr.dataset.go);
+      }
+    });
+  });
+
+  // Tap entire row for upcoming rows (they have role=button on the row itself)
+  $$(".upn-row.upn-tappable").forEach(row => {
+    row.addEventListener("click", () => _goToReminderAction(t, row.dataset.rem));
+    row.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+        e.preventDefault();
+        _goToReminderAction(t, row.dataset.rem);
+      }
+    });
+  });
+
+  $$(".upn-done").forEach(b => b.addEventListener("click", (e) => {
+    e.stopPropagation();
     const type = b.dataset.type;
     window.REMINDERS.markReminderDone(t, type);
     window.REMINDERS.scheduleAllReminders();
     toast("Marked done — next one scheduled");
     render();
   }));
-  $$(".upn-snooze").forEach(b => b.addEventListener("click", () => {
+  $$(".upn-snooze").forEach(b => b.addEventListener("click", (e) => {
+    e.stopPropagation();
     const type = b.dataset.type;
     window.REMINDERS.snoozeReminder(t, type, 24);
     window.REMINDERS.scheduleAllReminders();
     toast("Snoozed for 1 day");
     render();
   }));
-  $$(".upn-skip").forEach(b => b.addEventListener("click", () => {
+  $$(".upn-skip").forEach(b => b.addEventListener("click", (e) => {
+    e.stopPropagation();
     const type = b.dataset.type;
     const meta = window.REMINDERS.REM_META[type];
     if (!confirm(`Skip this ${meta.label.toLowerCase()}? We'll bump it to the next regular cycle.`)) return;
@@ -1420,7 +1488,7 @@ function renderClean(t){
   const suggested = Math.round(t.gallons * 0.5);
   if (!t.chemicals) t.chemicals = [];
   return `
-    <div class="section">
+    <div class="section" id="wc-section">
       <h2>Water change calculator</h2>
       <p class="muted" style="margin-top:0">Doses calculate against the gallons of new water you're putting back in. ${suggested} gal would be a ~50% change on this tank.</p>
       <div class="row">
@@ -1948,7 +2016,11 @@ function renderEventRow(e){
       <div class="event-expand">
         <div class="event-expand-inner">
           ${full || `<div class="event-field"><span class="event-fval muted">No additional details saved.</span></div>`}
-          <button class="btn small danger event-del-btn" data-del="${e.id}">Remove entry</button>
+          <div class="event-actions">
+            ${e.type === "water_change" ? `<button class="btn small secondary event-repeat-btn" data-repeat-tab="clean" type="button">Log another change</button>` : ""}
+            ${e.type === "water_test"   ? `<button class="btn small secondary event-repeat-btn" data-repeat-tab="tests" type="button">Log another test</button>` : ""}
+            <button class="btn small danger event-del-btn" data-del="${e.id}">Remove entry</button>
+          </div>
         </div>
       </div>
     </div>`;
@@ -2091,6 +2163,14 @@ function bindHistory(t){
     if(!confirm("Remove this entry from history?")) return;
     if (expandedEventId === b.dataset.del) expandedEventId = null;
     deleteEvent(t.id, b.dataset.del);
+    render();
+  }));
+  // "Log another" quick-action from expanded history entries — jump straight to the action tab
+  $$(".event-repeat-btn").forEach(b => b.addEventListener("click", (ev) => {
+    ev.stopPropagation();
+    const tab = b.dataset.repeatTab;
+    view.tab = tab;
+    expandedEventId = null;
     render();
   }));
   const toggle = (id) => {
@@ -2629,38 +2709,45 @@ function openSettingsSheet(){
   const HELP_TOPICS = [
     {
       q: "Add a tank",
-      where: "Home screen.",
-      how: "Tap the + button, then choose Start fresh and fill in your tank details.",
-      tip: "Begin with the name, size in gallons, and water type — you can add fish later.",
-      action: { label: "Open Add Tank", id: "addtank" },
+      where: "Home screen — tap the + button.",
+      how: "Choose your tank kind, fill in the name and gallon size, then save. You can add fish, chemicals, and reminders any time after.",
+      tip: "Start with just the basics. You can always edit tank details later from the Details tab.",
+      action: { label: "Add a tank", id: "addtank" },
     },
     {
-      q: "Reminders",
-      where: "Home screen and the top of each tank, where due care is flagged.",
-      how: "Open the flagged item to log it — once logged, the reminder clears and reschedules.",
-      tip: "Reminders track water changes and testing so recurring care doesn't slip.",
-      action: { label: "Go to Home", id: "home" },
+      q: "Water change reminders",
+      where: "\u201cUp next\u201d at the top of each tank\u2019s Details tab.",
+      how: "When a reminder is due, tap \u201cGo do it\u201d to jump straight to the Care tab. Log your water change there and the reminder resets automatically.",
+      tip: "Tap \u201cSnooze 1 day\u201d if you need a little more time. \u201cSkip once\u201d pushes it a full cycle without logging.",
+      action: { label: "Go to a tank", id: "tank-details" },
     },
     {
-      q: "Logging tests and maintenance",
-      where: "Inside a tank, under the Care and Tests tabs.",
-      how: "Open a tank, pick Care for water changes and dosing or Tests for readings, then save.",
-      tip: "Everything you log feeds History and keeps your reminders accurate.",
-      action: { label: "Open a tank", id: "tank-care" },
+      q: "Logging a water change",
+      where: "Inside a tank, under the Care tab.",
+      how: "Enter the gallons being changed, pick your chemicals, add any notes, then tap \u201cSave to history.\u201d The water-change reminder resets from that moment.",
+      tip: "Dosing auto-calculates from the gallons you enter — you don\u2019t have to do the math.",
+      action: { label: "Open Care tab", id: "tank-care" },
+    },
+    {
+      q: "Logging a water test",
+      where: "Inside a tank, under the Tests tab.",
+      how: "Enter any readings you have (you don\u2019t need all of them) and tap Save. The app color-codes each value — green is safe, red needs attention.",
+      tip: "API Master Test Kit values. Leave any field blank if you didn\u2019t test that parameter.",
+      action: { label: "Open Tests tab", id: "tank-tests" },
     },
     {
       q: "History",
       where: "Inside a tank, under the History tab.",
-      how: "Open a tank and tap History to see past tests, water changes, and fish added.",
-      tip: "Tap any entry to expand its full details.",
-      action: { label: "Open a tank", id: "tank-history" },
+      how: "Every water change, test, fish addition, and tank edit is logged here with a timestamp. Tap any entry to expand its full details.",
+      tip: "Use the filter chips at the top to zero in on a specific type of event.",
+      action: { label: "Open History tab", id: "tank-history" },
     },
     {
       q: "Species Compatibility",
       where: "Inside a tank, under the Fish tab.",
-      how: "Use Check fit to test a species against this tank, or Browse species for care basics.",
-      tip: "Results draw on trusted references for size, temperature, and pH.",
-      action: { label: "Open a tank", id: "tank-fish" },
+      how: "Tap \u201cCheck fit\u201d to see if a species suits your tank, or browse the library for care basics like temperature, pH, and tank size.",
+      tip: "Results are based on published care ranges — always research before purchasing fish.",
+      action: { label: "Open Fish tab", id: "tank-fish" },
     },
   ];
   const helpRows = HELP_TOPICS.map((h, i) => {
@@ -2724,16 +2811,13 @@ function openSettingsSheet(){
 
       <section class="settings-group">
         <h4 class="settings-group-title">Support</h4>
-        <button class="settings-action" id="settings-contact" type="button">
-          <span class="settings-label">Contact support</span><span class="settings-chev">›</span>
-        </button>
         <button class="settings-action" id="settings-bug" type="button">
           <span class="settings-label">Report a bug</span><span class="settings-chev">›</span>
         </button>
         <button class="settings-action" id="settings-feature" type="button">
           <span class="settings-label">Suggest a feature</span><span class="settings-chev">›</span>
         </button>
-        <p class="settings-note">We're a small team setting up support. Direct contact is coming soon — thanks for your patience.</p>
+        <p class="settings-note">Feedback and bug reports help improve My Tanks. Direct email support is coming — check back soon.</p>
       </section>
 
       <section class="settings-group">
@@ -2802,7 +2886,9 @@ function openSettingsSheet(){
         switch (b.dataset.helpAction) {
           case "addtank":      closeModal(); handleAddTankTap(); break;
           case "home":         closeModal(); view = { screen:"home", tankId:null, tab:"details" }; render(); break;
+          case "tank-details": goToTank("details"); break;
           case "tank-care":    goToTank("clean"); break;
+          case "tank-tests":   goToTank("tests"); break;
           case "tank-history": goToTank("history"); break;
           case "tank-fish":    goToTank("fish"); break;
         }
@@ -2815,11 +2901,10 @@ function openSettingsSheet(){
       if (window.TUTORIAL) window.TUTORIAL.openTutorial({ markSeen: false, onFinish: handleAddTankTap });
     });
 
-    const supportMsg = "Support contact details are coming soon. Thanks for using My Tanks!";
-    ["#settings-contact", "#settings-bug", "#settings-feature"].forEach(sel => {
-      const b = $(sel);
-      if (b) b.addEventListener("click", () => toast(supportMsg));
-    });
+    const bugMsg = "Bug reports help a ton. Email coming soon — for now, try a fresh reload and check if it persists.";
+    const featureMsg = "Feature ideas are always welcome. Direct email support is on the way — stay tuned.";
+    const bugBtn = $("#settings-bug"); if (bugBtn) bugBtn.addEventListener("click", () => toast(bugMsg));
+    const featBtn = $("#settings-feature"); if (featBtn) featBtn.addEventListener("click", () => toast(featureMsg));
 
     $("#settings-clear").addEventListener("click", () => {
       if (!confirm("Clear all tanks, fish, water changes, and tests on this device? This can't be undone. Export a backup first if you want to keep anything.")) return;
