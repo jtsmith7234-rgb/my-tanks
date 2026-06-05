@@ -487,13 +487,13 @@ function renderHome(){
       ${tanks.map(t => `
         <div class="swipe-row" data-row="${t.id}">
           <div class="swipe-actions-left">
-            <button class="swipe-act edit" data-act="edit" data-tank="${t.id}">
-              <span class="swipe-ico">✏️</span><span class="swipe-lbl">Edit</span>
+            <button class="swipe-act edit" data-act="edit" data-tank="${t.id}" aria-label="Edit ${t.name}">
+              <span class="swipe-ico" aria-hidden="true">✏️</span><span class="swipe-lbl">Edit</span>
             </button>
           </div>
           <div class="swipe-actions-right">
-            <button class="swipe-act delete" data-act="delete" data-tank="${t.id}">
-              <span class="swipe-ico">🗑️</span><span class="swipe-lbl">Delete</span>
+            <button class="swipe-act delete" data-act="delete" data-tank="${t.id}" aria-label="Delete ${t.name}">
+              <span class="swipe-ico" aria-hidden="true">🗑️</span><span class="swipe-lbl">Delete</span>
             </button>
           </div>
           ${_renderTankCard(t)}

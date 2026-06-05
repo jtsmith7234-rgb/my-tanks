@@ -612,7 +612,7 @@ html[data-skin="light"] .tab.active{
   background:rgba(255,255,255,.05);
   border:1px solid var(--glass-stroke);
   color:var(--ink);
-  padding:12px 14px;border-radius:14px;font-size:15px;font-family:inherit;
+  padding:12px 14px;border-radius:14px;font-size:16px;font-family:inherit;
   outline:none;transition:.18s ease;
   -webkit-backdrop-filter:blur(12px);
           backdrop-filter:blur(12px);
