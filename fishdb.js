@@ -113,6 +113,99 @@ const FISHDB = [
   { name:"Assassin Snail", sci:"Clea helena", minGal:5, adult:1, tempLo:70, tempHi:80, phLo:7.0, phHi:8.0, diet:"Carnivore (snails)", temperament:"Peaceful to fish", school:1, finNipper:false, shrimpRisk:false, care:"Easy", notes:"Eats pest snails. Won't bother fish or shrimp adults." }
 ];
 
+/* ============================================================
+   SOURCE STACK — curated reference roles (Option 1).
+   No live API / no runtime scraping. Each species carries source
+   labels; URLs point at the source's own search/home so they can
+   be refined to species-level links later without faking precision.
+     label   display name
+     role    what this source contributes
+     url(f)  conservative link, usually a search for the sci name
+   ============================================================ */
+const FISH_SOURCES = {
+  fishbase: {
+    label: "FishBase",
+    role: "Scientific naming & core species facts",
+    url: f => `https://www.fishbase.se/search.php?q=${encodeURIComponent(f.sci || f.name)}`
+  },
+  cof: {
+    label: "Catalog of Fishes",
+    role: "Taxonomic authority for scientific names",
+    url: () => "https://researcharchive.calacademy.org/research/ichthyology/catalog/fishcatmain.asp"
+  },
+  seriouslyfish: {
+    label: "Seriously Fish",
+    role: "Aquarium care & practical guidance",
+    url: f => `https://www.seriouslyfish.com/?s=${encodeURIComponent(f.sci || f.name)}`
+  },
+  iucn: {
+    label: "IUCN Red List",
+    role: "Conservation status",
+    url: f => `https://www.iucnredlist.org/search?query=${encodeURIComponent(f.sci || f.name)}`
+  }
+};
+
+/* Which sources apply to a species. Naming/care/taxonomy apply to all;
+   IUCN only when a conservation status is known (kept conservative). */
+function fishSources(f){
+  if (!f) return [];
+  const out = [
+    { ...FISH_SOURCES.fishbase, url: FISH_SOURCES.fishbase.url(f) },
+    { ...FISH_SOURCES.cof,      url: FISH_SOURCES.cof.url(f) },
+    { ...FISH_SOURCES.seriouslyfish, url: FISH_SOURCES.seriouslyfish.url(f) }
+  ];
+  if (fishConservation(f)){
+    out.push({ ...FISH_SOURCES.iucn, url: FISH_SOURCES.iucn.url(f) });
+  }
+  return out.map(s => ({ label: s.label, role: s.role, url: s.url }));
+}
+
+/* Conservation status — only for species where it is well established.
+   Conservative: omit (return null) rather than guess. */
+const FISH_CONSERVATION = {
+  "Symphysodon aequifasciatus": "Least Concern",
+  "Paracheirodon innesi": "Least Concern",
+  "Betta splendens": "Vulnerable",
+  "Danio rerio": "Least Concern",
+  "Poecilia reticulata": "Least Concern",
+  "Pterophyllum scalare": "Least Concern"
+};
+function fishConservation(f){
+  if (!f || !f.sci) return null;
+  return FISH_CONSERVATION[f.sci] || null;
+}
+
+/* Group / schooling note in plain language. */
+function fishGrouping(f){
+  if (!f) return "";
+  if (f.school >= 6) return `Keep a group of ${f.school}+`;
+  if (f.school > 1)  return `Best in groups of ${f.school}+`;
+  return "Fine kept singly";
+}
+
+/* Beginner-friendliness derived from care level. */
+function fishCareLevel(f){
+  const c = (f && f.care) || "";
+  if (c === "Easy") return "Beginner-friendly";
+  if (c === "Moderate") return "Some experience helpful";
+  if (c === "Hard") return "Advanced";
+  return c || "—";
+}
+
+/* Short one-line compatibility summary for the profile card.
+   Built from existing practical fields — no invented claims. */
+function fishProfileSummary(f){
+  if (!f) return "";
+  const tmp = (f.temperament || "").toLowerCase();
+  if (f.adult >= 10) return "Needs a large tank — not for nano setups.";
+  if (tmp.includes("aggressive") && !tmp.includes("semi")) return "Aggressive — choose tankmates carefully.";
+  if (f.finNipper) return "Use caution with long-finned tankmates.";
+  if (f.shrimpRisk && /shrimp|snail/i.test(f.name) === false) return "Use caution with shrimp or small inverts.";
+  if (f.school >= 6) return `Peaceful schooler — needs a group of ${f.school}+.`;
+  if (tmp.includes("peaceful")) return "Best for peaceful community tanks.";
+  return "Check tank size and tankmates before adding.";
+}
+
 function fishSearch(query, limit){
   const q = (query || "").toLowerCase().trim();
   if (!q) return [];
@@ -124,6 +217,16 @@ function fishSearch(query, limit){
     }
   }
   return out;
+}
+
+/* Alphabetized list for the Browse species mode. Optional query filters
+   on common or scientific name. Returns the full set when query empty. */
+function fishBrowse(query){
+  const q = (query || "").toLowerCase().trim();
+  const list = q
+    ? FISHDB.filter(f => f.name.toLowerCase().includes(q) || f.sci.toLowerCase().includes(q))
+    : FISHDB.slice();
+  return list.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function fishByName(name){
@@ -166,6 +269,61 @@ function fishCard(f){
         <div><span class="muted small">Group</span><b>${f.school > 1 ? f.school+"+" : "1"}</b></div>
       </div>
       <div class="fishdb-notes">${f.notes}</div>
+    </div>
+  `;
+}
+
+/* Expert-style species profile for Browse mode. Compact rows, a short
+   summary line, and a minimal trust section with an expandable Sources
+   drawer (toggled in app.js). */
+function fishProfileCard(f){
+  if (!f) return "";
+  const tempRange = `${f.tempLo}–${f.tempHi}°F`;
+  const sci = f.sci ? `<div class="profile-sci">${f.sci}</div>` : "";
+  const conservation = fishConservation(f);
+  const sciVerified = f.sci ? `<span class="trust-chip">Scientific name verified</span>` : "";
+
+  const rows = [
+    ["Adult size",   `${f.adult}"`],
+    ["Temperament",  f.temperament],
+    ["Temperature",  tempRange],
+    ["Min tank",     `${f.minGal} gal`],
+    ["Group",        fishGrouping(f)],
+    ["Care level",   fishCareLevel(f)]
+  ];
+  if (conservation) rows.push(["Conservation", conservation]);
+
+  const rowsHTML = rows.map(([k, v]) => `
+    <div class="profile-row">
+      <span class="profile-k">${k}</span>
+      <span class="profile-v">${v}</span>
+    </div>`).join("");
+
+  const sources = fishSources(f).map(s => `
+    <a class="source-item" href="${s.url}" target="_blank" rel="noopener noreferrer">
+      <span class="source-label">${s.label}</span>
+      <span class="source-role">${s.role}</span>
+    </a>`).join("");
+
+  return `
+    <div class="profile-card" data-profile>
+      <div class="profile-head">
+        <div class="profile-name">${f.name}</div>
+        ${sci}
+      </div>
+      <div class="profile-summary">${fishProfileSummary(f)}</div>
+      <div class="profile-rows">${rowsHTML}</div>
+      <div class="profile-trust">
+        <div class="trust-line">
+          Profile built from curated aquarium &amp; species references.
+          ${sciVerified}
+        </div>
+        <button type="button" class="sources-toggle" data-sources-toggle aria-expanded="false">
+          Sources
+          <span class="sources-chev">›</span>
+        </button>
+        <div class="sources-drawer" data-sources-drawer hidden>${sources}</div>
+      </div>
     </div>
   `;
 }
@@ -314,8 +472,13 @@ function fishCompatibility(candidate, tank){
 window.FISHDB_API = {
   all: FISHDB,
   search: fishSearch,
+  browse: fishBrowse,
   byName: fishByName,
   match: fishMatch,
   card: fishCard,
+  profileCard: fishProfileCard,
+  sources: fishSources,
+  conservation: fishConservation,
+  profileSummary: fishProfileSummary,
   compatibility: fishCompatibility
 };

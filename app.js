@@ -1080,12 +1080,27 @@ function renderFish(t){
 
     <div class="section">
       <h2>Species compatibility</h2>
-      <p class="muted" style="margin-top:0">Search to see if a fish is a good fit for this tank.</p>
-      <label class="field compat-field">
-        <input class="input" id="compat-search" placeholder="Search fish or species" autocomplete="off" />
-        <div id="compat-suggest" class="species-suggest" hidden></div>
-      </label>
-      <div id="compat-result"></div>
+      <div class="seg seg-fill species-modes" role="tablist">
+        <button type="button" class="seg-btn active" data-spmode="check" role="tab">Check fit</button>
+        <button type="button" class="seg-btn" data-spmode="browse" role="tab">Browse species</button>
+      </div>
+
+      <div class="spmode-panel" data-spmode-panel="check">
+        <p class="muted" style="margin-top:12px">Search to see if a fish is a good fit for this tank.</p>
+        <label class="field compat-field">
+          <input class="input" id="compat-search" placeholder="Search fish or species" autocomplete="off" />
+          <div id="compat-suggest" class="species-suggest" hidden></div>
+        </label>
+        <div id="compat-result"></div>
+      </div>
+
+      <div class="spmode-panel" data-spmode-panel="browse" hidden>
+        <p class="muted" style="margin-top:12px">Tap a fish for a quick expert profile.</p>
+        <label class="field">
+          <input class="input" id="browse-search" placeholder="Search species" autocomplete="off" />
+        </label>
+        <div id="browse-list" class="browse-list"></div>
+      </div>
     </div>
   `;
 }
@@ -1194,6 +1209,70 @@ function bindFish(t){
     compatSearch.addEventListener("blur", () => {
       setTimeout(() => { compatSuggest.hidden = true; }, 150);
     });
+  }
+
+  // ----- Mode switch: Check fit / Browse species -----
+  const modeBtns = $$(".species-modes .seg-btn");
+  modeBtns.forEach(btn => btn.addEventListener("click", () => {
+    const mode = btn.dataset.spmode;
+    modeBtns.forEach(b => b.classList.toggle("active", b === btn));
+    $$("[data-spmode-panel]").forEach(p => { p.hidden = p.dataset.spmodePanel !== mode; });
+    if (mode === "browse") renderBrowseList("");
+  }));
+
+  // ----- Browse species -----
+  const browseSearch = $("#browse-search");
+  const browseList   = $("#browse-list");
+
+  function renderBrowseList(q){
+    if (!window.FISHDB_API || !browseList) return;
+    const list = window.FISHDB_API.browse(q);
+    if (!list.length){
+      browseList.innerHTML = `<p class="muted browse-empty">No species match that search.</p>`;
+      return;
+    }
+    browseList.innerHTML = list.map(f => `
+      <button type="button" class="browse-row" data-name="${escapeHTML(f.name)}">
+        <span class="browse-row-main">
+          <span class="browse-row-name">${escapeHTML(f.name)}</span>
+          ${f.sci ? `<span class="browse-row-sci">${escapeHTML(f.sci)}</span>` : ""}
+        </span>
+        <span class="browse-row-chev">›</span>
+      </button>
+      <div class="browse-detail" data-detail="${escapeHTML(f.name)}" hidden></div>
+    `).join("");
+
+    $$(".browse-row", browseList).forEach(row => row.addEventListener("click", () => {
+      const name = row.dataset.name;
+      const detail = browseList.querySelector(`[data-detail="${CSS.escape(name)}"]`);
+      const isOpen = row.classList.contains("open");
+      // Close any open profile first (single-open accordion).
+      $$(".browse-row.open", browseList).forEach(r => r.classList.remove("open"));
+      $$(".browse-detail", browseList).forEach(d => { d.hidden = true; d.innerHTML = ""; });
+      if (!isOpen){
+        const f = window.FISHDB_API.byName(name);
+        detail.innerHTML = window.FISHDB_API.profileCard(f);
+        detail.hidden = false;
+        row.classList.add("open");
+        bindSourcesToggle(detail);
+      }
+    }));
+  }
+
+  function bindSourcesToggle(scope){
+    const toggle = scope.querySelector("[data-sources-toggle]");
+    const drawer = scope.querySelector("[data-sources-drawer]");
+    if (!toggle || !drawer) return;
+    toggle.addEventListener("click", () => {
+      const open = drawer.hidden;
+      drawer.hidden = !open;
+      toggle.setAttribute("aria-expanded", String(open));
+      toggle.classList.toggle("open", open);
+    });
+  }
+
+  if (browseSearch){
+    browseSearch.addEventListener("input", () => renderBrowseList(browseSearch.value.trim()));
   }
 
   $("#add-fish-btn").addEventListener("click", () => {
