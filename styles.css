@@ -578,6 +578,8 @@ html[data-skin="light"] .tab.active{
 .fish-list{display:flex;flex-direction:column;gap:8px}
 .fish-row{
   display:flex;align-items:center;gap:12px;
+  /* allow Edit/Remove to wrap below the species text on very narrow screens */
+  flex-wrap:wrap;
   padding:12px 14px;border-radius:14px;
   background:rgba(255,255,255,.04);
   border:1px solid var(--glass-stroke-soft);
@@ -593,11 +595,14 @@ html[data-skin="light"] .tab.active{
   border:1px solid rgba(255,122,74,.50);
   color:#fff;font-weight:800;font-size:14px;
   box-shadow:0 1px 0 rgba(255,255,255,.18) inset, 0 4px 12px rgba(255,122,74,.18);
+  flex:none;
 }
+/* species block grows but can also shrink so actions don't get pushed off-screen */
+.fish-row > div:not(.count):not(.spacer):not(.row-actions){min-width:0;flex:1 1 auto;word-break:break-word}
 .fish-row .species{font-weight:600;color:var(--ink)}
 .fish-row .pet-name{color:var(--ink-dim);font-size:13px;margin-left:6px;font-weight:500;font-style:italic}
 .fish-row .spacer{flex:1}
-.fish-row .row-actions{display:flex;gap:6px}
+.fish-row .row-actions{display:flex;gap:6px;margin-left:auto;flex:none}
 
 /* ============================================================
    INPUTS — sumi ink fields
@@ -1183,7 +1188,9 @@ button:focus-visible, .tab:focus-visible, .chip:focus-visible{
 }
 html[data-skin="dark"] .upn-icon{ background:rgba(255,255,255,.08) }
 .upn-body{ display:flex; flex-direction:column; gap:2px; min-width:0; flex:1 }
-.upn-title{ font-weight:700; font-size:15px; color:var(--ink); letter-spacing:.1px }
+.upn-title{ font-weight:700; font-size:15px; color:var(--ink); letter-spacing:.1px;
+  /* prevent ugly mid-word breaks like 'Daily check-/in' on very narrow screens */
+  word-break:keep-all; overflow-wrap:break-word; hyphens:none }
 .upn-sub{ font-size:13px; font-weight:600; color:var(--ink-dim) }
 .upn-sub.bad{ color:var(--bad) }
 .upn-sub.warn{ color:var(--warn) }
@@ -1224,7 +1231,8 @@ html[data-skin="dark"] .upn-icon{ background:rgba(255,255,255,.08) }
 .upn-go-btn{
   appearance:none; cursor:pointer; font:inherit;
   display:inline-flex; align-items:center; gap:3px;
-  padding:5px 10px; border-radius:9px;
+  /* tap target ~36px tall so it's comfortable on iOS without overpowering the row */
+  padding:8px 10px; border-radius:10px; min-height:36px;
   background:var(--glass-fill-strong); border:1px solid var(--glass-stroke);
   color:var(--sakura); font-size:12px; font-weight:600; white-space:nowrap; flex:none;
   transition:background .15s ease, transform .12s ease;
