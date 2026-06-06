@@ -1976,6 +1976,92 @@ input[type=time].input{ font-family:inherit }
 .ft-do{ border-left: 3px solid #6ea8ff; }
 .ft-expect{ border-left: 3px solid #5ec98a; }
 
+/* Per-action checkbox list inside each "day card" */
+.ft-check-list{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ft-check-item{ margin: 0; }
+.ft-check{
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--glass-stroke, rgba(255,255,255,.08));
+  border-radius: 12px;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background .15s ease, border-color .15s ease, opacity .15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.ft-check:hover{ background: rgba(255,255,255,.07); }
+.ft-check:active{ background: rgba(255,255,255,.09); }
+.ft-check-bubble{
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #6ea8ff;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  color: transparent;
+  margin-top: 1px;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.ft-check-text{
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ft-check-label{
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--ink);
+  word-break: break-word;
+}
+.ft-check-detail{
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--ink-dim);
+  word-break: break-word;
+}
+.ft-check-item.on .ft-check{
+  background: rgba(94,201,138,.10);
+  border-color: rgba(94,201,138,.45);
+}
+.ft-check-item.on .ft-check-bubble{
+  background: #5ec98a;
+  border-color: #5ec98a;
+  color: #0b1014;
+}
+.ft-check-item.on .ft-check-label{
+  text-decoration: line-through;
+  color: var(--ink-dim);
+}
+.ft-check-item.on .ft-check-detail{
+  opacity: .7;
+}
+@media (prefers-reduced-motion: reduce){
+  .ft-check, .ft-check-bubble { transition: none; }
+}
+
 /* ============================================================
    ACTION SHEET (long-press on tank card)
    ============================================================ */

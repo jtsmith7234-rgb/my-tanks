@@ -9,142 +9,136 @@
    inline plain-English explanation.
    ============================================================ */
 
+// Each "do" item: { id, label, detail? } — id is stable so check state survives content tweaks.
 const FIRST_TANK_STAGES = [
   {
     key: "setup",
     daysOffset: 0,
-    title: "Day 0 — Get your gear together",
-    summary: "Grab everything before water goes in. Bigger tanks are easier than small ones.",
+    title: "Before you start — Grab your gear",
+    summary: "Get everything together before water goes in. Bigger tanks are actually easier than small ones.",
     need: [
-      "A tank — 10 gallons or bigger (more water = more forgiving of mistakes)",
-      "A filter rated for your tank size",
-      "A heater (most tropical fish like 75–80°F)",
+      "A tank (10 gallons or bigger), a filter, a heater, and a thermometer",
       "Gravel or sand for the bottom",
-      "A water conditioner like Seachem Prime (removes chlorine from tap water)",
-      "A bottle of starter bacteria (Fritz Turbo Start, Seachem Stability, or API Quick Start)",
-      "A liquid water test kit (API Master Kit) — strips are less accurate",
-      "A thermometer",
-      "Optional: rocks, driftwood, or live plants for decoration"
+      "Water conditioner (Seachem Prime is a safe pick)",
+      "Starter bacteria (Fritz Turbo Start, Seachem Stability, or API Quick Start)",
+      "A liquid test kit (API Master Kit works well — skip the paper strips)",
+      "Optional: rocks, driftwood, or live plants if you want them"
     ],
     do: [
-      "Pick the spot for the tank — somewhere level and strong enough to hold the weight",
-      "Read the back of each box so you know what you're working with"
+      { id:"gear",  label:"Pick up your starter gear", detail:"You don't need anything fancy. The list above is all of it." },
+      { id:"place", label:"Pick a spot for the tank", detail:"Somewhere level and solid. A filled 20-gallon tank weighs about 200 lbs, so it can't go on anything wobbly." },
+      { id:"read",  label:"Glance over the instructions on each box", detail:"No need to memorize anything. Just get a feel for what each thing does before you turn it on." }
     ],
     expect: [
-      "You'll have a pile of gear and an empty tank. That's the right starting point.",
-      "Don't put any fish in yet — even one fish now would likely die in the first week."
+      "You'll have a pile of gear and an empty tank. That's exactly where you should be.",
+      "No fish yet — not even one. The tank isn't ready for them, and adding fish too early is the #1 reason new tanks fail."
     ],
-    tip: "A 20-gallon tank is actually easier to keep stable than a 5-gallon. Bigger is friendlier for beginners."
+    tip: "Bigger is easier. A 20-gallon tank is more forgiving than a 5-gallon because the extra water dilutes mistakes."
   },
   {
     key: "fill",
     daysOffset: 1,
     title: "Day 1 — Fill it up",
-    summary: "Add gravel, water, and turn the equipment on.",
+    summary: "Today you'll set the tank up: gravel, water, and turn the equipment on. No fish yet.",
     need: [
-      "Everything from Day 0",
-      "A clean bucket (never used with soap)"
+      "Everything from your gear list",
+      "A clean bucket (one that's never had soap in it)"
     ],
     do: [
-      "Rinse the gravel in plain water until it runs clear, then add it to the tank",
-      "Place any rocks, wood, or plants",
-      "Add tap water — and add water conditioner as you fill (it neutralizes chlorine before it kills anything)",
-      "Plug in the filter and heater",
-      "Wait a few hours for the temperature to settle around 75–80°F",
-      "Run a baseline water test and log the numbers in the Tests tab"
+      { id:"rinse",   label:"Rinse the gravel and add it to the tank", detail:"Rinse it in plain water (no soap, ever) until the water runs clear. Then add rocks, wood, or plants while everything is still dry — it's way easier than fishing them in later." },
+      { id:"fill",    label:"Add tap water and conditioner together", detail:"Pour water conditioner in as you fill. Tap water has chlorine, and chlorine kills the good bacteria you're about to grow. The conditioner takes care of that instantly." },
+      { id:"plug",    label:"Plug in the filter and heater", detail:"Set the heater to 78°F if you're not sure. Give it a few hours to warm up before checking." },
+      { id:"basetest",label:"Do a first water test and save it", detail:"Use your liquid test kit and check ammonia, nitrite, nitrate, and pH. Everything should be near zero. Save the numbers in the Tests tab so you have a starting point." }
     ],
     expect: [
-      "The water may look cloudy at first — that's just dust from the gravel and it clears in a day or two.",
-      "Your first test will likely show 0 ammonia, 0 nitrite, 0 nitrate. That's normal for a brand-new tank."
+      "The water might look cloudy for a day or two — that's just dust from the gravel. It clears on its own.",
+      "Your first test should show mostly zeros. That's normal and expected."
     ],
-    tip: "Untreated tap water has chlorine, which kills the good bacteria you're about to grow. Always add conditioner."
+    tip: "If you forget anything today, it's fine. The conditioner is the only thing that absolutely has to go in before you walk away."
   },
   {
     key: "cycle_start",
     daysOffset: 2,
-    title: "Days 2–7 — Start growing good bacteria",
-    summary: "You're 'cycling' the tank — growing invisible bacteria that turn fish waste into something safe.",
+    title: "Days 2–7 — Grow the good bacteria",
+    summary: "This is the part where the tank quietly gets ready for fish. You're growing invisible bacteria that handle fish waste safely.",
     need: [
       "Your starter bacteria bottle",
-      "A pinch of fish food (yes, even with no fish)",
+      "A tiny pinch of fish food (even though there are no fish)",
       "Your test kit"
     ],
     do: [
-      "Add a dose of starter bacteria each day (follow the bottle)",
-      "Drop a small pinch of fish food into the tank daily — it breaks down into ammonia, which feeds the bacteria",
-      "Test ammonia every day or two and write down the number",
-      "Still no fish — the tank isn't ready"
+      { id:"dose",    label:"Add starter bacteria once a day", detail:"Use the dose on the back of the bottle. This is the bacteria you're trying to grow." },
+      { id:"feed",    label:"Drop a tiny pinch of food in the tank each day", detail:"It breaks down and creates the ammonia those bacteria eat. No fish, but the bacteria still need food." },
+      { id:"test",    label:"Test ammonia every couple of days", detail:"Just log the number. It'll go up this week — that's what you want." }
     ],
     expect: [
-      "Ammonia will climb from 0 to maybe 1–4 ppm over the week. That's a good sign — it means the bacteria have food to grow on.",
-      "The water may still look totally normal. The action is microscopic."
+      "Ammonia goes from 0 up to maybe 1–4 ppm. That's a good thing right now.",
+      "The water still looks totally normal. All the action is microscopic.",
+      "Still no fish — we'll get there."
     ],
-    tip: "Hobbyists call this a 'fishless cycle' — growing the bacteria first, so no fish get hurt. It's the safest way to start."
+    tip: "This whole stage is called a 'fishless cycle.' Fancy name for a simple idea: grow the bacteria first, so no fish gets hurt while the tank ramps up."
   },
   {
     key: "cycle_middle",
     daysOffset: 8,
-    title: "Days 8–21 — The middle stretch",
-    summary: "Ammonia starts dropping. A new number called nitrite shows up. This is the cycle working.",
+    title: "Days 8–21 — The slow middle",
+    summary: "Not much to do here — just check on it. Ammonia drops, a new number called nitrite appears. That's the tank doing its job.",
     need: [
-      "Patience — this is the slowest stage",
-      "Your test kit"
+      "Your test kit",
+      "Some patience — this stretch is the slowest"
     ],
     do: [
-      "Test every 2–3 days",
-      "Keep adding a tiny pinch of food so the bacteria don't starve",
-      "Skip water changes for now — they'd slow down the bacteria you're trying to grow"
+      { id:"test",    label:"Test the water every 2–3 days", detail:"You're watching for ammonia falling and nitrite rising. Both are good signs." },
+      { id:"feed",    label:"Keep dropping a tiny pinch of food in daily", detail:"Don't stop now — the bacteria still need food to keep growing." },
+      { id:"nochange",label:"Don't do a water change yet", detail:"A big water change here would slow down the bacteria. Wait until things finish up." }
     ],
     expect: [
-      "Ammonia falls toward 0",
-      "Nitrite (the second number on your test kit) rises — sometimes high. This is expected, not a problem.",
-      "Total time so far feels long. That's normal — most tanks take 3–6 weeks to fully cycle."
+      "Ammonia drops back toward 0.",
+      "Nitrite shows up and may climb high — that's normal, not a problem.",
+      "This is the longest stretch. Most tanks take 3–6 weeks total to fully cycle, and you're sitting in the middle of it."
     ],
-    tip: "If ammonia is dropping and nitrite is rising, the first half of the cycle is working. You're on track."
+    tip: "If ammonia is going down and nitrite is going up, everything is working. Trust the process."
   },
   {
     key: "cycle_finish",
     daysOffset: 22,
-    title: "Days 22–28 — Almost there",
-    summary: "Nitrite drops to zero. A third number — nitrate — appears. That's the finish line.",
+    title: "Days 22–28 — Almost ready",
+    summary: "You're at the finish line. Nitrite drops to zero, a third number called nitrate shows up, and the tank is ready for fish.",
     need: [
       "Your test kit",
-      "Water conditioner for the pre-fish water change"
+      "Water conditioner for one last water change before fish"
     ],
     do: [
-      "Test daily — you're close",
-      "Watch for: ammonia 0, nitrite 0, nitrate 5–20 ppm",
-      "When you hit those numbers two days in a row, the tank is cycled",
-      "Do a 25–50% water change with conditioned tap water before adding any fish"
+      { id:"testdaily",label:"Test the water every day this week", detail:"You're looking for three numbers: ammonia 0, nitrite 0, and nitrate somewhere between 5–20 ppm." },
+      { id:"confirm",  label:"Wait until you see those numbers two days in a row", detail:"One good day isn't enough. Two in a row is the green light — the tank is cycled." },
+      { id:"prewc",    label:"Do a 25–50% water change before adding any fish", detail:"Use conditioned tap water. This drops the nitrate down so your new fish start in clean water." }
     ],
     expect: [
-      "Nitrate (the third number) showing up is the sign you've been waiting for — it means the full bacteria chain works.",
-      "After the water change, you're ready for your first fish."
+      "Nitrate showing up for the first time is the moment you've been waiting for. It means the full bacteria chain is working.",
+      "After that water change, you're cleared to add your first fish."
     ],
-    tip: "Adding fish to a tank that isn't cycled is the #1 cause of new-fish deaths. The wait is worth it."
+    tip: "This is the part people get impatient about. Don't rush it — adding fish too early is the #1 reason new tanks fail."
   },
   {
     key: "first_fish",
     daysOffset: 30,
     title: "Day 30+ — Add your first fish",
-    summary: "Start small. Pick hardy beginner fish. Don't fill the tank up all at once.",
+    summary: "The wait is over. Start small with hardy beginner fish — don't fill the tank up all at once.",
     need: [
-      "A short list of beginner-friendly fish (try the Fish tab and filter for beginners)",
-      "A small bucket and a clip or clothespin"
+      "A small list of beginner fish (the Fish tab has a beginner filter)",
+      "A small clean bucket and a clip or clothespin (to hold the bag while you acclimate them)"
     ],
     do: [
-      "Buy 4–6 small hardy fish — not a full tank's worth",
-      "Float the bag in the tank for 15 minutes so the water warms slowly",
-      "Slowly mix tank water into the bag over another 20–30 minutes, then gently scoop the fish in (leave the store water behind)",
-      "Test water 24 hours later — ammonia and nitrite should both still be 0",
-      "Feed lightly the first week — less food means less waste",
-      "Wait 2 weeks before adding any more fish"
+      { id:"pick",    label:"Pick 4–6 small, hardy fish to start", detail:"Don't stock the whole tank yet. Good first picks: White Clouds, Zebra Danios, Platies, Bronze Cories, or Cherry Shrimp." },
+      { id:"accl",    label:"Take your time getting them in the tank", detail:"Float the bag in the tank for about 15 minutes so the water warms up to match. Then slowly add a little tank water to the bag every few minutes for 20–30 minutes. Finally, scoop the fish into the tank — don't pour the store water in." },
+      { id:"checktest",label:"Test the water a day later", detail:"Ammonia and nitrite should both still be 0. If you see anything, do a 25% water change." },
+      { id:"wait",    label:"Feed lightly and wait 2 weeks before adding more fish", detail:"Less food means less waste. Give the bacteria time to catch up before you add anything new." }
     ],
     expect: [
-      "Fish may hide for the first day or two — that's normal, they're new to the place.",
-      "If ammonia or nitrite shows up after adding fish, do a 25% water change and recheck the next day."
+      "Fish often hide for the first day or two. That's normal — they're getting used to the new home.",
+      "If ammonia or nitrite show up after the fish go in, do a 25% water change and check again the next day."
     ],
-    tip: "Easy starter fish: White Cloud Minnows, Zebra Danios, Platies, Bronze Cory Cats, or Cherry Shrimp."
+    tip: "You don't have to get this perfect. A 25% water change fixes almost any small problem that comes up in week one."
   }
 ];
 
@@ -346,6 +340,11 @@ function isComplete(tank, key){
   return !!(tank.firstTank && tank.firstTank.completed && tank.firstTank.completed[key]);
 }
 
+function _checked(tank, stageKey, itemId){
+  return !!(tank.firstTank && tank.firstTank.checked && tank.firstTank.checked[stageKey] && tank.firstTank.checked[stageKey][itemId]);
+}
+
+// Used for need/expect lists (plain strings) only.
 function _renderList(label, items, cls){
   if (!items || !items.length) return "";
   return `
@@ -353,6 +352,37 @@ function _renderList(label, items, cls){
       <div class="ft-block-label">${label}</div>
       <ul class="ft-block-list">
         ${items.map(item => `<li>${item}</li>`).join("")}
+      </ul>
+    </div>
+  `;
+}
+
+// "What to do" — each item gets a checkbox bubble.
+function _renderDoChecklist(tank, stage){
+  const items = stage.do || [];
+  if (!items.length) return "";
+  return `
+    <div class="ft-block ft-do">
+      <div class="ft-block-label">What to do</div>
+      <ul class="ft-check-list">
+        ${items.map(it => {
+          const isObj = typeof it === "object" && it !== null;
+          const id = isObj ? it.id : String(it).slice(0,20);
+          const label = isObj ? it.label : it;
+          const detail = isObj ? it.detail : "";
+          const on = _checked(tank, stage.key, id);
+          return `
+            <li class="ft-check-item ${on ? "on" : ""}">
+              <button class="ft-check" data-stage="${stage.key}" data-item="${id}" aria-label="${on ? "Uncheck" : "Check"}: ${label.replace(/"/g,'&quot;')}" aria-pressed="${on}">
+                <span class="ft-check-bubble" aria-hidden="true">${on ? "✓" : ""}</span>
+                <span class="ft-check-text">
+                  <span class="ft-check-label">${label}</span>
+                  ${detail ? `<span class="ft-check-detail">${detail}</span>` : ""}
+                </span>
+              </button>
+            </li>
+          `;
+        }).join("")}
       </ul>
     </div>
   `;
@@ -410,7 +440,7 @@ function renderFirstTankSection(tank){
             <div class="ft-stage-body" ${expanded ? "" : "hidden"}>
               <p class="ft-stage-summary">${st.summary}</p>
               ${_renderList("What you need", st.need, "ft-need")}
-              ${_renderList("What to do", st.do, "ft-do")}
+              ${_renderDoChecklist(tank, st)}
               ${_renderList("What to expect", st.expect, "ft-expect")}
               <div class="ft-tip"><b>Tip:</b> ${st.tip}</div>
               ${done
@@ -463,7 +493,43 @@ function bindFirstTank(tank, onChange){
     e.stopPropagation();
     const key = b.dataset.stage;
     if (tank.firstTank.completed) delete tank.firstTank.completed[key];
+    if (tank.firstTank.checked) delete tank.firstTank.checked[key]; // clear per-item checks too
     onChange("Reopened: " + key);
+  }));
+
+  // Per-item checkboxes inside each day card
+  document.querySelectorAll(".ft-check").forEach(b => b.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const stageKey = b.dataset.stage;
+    const itemId   = b.dataset.item;
+    tank.firstTank.checked = tank.firstTank.checked || {};
+    tank.firstTank.checked[stageKey] = tank.firstTank.checked[stageKey] || {};
+    const isOn = !!tank.firstTank.checked[stageKey][itemId];
+    if (isOn) {
+      delete tank.firstTank.checked[stageKey][itemId];
+    } else {
+      tank.firstTank.checked[stageKey][itemId] = true;
+    }
+
+    // Auto-mark the whole stage done when every "do" item is checked.
+    const stages = stagesForTank(tank);
+    const stage = stages.find(s => s.key === stageKey);
+    if (stage) {
+      const items = stage.do || [];
+      const allOn = items.length > 0 && items.every(it => {
+        const id = (typeof it === "object" && it !== null) ? it.id : String(it).slice(0,20);
+        return !!(tank.firstTank.checked[stageKey] && tank.firstTank.checked[stageKey][id]);
+      });
+      tank.firstTank.completed = tank.firstTank.completed || {};
+      if (allOn) {
+        tank.firstTank.completed[stageKey] = true;
+      } else if (tank.firstTank.completed[stageKey]) {
+        // If user unchecks an item, don't keep the stage marked done
+        delete tank.firstTank.completed[stageKey];
+      }
+    }
+
+    onChange(isOn ? "Unchecked" : "Checked");
   }));
 }
 
