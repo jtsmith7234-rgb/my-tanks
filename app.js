@@ -1519,28 +1519,17 @@ function renderFish(t){
     </div>
 
     <div class="section">
-      <h2>Species compatibility</h2>
-      <div class="seg seg-fill species-modes" role="tablist">
-        <button type="button" class="seg-btn active" data-spmode="check" role="tab">Check fit</button>
-        <button type="button" class="seg-btn" data-spmode="browse" role="tab">Browse species</button>
-      </div>
-
-      <div class="spmode-panel" data-spmode-panel="check">
-        <p class="muted" style="margin-top:12px">Search to see if a fish is a good fit for this tank.</p>
-        <label class="field compat-field">
-          <input class="input" id="compat-search" placeholder="Search fish or species" autocomplete="off" />
-          <div id="compat-suggest" class="species-suggest" hidden></div>
-        </label>
-        <div id="compat-result"></div>
-      </div>
-
-      <div class="spmode-panel" data-spmode-panel="browse" hidden>
-        <p class="muted" style="margin-top:12px">Tap a fish for a quick expert profile.</p>
-        <label class="field">
-          <input class="input" id="browse-search" placeholder="Search species" autocomplete="off" />
-        </label>
-        <div id="browse-list" class="browse-list"></div>
-      </div>
+      <h2>Browse species &amp; compatibility</h2>
+      <p class="muted" style="margin-top:0">Search to check if a fish is a good fit for this tank, or browse the full library. Tap any fish to see its profile — then add it right here.</p>
+      <label class="field compat-field">
+        <input class="input" id="compat-search" placeholder="Search fish or species" autocomplete="off" />
+        <div id="compat-suggest" class="species-suggest" hidden></div>
+      </label>
+      <div id="compat-result"></div>
+      <label class="field" style="margin-top:12px">
+        <input class="input" id="browse-search" placeholder="Browse all species" autocomplete="off" />
+      </label>
+      <div id="browse-list" class="browse-list"></div>
     </div>
   `;
 }
@@ -1651,16 +1640,7 @@ function bindFish(t){
     });
   }
 
-  // ----- Mode switch: Check fit / Browse species -----
-  const modeBtns = $$(".species-modes .seg-btn");
-  modeBtns.forEach(btn => btn.addEventListener("click", () => {
-    const mode = btn.dataset.spmode;
-    modeBtns.forEach(b => b.classList.toggle("active", b === btn));
-    $$("[data-spmode-panel]").forEach(p => { p.hidden = p.dataset.spmodePanel !== mode; });
-    if (mode === "browse") renderBrowseList("");
-  }));
-
-  // ----- Browse species -----
+  // ----- Browse species & compatibility (unified panel) -----
   const browseSearch = $("#browse-search");
   const browseList   = $("#browse-list");
 
@@ -1692,10 +1672,20 @@ function bindFish(t){
       $$(".browse-detail", browseList).forEach(d => { d.hidden = true; d.innerHTML = ""; });
       if (!isOpen){
         const f = window.FISHDB_API.byName(name);
-        detail.innerHTML = window.FISHDB_API.profileCard(f);
+        if (!f) return;
+        detail.innerHTML = window.FISHDB_API.profileCard(f) +
+          `<button type="button" class="btn block browse-add-btn" data-addname="${escapeHTML(f.name)}" style="margin-top:12px">Add to tank</button>`;
         detail.hidden = false;
         row.classList.add("open");
         bindSourcesToggle(detail);
+        // Wire Add to tank — skips tank picker since we're already inside this tank
+        const addBtn = detail.querySelector(".browse-add-btn");
+        if (addBtn){
+          addBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            showQuickAddCompat(f, t);
+          });
+        }
       }
     }));
   }
@@ -1711,6 +1701,9 @@ function bindFish(t){
       toggle.classList.toggle("open", open);
     });
   }
+
+  // Render browse list immediately (no mode switch needed)
+  renderBrowseList("");
 
   if (browseSearch){
     browseSearch.addEventListener("input", () => renderBrowseList(browseSearch.value.trim()));
@@ -3026,38 +3019,34 @@ function openSettingsSheet(){
     },
     {
       q: "Water change reminders",
-      where: "\u201cUp next\u201d at the top of each tank\u2019s Details tab.",
-      how: "When a reminder is due, tap \u201cGo do it\u201d to jump straight to the Care tab. Log your water change there and the reminder resets automatically.",
-      tip: "Tap \u201cSnooze 1 day\u201d if you need a little more time. \u201cSkip once\u201d pushes it a full cycle without logging.",
-      action: { label: "Go to a tank", id: "tank-details" },
+      where: "“Up next” at the top of each tank’s Details tab.",
+      how: "When a reminder is due, tap “Go do it” to jump straight to the Care tab. Log your water change there and the reminder resets automatically.",
+      tip: "Tap “Snooze 1 day” if you need a little more time. “Skip once” pushes it a full cycle without logging.",
     },
     {
       q: "Logging a water change",
       where: "Inside a tank, under the Care tab.",
-      how: "Enter the gallons being changed, pick your chemicals, add any notes, then tap \u201cSave to history.\u201d The water-change reminder resets from that moment.",
-      tip: "Dosing auto-calculates from the gallons you enter — you don\u2019t have to do the math.",
-      action: { label: "Open Care tab", id: "tank-care" },
+      how: "Enter the gallons being changed, pick your chemicals, add any notes, then tap “Save to history.” The water-change reminder resets from that moment.",
+      tip: "Dosing auto-calculates from the gallons you enter — you don’t have to do the math.",
     },
     {
       q: "Logging a water test",
       where: "Inside a tank, under the Tests tab.",
-      how: "Enter any readings you have (you don\u2019t need all of them) and tap Save. The app color-codes each value — green is safe, red needs attention.",
-      tip: "API Master Test Kit values. Leave any field blank if you didn\u2019t test that parameter.",
-      action: { label: "Open Tests tab", id: "tank-tests" },
+      how: "Enter any readings you have (you don’t need all of them) and tap Save. The app color-codes each value — green is safe, red needs attention.",
+      tip: "API Master Test Kit values. Leave any field blank if you didn’t test that parameter.",
     },
     {
       q: "History",
       where: "Inside a tank, under the History tab.",
       how: "Every water change, test, fish addition, and tank edit is logged here with a timestamp. Tap any entry to expand its full details.",
       tip: "Use the filter chips at the top to zero in on a specific type of event.",
-      action: { label: "Open History tab", id: "tank-history" },
     },
     {
-      q: "Species Compatibility",
-      where: "Inside a tank, under the Fish tab.",
-      how: "Tap \u201cCheck fit\u201d to see if a species suits your tank, or browse the library for care basics like temperature, pH, and tank size.",
-      tip: "Results are based on published care ranges — always research before purchasing fish.",
-      action: { label: "Open Fish tab", id: "tank-fish" },
+      q: "Species Compatibility Browser",
+      where: "Tap the fish icon at the top of any screen to open the browser from anywhere.",
+      how: "Search any fish to see care stats — temperature, pH, tank size, and temperament. Inside a tank, go to the Fish tab and scroll to “Browse species & compatibility” to check fit and add directly to that tank.",
+      tip: "Results are based on published care ranges. Always do a quick research pass before buying — especially for invertebrates and rarer species.",
+      action: { label: "Species Compatibility Browser", id: "home-species" },
     },
   ];
   const helpRows = HELP_TOPICS.map((h, i) => {
@@ -3205,6 +3194,7 @@ function openSettingsSheet(){
           case "tank-tests":   goToTank("tests"); break;
           case "tank-history": goToTank("history"); break;
           case "tank-fish":    goToTank("fish"); break;
+          case "home-species": closeModal(); view = { screen:"species", tankId:null, tab:"details" }; render(); break;
         }
       });
     });
