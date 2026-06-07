@@ -1522,13 +1522,10 @@ function renderFish(t){
       <h2>Browse species &amp; compatibility</h2>
       <p class="muted" style="margin-top:0">Search to check if a fish is a good fit for this tank, or browse the full library. Tap any fish to see its profile — then add it right here.</p>
       <label class="field compat-field">
-        <input class="input" id="compat-search" placeholder="Search fish or species" autocomplete="off" />
+        <input class="input" id="compat-search" placeholder="Search or browse species" autocomplete="off" />
         <div id="compat-suggest" class="species-suggest" hidden></div>
       </label>
       <div id="compat-result"></div>
-      <label class="field" style="margin-top:12px">
-        <input class="input" id="browse-search" placeholder="Browse all species" autocomplete="off" />
-      </label>
       <div id="browse-list" class="browse-list"></div>
     </div>
   `;
@@ -1582,10 +1579,11 @@ function bindFish(t){
     });
   }
 
-  // ----- Species compatibility -----
+  // ----- Browse species & compatibility (single search) -----
   const compatSearch  = $("#compat-search");
   const compatSuggest = $("#compat-suggest");
   const compatResult  = $("#compat-result");
+  const browseList    = $("#browse-list");
 
   function showCompatResult(name){
     if (!window.FISHDB_API){ compatResult.innerHTML = ""; return; }
@@ -1608,41 +1606,6 @@ function bindFish(t){
       </div>
     `;
   }
-
-  function showCompatSuggestions(q){
-    if (!window.FISHDB_API){ return; }
-    const results = window.FISHDB_API.search(q, 6);
-    if (!results.length){ compatSuggest.hidden = true; compatSuggest.innerHTML = ""; return; }
-    compatSuggest.innerHTML = results.map(f => `
-      <button type="button" class="species-suggest-row" data-name="${escapeHTML(f.name)}">
-        <span class="species-suggest-name">${escapeHTML(f.name)}</span>
-        <span class="species-suggest-meta">${f.minGal} gal · ${f.adult}" adult · ${f.tempLo}-${f.tempHi}°F</span>
-      </button>
-    `).join("");
-    compatSuggest.hidden = false;
-    $$(".species-suggest-row", compatSuggest).forEach(b => b.addEventListener("click", () => {
-      compatSearch.value = b.dataset.name;
-      compatSuggest.hidden = true;
-      showCompatResult(b.dataset.name);
-    }));
-  }
-
-  if (compatSearch){
-    compatSearch.addEventListener("input", () => {
-      const v = compatSearch.value.trim();
-      showCompatSuggestions(v);
-      // Show result immediately if the text exactly matches a species.
-      const f = window.FISHDB_API && window.FISHDB_API.byName(v);
-      if (f) showCompatResult(v); else compatResult.innerHTML = "";
-    });
-    compatSearch.addEventListener("blur", () => {
-      setTimeout(() => { compatSuggest.hidden = true; }, 150);
-    });
-  }
-
-  // ----- Browse species & compatibility (unified panel) -----
-  const browseSearch = $("#browse-search");
-  const browseList   = $("#browse-list");
 
   function renderBrowseList(q){
     if (!window.FISHDB_API || !browseList) return;
@@ -1702,12 +1665,23 @@ function bindFish(t){
     });
   }
 
-  // Render browse list immediately (no mode switch needed)
-  renderBrowseList("");
-
-  if (browseSearch){
-    browseSearch.addEventListener("input", () => renderBrowseList(browseSearch.value.trim()));
+  // Single search input drives both compat result and browse list
+  if (compatSearch){
+    compatSearch.addEventListener("input", () => {
+      const v = compatSearch.value.trim();
+      // Filter the browse list as the user types
+      renderBrowseList(v);
+      // Show compat badge instantly when the query is an exact species match
+      const f = window.FISHDB_API && window.FISHDB_API.byName(v);
+      if (f){ showCompatResult(v); } else { compatResult.innerHTML = ""; }
+    });
+    compatSearch.addEventListener("blur", () => {
+      setTimeout(() => { compatSuggest.hidden = true; }, 150);
+    });
   }
+
+  // Render browse list on first load (empty query = full list)
+  renderBrowseList("");
 
   $("#add-fish-btn").addEventListener("click", () => {
     const sp = $("#add-species").value.trim();
