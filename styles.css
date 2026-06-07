@@ -2654,3 +2654,530 @@ html[data-skin="dark"] .compat-bad{ color:#ffb0b0 }
   .species-thumb{ border-color:rgba(0,0,0,.08) }
   .species-hero{ border-color:rgba(0,0,0,.08); background:rgba(0,0,0,.03) }
 }
+
+/* ============================================================
+   THEME: CLEAN — Mirror the tankcarebuddy.com website exactly.
+   Warm off-white surfaces, deep teal primary, Inter + Plus
+   Jakarta Sans typography, clean solid cards with no glass/blur,
+   uniform teal stroke-style icons. Replaces ALL glass/backdrop
+   effects, bubble animations, and gradient backgrounds.
+   ============================================================ */
+
+html[data-theme="clean"] {
+  /* — Surface tokens — */
+  --clean-bg:          #f4f7f7;
+  --clean-surface:     #ffffff;
+  --clean-surface-2:   #eef3f3;
+  --clean-border:      #ccd8d8;
+  --clean-divider:     #dde6e6;
+
+  /* — Text tokens — */
+  --clean-ink:         #0f2323;
+  --clean-ink-muted:   #4a6363;
+  --clean-ink-faint:   #8aa5a5;
+
+  /* — Primary teal — */
+  --clean-primary:     #007878;
+  --clean-primary-h:   #005f5f;
+  --clean-primary-lt:  #e0f0f0;
+
+  /* — Status — */
+  --clean-good:        #3a8a40;
+  --clean-good-bg:     #e6f4e7;
+  --clean-warn:        #a05e00;
+  --clean-warn-bg:     #fff3e0;
+  --clean-bad:         #c0392b;
+  --clean-bad-bg:      #fdecea;
+
+  /* — Shadows — */
+  --clean-shadow-sm:   0 2px 8px rgba(0,60,60,0.09);
+  --clean-shadow-md:   0 6px 20px rgba(0,60,60,0.10);
+
+  /* Wire existing app tokens to clean values */
+  --glass-fill:        var(--clean-surface);
+  --glass-fill-strong: var(--clean-surface-2);
+  --glass-stroke:      var(--clean-border);
+  --glass-stroke-soft: var(--clean-divider);
+  --glass-highlight:   transparent;
+  --glass-shadow:      var(--clean-shadow-md);
+  --glass-shadow-sm:   var(--clean-shadow-sm);
+
+  --ink:               var(--clean-ink);
+  --ink-dim:           var(--clean-ink-muted);
+  --ink-soft:          var(--clean-ink-faint);
+
+  --sakura:            var(--clean-primary);
+  --sakura-soft:       var(--clean-primary);
+  --sakura-deep:       var(--clean-primary-h);
+  --koi:               var(--clean-primary);
+  --koi-soft:          var(--clean-primary);
+  --jade:              var(--clean-good);
+  --warn:              var(--clean-warn);
+  --bad:               var(--clean-bad);
+}
+
+/* ── BODY / BACKGROUND ───────────────────────────────────── */
+html[data-theme="clean"] body {
+  background: var(--clean-bg);
+  min-height: 100vh;
+  overflow-x: hidden;
+  overscroll-behavior: none;
+}
+
+/* Kill all particle / plant animations */
+html[data-theme="clean"] .petal      { display: none !important; }
+html[data-theme="clean"] .fx-plants  { display: none !important; }
+html[data-theme="clean"] .petals::before { display: none !important; }
+
+/* ── APP SHELL ───────────────────────────────────────────── */
+html[data-theme="clean"] #app {
+  background: var(--clean-bg);
+}
+
+/* ── TOP BAR ─────────────────────────────────────────────── */
+html[data-theme="clean"] .topbar {
+  background: var(--clean-surface);
+  border: none;
+  border-bottom: 1px solid var(--clean-divider);
+  border-radius: 0;
+  margin: 0;
+  padding: 12px 16px;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: 0 1px 0 var(--clean-divider);
+}
+html[data-theme="clean"] .topbar::before { display: none; }
+html[data-theme="clean"] .topbar h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+  color: var(--clean-ink);
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  -webkit-text-fill-color: var(--clean-ink);
+  text-shadow: none;
+}
+
+/* ── GHOST BUTTONS (back / settings / add) ───────────────── */
+html[data-theme="clean"] .ghost-btn {
+  background: transparent;
+  border: 1.5px solid var(--clean-border);
+  color: var(--clean-ink-muted);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+  border-radius: 12px;
+}
+html[data-theme="clean"] .ghost-btn:hover {
+  background: var(--clean-primary-lt);
+  border-color: var(--clean-primary);
+  color: var(--clean-primary);
+}
+
+/* ── FOOTER ──────────────────────────────────────────────── */
+html[data-theme="clean"] .footer {
+  background: var(--clean-surface);
+  border: 1px solid var(--clean-divider);
+  border-radius: 16px;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: var(--clean-shadow-sm);
+  color: var(--clean-ink-muted);
+}
+
+/* ── TANK CARDS ──────────────────────────────────────────── */
+html[data-theme="clean"] .tank-card {
+  background: var(--clean-surface);
+  border: 1px solid var(--clean-border);
+  border-radius: 20px;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: var(--clean-shadow-sm);
+  color: var(--clean-ink);
+}
+html[data-theme="clean"] .tank-card::before { display: none; }
+html[data-theme="clean"] .tank-card:hover {
+  background: var(--clean-surface);
+  border-color: var(--clean-primary);
+  box-shadow: var(--clean-shadow-md);
+  transform: translateY(-2px);
+}
+html[data-theme="clean"] .tank-card .tc-name { color: var(--clean-ink); }
+html[data-theme="clean"] .tank-card .tc-meta { color: var(--clean-ink-muted); }
+html[data-theme="clean"] .tank-card .tc-status {
+  background: var(--clean-surface-2);
+  border-color: var(--clean-border);
+  color: var(--clean-ink-muted);
+}
+
+/* ── SECTIONS ────────────────────────────────────────────── */
+html[data-theme="clean"] .section {
+  background: var(--clean-surface);
+  border: 1px solid var(--clean-border);
+  border-radius: 20px;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: var(--clean-shadow-sm);
+}
+html[data-theme="clean"] .section::before { display: none; }
+html[data-theme="clean"] .section h2 {
+  color: var(--clean-ink);
+}
+html[data-theme="clean"] .section h3 {
+  color: var(--clean-primary);
+}
+
+/* ── TABS ────────────────────────────────────────────────── */
+html[data-theme="clean"] .tabs {
+  background: var(--clean-surface);
+  border: 1px solid var(--clean-divider);
+  border-radius: 14px;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: var(--clean-shadow-sm);
+}
+html[data-theme="clean"] .tab {
+  color: var(--clean-ink-muted);
+}
+html[data-theme="clean"] .tab.active {
+  background: var(--clean-primary);
+  color: #fff;
+  border: none;
+  box-shadow: none;
+}
+
+/* ── BUTTONS ─────────────────────────────────────────────── */
+html[data-theme="clean"] .btn {
+  background: var(--clean-primary);
+  border: 1.5px solid var(--clean-primary);
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(0,120,120,0.20);
+  text-shadow: none;
+  font-family: var(--font-display);
+  font-weight: 600;
+}
+html[data-theme="clean"] .btn:hover {
+  background: var(--clean-primary-h);
+  border-color: var(--clean-primary-h);
+  filter: none;
+}
+html[data-theme="clean"] .btn.secondary {
+  background: var(--clean-surface-2);
+  border: 1.5px solid var(--clean-border);
+  color: var(--clean-ink);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+html[data-theme="clean"] .btn.secondary:hover {
+  background: var(--clean-primary-lt);
+  border-color: var(--clean-primary);
+  color: var(--clean-primary);
+}
+html[data-theme="clean"] .btn.danger {
+  background: var(--clean-bad-bg);
+  border: 1.5px solid rgba(192,57,43,.30);
+  color: var(--clean-bad);
+  box-shadow: none;
+}
+
+/* ── INPUTS ──────────────────────────────────────────────── */
+html[data-theme="clean"] .input,
+html[data-theme="clean"] .select {
+  background: var(--clean-surface);
+  border: 1.5px solid var(--clean-border);
+  color: var(--clean-ink);
+  border-radius: 12px;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+html[data-theme="clean"] .input:focus,
+html[data-theme="clean"] .select:focus {
+  border-color: var(--clean-primary);
+  background: var(--clean-surface);
+  box-shadow: 0 0 0 3px rgba(0,120,120,0.15);
+}
+html[data-theme="clean"] .input::placeholder { color: var(--clean-ink-faint); }
+html[data-theme="clean"] label.field span { color: var(--clean-primary); }
+
+/* ── FISH ROWS ───────────────────────────────────────────── */
+html[data-theme="clean"] .fish-row {
+  background: var(--clean-surface-2);
+  border: 1px solid var(--clean-divider);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+html[data-theme="clean"] .fish-row:hover { background: var(--clean-primary-lt); }
+html[data-theme="clean"] .fish-row .count {
+  background: var(--clean-primary-lt);
+  border: 1.5px solid rgba(0,120,120,.30);
+  color: var(--clean-primary);
+  box-shadow: none;
+}
+
+/* ── CHIPS ───────────────────────────────────────────────── */
+html[data-theme="clean"] .chip {
+  background: var(--clean-surface-2);
+  border: 1.5px solid var(--clean-border);
+  color: var(--clean-ink-muted);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+html[data-theme="clean"] .chip:hover {
+  border-color: var(--clean-primary);
+  color: var(--clean-primary);
+}
+html[data-theme="clean"] .chip.active {
+  background: var(--clean-primary);
+  border-color: var(--clean-primary);
+  color: #fff;
+  box-shadow: none;
+}
+
+/* ── MODAL ───────────────────────────────────────────────── */
+html[data-theme="clean"] .modal-backdrop {
+  background: rgba(15,35,35,.50);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+html[data-theme="clean"] .modal {
+  background: var(--clean-surface);
+  border: 1px solid var(--clean-border);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: 0 -12px 40px rgba(0,60,60,0.14);
+  color: var(--clean-ink);
+}
+html[data-theme="clean"] .modal::before {
+  background: var(--clean-divider);
+}
+
+/* ── SETTINGS SHEET ──────────────────────────────────────── */
+html[data-theme="clean"] .settings-row,
+html[data-theme="clean"] .settings-action {
+  background: var(--clean-surface-2);
+  border: 1px solid var(--clean-divider);
+  color: var(--clean-ink);
+}
+html[data-theme="clean"] .settings-action:hover {
+  background: var(--clean-primary-lt);
+}
+html[data-theme="clean"] .settings-x {
+  background: var(--clean-surface-2);
+  border: 1.5px solid var(--clean-border);
+  color: var(--clean-ink-muted);
+}
+html[data-theme="clean"] .seg {
+  background: var(--clean-surface-2);
+  border: 1.5px solid var(--clean-border);
+}
+html[data-theme="clean"] .seg-btn { color: var(--clean-ink-muted); }
+html[data-theme="clean"] .seg-btn.active {
+  background: var(--clean-primary);
+  color: #fff;
+  box-shadow: none;
+}
+html[data-theme="clean"] .settings-group-title { color: var(--clean-ink-muted); }
+html[data-theme="clean"] .settings-note { color: var(--clean-ink-muted); }
+html[data-theme="clean"] .settings-value { color: var(--clean-ink-muted); }
+html[data-theme="clean"] .settings-chev { color: var(--clean-ink-faint); }
+
+/* ── ADVISOR BANNER ──────────────────────────────────────── */
+html[data-theme="clean"] .advisor-banner {
+  background: var(--clean-surface);
+  border: 1px solid var(--clean-divider);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: var(--clean-shadow-sm);
+}
+html[data-theme="clean"] .advisor-banner.urgent { border-color: rgba(192,57,43,.30); background: var(--clean-bad-bg); }
+html[data-theme="clean"] .advisor-banner.soon   { border-color: rgba(160,94,0,.25);  background: var(--clean-warn-bg); }
+html[data-theme="clean"] .advisor-banner.fyi    { border-color: rgba(0,120,120,.25); background: var(--clean-primary-lt); }
+html[data-theme="clean"] .advisor-banner::before { background: var(--clean-primary) }
+html[data-theme="clean"] .advisor-banner.urgent::before { background: var(--clean-bad) }
+html[data-theme="clean"] .advisor-banner.soon::before   { background: var(--clean-warn) }
+
+/* ── UP NEXT ROWS ────────────────────────────────────────── */
+html[data-theme="clean"] .upn-row {
+  background: var(--clean-surface);
+  border: 1px solid var(--clean-border);
+}
+html[data-theme="clean"] .upn-icon {
+  background: var(--clean-primary-lt);
+  border: 1.5px solid rgba(0,120,120,.20);
+}
+html[data-theme="clean"] .upn-due-now {
+  border-color: rgba(192,57,43,.35);
+  background: var(--clean-bad-bg);
+  box-shadow: none;
+}
+html[data-theme="clean"] .upn-snoozed {
+  border-color: rgba(160,94,0,.30);
+  background: var(--clean-warn-bg);
+}
+html[data-theme="clean"] .upn-go-btn {
+  background: var(--clean-primary-lt);
+  border: 1.5px solid rgba(0,120,120,.25);
+  color: var(--clean-primary);
+}
+
+/* ── HISTORY / EVENT ROWS ────────────────────────────────── */
+html[data-theme="clean"] .event-row {
+  background: var(--clean-surface-2);
+  border: 1px solid var(--clean-divider);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+html[data-theme="clean"] .event-row.open { background: var(--clean-primary-lt); border-color: rgba(0,120,120,.25); }
+html[data-theme="clean"] .event-icon {
+  background: var(--clean-primary-lt);
+  border: 1.5px solid rgba(0,120,120,.25);
+  box-shadow: none;
+}
+html[data-theme="clean"] .event-icon.water_change { background: #e0f0f8; border-color: rgba(0,100,160,.20); }
+html[data-theme="clean"] .event-icon.water_test   { background: var(--clean-good-bg); border-color: rgba(58,138,64,.25); }
+html[data-theme="clean"] .event-icon.fish_add     { background: var(--clean-primary-lt); border-color: rgba(0,120,120,.25); }
+html[data-theme="clean"] .event-icon.fish_remove  { background: var(--clean-bad-bg); border-color: rgba(192,57,43,.20); }
+html[data-theme="clean"] .event-field { border-bottom: 1px solid var(--clean-divider); }
+
+/* ── DOSE CARDS ──────────────────────────────────────────── */
+html[data-theme="clean"] .dose-card {
+  background: var(--clean-surface);
+  border: 1px solid var(--clean-border);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: var(--clean-shadow-sm);
+  border-radius: 16px;
+}
+html[data-theme="clean"] .dose-card::before { display: none; }
+html[data-theme="clean"] .dose-card .label { color: var(--clean-primary); }
+html[data-theme="clean"] .dose-card .big {
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  -webkit-text-fill-color: var(--clean-ink);
+  color: var(--clean-ink);
+  text-shadow: none;
+}
+html[data-theme="clean"] .dose-card .big .unit { color: var(--clean-ink-muted); -webkit-text-fill-color: var(--clean-ink-muted); }
+
+/* ── GRAPH CARDS ─────────────────────────────────────────── */
+html[data-theme="clean"] .graph-card {
+  background: var(--clean-surface);
+  border: 1px solid var(--clean-border);
+  box-shadow: var(--clean-shadow-sm);
+}
+
+/* ── STORAGE BANNER ──────────────────────────────────────── */
+html[data-theme="clean"] #storage-banner {
+  background: var(--clean-surface);
+  border: 1px solid var(--clean-border);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  color: var(--clean-ink);
+  box-shadow: var(--clean-shadow-sm);
+}
+html[data-theme="clean"] #storage-banner.ok   { background: var(--clean-good-bg); border-color: rgba(58,138,64,.30); color: #1a4d1e; }
+html[data-theme="clean"] #storage-banner.warn { background: var(--clean-warn-bg); border-color: rgba(160,94,0,.30);  color: #5a3600; }
+
+/* ── BACKUP BLOCKS ───────────────────────────────────────── */
+html[data-theme="clean"] .backup-block {
+  background: var(--clean-surface-2);
+  border: 1px solid var(--clean-divider);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* ── FISH / SPECIES BROWSER ──────────────────────────────── */
+html[data-theme="clean"] .browse-list {
+  background: var(--clean-surface);
+  border: 1px solid var(--clean-border);
+  border-radius: 16px;
+}
+html[data-theme="clean"] .browse-row {
+  color: var(--clean-ink);
+  border-bottom: 1px solid var(--clean-divider);
+}
+html[data-theme="clean"] .browse-row:hover,
+html[data-theme="clean"] .browse-row:focus { background: var(--clean-primary-lt); }
+html[data-theme="clean"] .browse-row.open  { background: var(--clean-primary-lt); }
+html[data-theme="clean"] .profile-card,
+html[data-theme="clean"] .fishdb-card,
+html[data-theme="clean"] .compat-card {
+  background: var(--clean-surface-2);
+  border: 1px solid var(--clean-border);
+}
+html[data-theme="clean"] .species-suggest {
+  background: var(--clean-surface);
+  border: 1px solid var(--clean-border);
+  box-shadow: var(--clean-shadow-md);
+}
+html[data-theme="clean"] .species-suggest-row:hover,
+html[data-theme="clean"] .species-suggest-row:focus { background: var(--clean-primary-lt); }
+
+/* ── REMINDERS ───────────────────────────────────────────── */
+html[data-theme="clean"] .rem-perm-banner {
+  background: var(--clean-primary-lt);
+  border: 1px solid rgba(0,120,120,.25);
+}
+html[data-theme="clean"] .rem-perm-banner.muted { background: var(--clean-surface-2); border-color: var(--clean-divider); }
+html[data-theme="clean"] .rem-perm-banner.ok    { background: var(--clean-good-bg);  border-color: rgba(58,138,64,.25); }
+html[data-theme="clean"] .rem-row { border-bottom: 1px solid var(--clean-divider); }
+html[data-theme="clean"] .rem-row .toggle input[type=checkbox] { accent-color: var(--clean-primary); }
+
+/* ── READING CHIPS ───────────────────────────────────────── */
+html[data-theme="clean"] .reading-good    { color: var(--clean-good); background: var(--clean-good-bg); border-color: rgba(58,138,64,.35); }
+html[data-theme="clean"] .reading-warn    { color: var(--clean-warn); background: var(--clean-warn-bg); border-color: rgba(160,94,0,.30); }
+html[data-theme="clean"] .reading-bad     { color: var(--clean-bad);  background: var(--clean-bad-bg);  border-color: rgba(192,57,43,.30); }
+html[data-theme="clean"] .reading-unknown { color: var(--clean-ink-muted); background: var(--clean-surface-2); border-color: var(--clean-border); }
+
+/* ── PILLS ───────────────────────────────────────────────── */
+html[data-theme="clean"] .pill     { background: var(--clean-primary-lt); border-color: rgba(0,120,120,.25); color: var(--clean-primary); }
+html[data-theme="clean"] .pill.alt { background: var(--clean-primary-lt); border-color: rgba(0,120,120,.25); color: var(--clean-primary); }
+html[data-theme="clean"] .pill.gray{ background: var(--clean-surface-2);  border-color: var(--clean-divider); color: var(--clean-ink-muted); }
+
+/* ── THEME CARD selected color override ──────────────────── */
+html[data-theme="clean"] .theme-card.selected { border-color: var(--clean-primary); box-shadow: 0 0 0 2px rgba(0,120,120,.20) inset; }
+html[data-theme="clean"] .theme-check { background: var(--clean-primary); }
+
+/* ── FOCUS RINGS ─────────────────────────────────────────── */
+html[data-theme="clean"] button:focus-visible,
+html[data-theme="clean"] .tab:focus-visible,
+html[data-theme="clean"] .chip:focus-visible {
+  outline: 2px solid var(--clean-primary);
+  outline-offset: 2px;
+}
+
+/* ── FIRST TANK MODE ─────────────────────────────────────── */
+html[data-theme="clean"] .first-tank-cta {
+  background: var(--clean-primary-lt);
+  border: 1px solid rgba(0,120,120,.20);
+}
+html[data-theme="clean"] .first-tank-cta h2 {
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  -webkit-text-fill-color: var(--clean-primary);
+  color: var(--clean-primary);
+}
+html[data-theme="clean"] .ft-stage { background: var(--clean-surface-2); border-color: var(--clean-divider); }
+html[data-theme="clean"] .ft-stage.active { border-color: var(--clean-primary); }
+html[data-theme="clean"] .ft-stage.done { background: var(--clean-good-bg); border-color: rgba(58,138,64,.20); }
+html[data-theme="clean"] .ft-stage-icon { background: var(--clean-surface-2); }
+html[data-theme="clean"] .ft-stage.active .ft-stage-icon { background: var(--clean-primary); }
+html[data-theme="clean"] .ft-stage.done .ft-stage-icon  { background: var(--clean-good); color: #fff; }
+html[data-theme="clean"] .ft-progress-fill { background: linear-gradient(90deg, var(--clean-primary), #009999); }
+html[data-theme="clean"] .ft-do { border-left-color: var(--clean-primary); }
+html[data-theme="clean"] .ft-do .ft-block-list li::before { color: var(--clean-primary); }
+
+/* ── THEME PREVIEW SWATCH ────────────────────────────────── */
+.theme-preview-clean {
+  background: linear-gradient(160deg, #e0f0f0 0%, #f4f7f7 45%, #ffffff 100%);
+  border: 1px solid #ccd8d8 !important;
+}
+
+/* ── HR / DIVIDER ────────────────────────────────────────── */
+html[data-theme="clean"] .hr { background: linear-gradient(90deg, transparent, var(--clean-divider), transparent); }
