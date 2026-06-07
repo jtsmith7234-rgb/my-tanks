@@ -6,7 +6,7 @@
      3. Settings → Help (short beginner how-to answers)
    Reuses the app's openModal/closeModal sheet infra and theme
    tokens. Snapshots are lightweight CSS/HTML mini-mockups that
-   resemble real My Tanks screens — no image assets.
+   resemble real Tank Care Buddy screens — no image assets.
    ============================================================ */
 (function(){
   "use strict";
@@ -38,7 +38,7 @@
 
   function snapHome(){
     return deviceFrame(`
-      <div class="tut-ui-head"><span class="tut-ui-gear">⚙</span><span class="tut-ui-title">My Tanks</span><span class="tut-ui-add">+</span></div>
+      <div class="tut-ui-head"><span class="tut-ui-gear">⚙</span><span class="tut-ui-title">Tank Care Buddy</span><span class="tut-ui-add">+</span></div>
       <div class="tut-card tut-ok">
         <div class="tut-card-top"><b>Reef Tank</b><span class="tut-pill tut-pill-ok">● Looking good</span></div>
         <div class="tut-card-sub">55 gal · Saltwater · 12 animals</div>
@@ -133,14 +133,14 @@
     {
       label: "Welcome",
       snap: snapHome,
-      title: "Welcome to My Tanks",
+      title: "Welcome to Tank Care Buddy",
       body: "Your simple home base for keeping every aquarium healthy — all in one place."
     },
     {
       label: "New here?",
       snap: snapBeginner,
       title: "First tank? We can help",
-      body: "My Tanks guides you through the basics, step by step, as you set up your first tank."
+      body: "Tank Care Buddy guides you through the basics, step by step, as you set up your first tank."
     },
     {
       label: "Step 1",
@@ -152,7 +152,7 @@
       label: "Step 2",
       snap: snapCareLog,
       title: "Log water changes & tests",
-      body: "Track changes, tests, and dosing as you go. My Tanks keeps the history for you."
+      body: "Track changes, tests, and dosing as you go. Tank Care Buddy keeps the history for you."
     },
     {
       label: "Step 3",
@@ -205,7 +205,7 @@
     _state = { idx: 0, onFinish: opts.onFinish || null, markSeen: opts.markSeen !== false };
 
     const html = `
-      <div class="tut" role="dialog" aria-label="My Tanks tutorial">
+      <div class="tut" role="dialog" aria-label="Tank Care Buddy tutorial">
         <button class="tut-skip" data-tut-skip type="button">Skip</button>
         <div class="tut-track" id="tut-track">
           ${CARDS.map((c,i) => cardHTML(c,i,total)).join("")}
@@ -306,9 +306,9 @@
     { q: "How do I log a water test?",
       a: "Open a tank, go to <b>Tests</b>, and tap <b>Log water test</b>. Enter your readings (pH, ammonia, nitrate, and more)." },
     { q: "How do reminders work?",
-      a: "My Tanks suggests when care is due based on your logged history. Check the trends and reminders to see what's coming up." },
+      a: "Tank Care Buddy suggests when care is due based on your logged history. Check the trends and reminders to see what's coming up." },
     { q: "How do I check species compatibility?",
-      a: "When adding or viewing fish, My Tanks flags whether your species get along — look for the compatibility result before buying new fish." },
+      a: "When adding or viewing fish, Tank Care Buddy flags whether your species get along — look for the compatibility result before buying new fish." },
     { q: "How do I export or import a backup?",
       a: "Open <b>Settings</b> → <b>Data &amp; Backup</b>. Use <b>Export backup</b> to save a file to your phone, and <b>Import backup</b> to restore it." }
   ];

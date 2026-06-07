@@ -1,6 +1,6 @@
 {
-  "name": "My Tanks",
-  "short_name": "My Tanks",
+  "name": "Tank Care Buddy",
+  "short_name": "Tank Care Buddy",
   "description": "Freshwater aquarium tracker — water changes, dosing, and tests",
   "start_url": "./index.html",
   "scope": "./",

@@ -86,7 +86,7 @@ applyTheme(getTheme());
    ============================================================ */
 function snapshot(){
   return {
-    app: "My Tanks",
+    app: "Tank Care Buddy",
     version: 1,
     exportedAt: new Date().toISOString(),
     tanks: JSON.parse(store.get(KEY_TANKS) || "null") || (typeof tanks !== "undefined" ? tanks : []),
@@ -108,8 +108,10 @@ function downloadBackup(){
 function restoreFromText(text){
   let data;
   try { data = JSON.parse(text); } catch(e){ throw new Error("Backup file is not valid JSON."); }
-  if (!data || data.app !== "My Tanks" || !Array.isArray(data.tanks)) {
-    throw new Error("This doesn't look like a My Tanks backup.");
+  // Accept both the current name and the prior "My Tanks" name so older backups still load.
+  const validApp = data && (data.app === "Tank Care Buddy" || data.app === "My Tanks");
+  if (!data || !validApp || !Array.isArray(data.tanks)) {
+    throw new Error("This doesn't look like a Tank Care Buddy backup.");
   }
   tanks  = data.tanks;
   events = data.events  || {};
@@ -352,7 +354,7 @@ function render(){
   const addBtn  = $("#add-tank-btn");
 
   if(view.screen === "home"){
-    titleEl.textContent = "My Tanks";
+    titleEl.textContent = "Tank Care Buddy";
     backBtn.hidden = true;
     addBtn.hidden = false;
     renderHome();
@@ -1093,7 +1095,7 @@ function renderRemindersSection(t){
   } else if (perm === "default"){
     permBanner = `<div class="rem-perm-banner"><span>Want a phone alert when something is due?</span><button class="btn small" id="rem-enable">Turn on</button></div>`;
   } else if (perm === "denied"){
-    permBanner = `<div class="rem-perm-banner muted">Phone notifications are off. You can turn them back on in your iOS settings under My Tanks.</div>`;
+    permBanner = `<div class="rem-perm-banner muted">Phone notifications are off. You can turn them back on in your iOS settings under Tank Care Buddy.</div>`;
   } else {
     permBanner = `<div class="rem-perm-banner ok">\u2713 Phone notifications are on for this device.</div>`;
   }
@@ -2539,7 +2541,7 @@ function openShareModal(){
 
   const html = `
     <div style="max-width:520px">
-      <h2 style="margin:0 0 8px">Share My Tanks</h2>
+      <h2 style="margin:0 0 8px">Share Tank Care Buddy</h2>
       <p class="muted" style="margin:0 0 14px">Send this to a friend so they can try it on their own phone. Their tanks stay on their device, not yours.</p>
 
       <label class="label" style="display:block;margin-bottom:6px">Message</label>
@@ -2584,7 +2586,7 @@ function openShareModal(){
       nativeBtn.addEventListener("click", async () => {
         try {
           await navigator.share({
-            title: "My Tanks beta",
+            title: "Tank Care Buddy beta",
             text:  ta.value,
             url
           });
@@ -2851,19 +2853,23 @@ function openSettingsSheet(){
         <button class="settings-action" id="settings-feature" type="button">
           <span class="settings-label">Suggest a feature</span><span class="settings-chev">›</span>
         </button>
-        <p class="settings-note">Feedback and bug reports help improve My Tanks. Direct email support is coming — check back soon.</p>
+        <p class="settings-note">Feedback and bug reports help improve Tank Care Buddy. Direct email support is coming — check back soon.</p>
       </section>
 
       <section class="settings-group">
         <h4 class="settings-group-title">App</h4>
         <button class="settings-action" id="settings-share" type="button">
-          <span class="settings-label">Share My Tanks</span><span class="settings-chev">›</span>
+          <span class="settings-label">Share Tank Care Buddy</span><span class="settings-chev">›</span>
         </button>
         <div class="settings-row">
           <span class="settings-label">Version</span>
           <span class="settings-value">${APP_VERSION}</span>
         </div>
-        <p class="settings-note">My Tanks — your simple aquarium companion.</p>
+        <div class="settings-row">
+          <span class="settings-label">Owned by</span>
+          <span class="settings-value">The Pop Umbrella</span>
+        </div>
+        <p class="settings-note">Tank Care Buddy — your simple aquarium companion.</p>
       </section>
     </div>
   `, () => {

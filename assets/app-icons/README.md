@@ -1,6 +1,6 @@
 # App Icon Assets
 
-This folder holds the **source-of-truth master images** for the My Tanks app icon. These files are what we will hand off to Capacitor / Xcode when we initialize the native iOS project.
+This folder holds the **source-of-truth master images** for the Tank Care Buddy app icon. These files are what we will hand off to Capacitor / Xcode when we initialize the native iOS project.
 
 Do not edit these PNGs in place — replace them with new exports from the original design file when the icon changes.
 
