@@ -1198,6 +1198,218 @@ const FISH_IMAGES = {
     imageAttributionText: "Photo by Holger Krisp / Wikimedia Commons / CC BY-SA 4.0"
   },
 
+  // ===== TIER 3 SPECIES IMAGES =====
+
+  // Albino Cory Catfish
+  "Corydoras aeneus (albino)": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Corydoras_Albino.jpg/330px-Corydoras_Albino.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Corydoras_Albino.jpg/960px-Corydoras_Albino.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3ACorydoras_Albino.jpg",
+    imageLicenseType: "Public domain",
+    imageLicenseUrl:  "https://creativecommons.org/publicdomain/zero/1.0",
+    imageAttributionText: "Photo by Wikimedia Commons contributor / Wikimedia Commons / Public domain"
+  },
+  // Apistogramma Cacatuoides
+  "Apistogramma cacatuoides": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Apistogramma_cacatuoides.jpg/330px-Apistogramma_cacatuoides.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Apistogramma_cacatuoides.jpg/960px-Apistogramma_cacatuoides.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AApistogramma_cacatuoides.jpg",
+    imageLicenseType: "CC BY-SA 3.0",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/3.0",
+    imageAttributionText: "Photo by Redspider / Wikimedia Commons / CC BY-SA 3.0"
+  },
+  // Assassin Snail
+  "Clea helena": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Anentome_helena_01.JPG/330px-Anentome_helena_01.JPG",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Anentome_helena_01.JPG/960px-Anentome_helena_01.JPG",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AAnentome_helena_01.JPG",
+    imageLicenseType: "CC BY-SA 3.0",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/3.0",
+    imageAttributionText: "Photo by H. Zell / Wikimedia Commons / CC BY-SA 3.0"
+  },
+  // Bloodfin Tetra
+  "Aphyocharax anisitsi": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Aphyocharax_anisitsi.jpg/330px-Aphyocharax_anisitsi.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/7/7a/Aphyocharax_anisitsi.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AAphyocharax_anisitsi.jpg",
+    imageLicenseType: "CC BY-SA 3.0",
+    imageLicenseUrl:  "http://creativecommons.org/licenses/by-sa/3.0/",
+    imageAttributionText: "Photo by Hemigrammus at German Wikipedia / Wikimedia Commons / CC BY-SA 3.0"
+  },
+  // Celestial Pearl Danio
+  "Danio margaritatus": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Danio_margaritatus.jpg/330px-Danio_margaritatus.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Danio_margaritatus.jpg/960px-Danio_margaritatus.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3ADanio_margaritatus.jpg",
+    imageLicenseType: "CC BY-SA 3.0",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/3.0",
+    imageAttributionText: "Photo by Cisamarc / Wikimedia Commons / CC BY-SA 3.0"
+  },
+  // Chili Rasbora
+  "Boraras brigittae": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Boraras_brigittae.jpg/330px-Boraras_brigittae.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Boraras_brigittae.jpg/960px-Boraras_brigittae.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3ABoraras_brigittae.jpg",
+    imageLicenseType: "CC BY-SA 4.0",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/4.0",
+    imageAttributionText: "Photo by Atulbhats / Wikimedia Commons / CC BY-SA 4.0"
+  },
+  // Clown Pleco
+  "Panaqolus maccus": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Panaqolus_maccus.jpg/330px-Panaqolus_maccus.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Panaqolus_maccus.jpg/960px-Panaqolus_maccus.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3APanaqolus_maccus.jpg",
+    imageLicenseType: "CC0",
+    imageLicenseUrl:  "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    imageAttributionText: "Photo by Jarne Colman / Wikimedia Commons / CC0"
+  },
+  // Crystal Red Shrimp
+  "Caridina cantonensis": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Caridina_cantonensis_in_Ouwehands_Dierenpark.jpg/330px-Caridina_cantonensis_in_Ouwehands_Dierenpark.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Caridina_cantonensis_in_Ouwehands_Dierenpark.jpg/960px-Caridina_cantonensis_in_Ouwehands_Dierenpark.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3ACaridina_cantonensis_in_Ouwehands_Dierenpark.jpg",
+    imageLicenseType: "CC BY-SA 4.0",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/4.0",
+    imageAttributionText: "Photo by FakirNL / Wikimedia Commons / CC BY-SA 4.0"
+  },
+  // Diamond Tetra
+  "Moenkhausia pittieri": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Moenkhausia_pittieri.jpg/330px-Moenkhausia_pittieri.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Moenkhausia_pittieri.jpg/960px-Moenkhausia_pittieri.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AMoenkhausia_pittieri.jpg",
+    imageLicenseType: "CC BY-SA 2.5",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/2.5",
+    imageAttributionText: "Photo by Wikimedia Commons contributor / Wikimedia Commons / CC BY-SA 2.5"
+  },
+  // Gold Barb
+  "Barbodes semifasciolatus": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Gold_Barb_Puntius_semifasciolatus_6.png/330px-Gold_Barb_Puntius_semifasciolatus_6.png",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/b/bf/Gold_Barb_Puntius_semifasciolatus_6.png",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AGold_Barb_Puntius_semifasciolatus_6.png",
+    imageLicenseType: "CC BY-SA 3.0",
+    imageLicenseUrl:  "http://creativecommons.org/licenses/by-sa/3.0/",
+    imageAttributionText: "Photo by Fred Hsu / Wikimedia Commons / Wikimedia Commons / CC BY-SA 3.0"
+  },
+  // Hatchetfish (Marble)
+  "Carnegiella strigata": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Carnegiella_strigata.jpg/330px-Carnegiella_strigata.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/2/2f/Carnegiella_strigata.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3ACarnegiella_strigata.jpg",
+    imageLicenseType: "CC BY-SA 2.5",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/2.5",
+    imageAttributionText: "Photo by Dawson / Wikimedia Commons / Wikimedia Commons / CC BY-SA 2.5"
+  },
+  // Killifish (Golden Wonder)
+  "Aplocheilus lineatus": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Aplocheilus_lineatus_Day.png/330px-Aplocheilus_lineatus_Day.png",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/8/8c/Aplocheilus_lineatus_Day.png",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AAplocheilus_lineatus_Day.png",
+    imageLicenseType: "Public domain",
+    imageLicenseUrl:  "https://creativecommons.org/publicdomain/zero/1.0",
+    imageAttributionText: "Photo by Sir Francis Day (historical illustration) / Wikimedia Commons / Public domain"
+  },
+  // Lemon Tetra
+  "Hyphessobrycon pulchripinnis": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Hyphessobrycon_pulchripinnis.jpg/330px-Hyphessobrycon_pulchripinnis.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Hyphessobrycon_pulchripinnis.jpg/960px-Hyphessobrycon_pulchripinnis.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AHyphessobrycon_pulchripinnis.jpg",
+    imageLicenseType: "CC BY 2.5",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by/2.5",
+    imageAttributionText: "Photo by Waugsberg / Wikimedia Commons / CC BY 2.5"
+  },
+  // Otocinclus Catfish
+  "Otocinclus vittatus": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Otocinclus_vittatus.jpg/330px-Otocinclus_vittatus.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/4/47/Otocinclus_vittatus.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AOtocinclus_vittatus.jpg",
+    imageLicenseType: "CC BY-SA 3.0",
+    imageLicenseUrl:  "http://creativecommons.org/licenses/by-sa/3.0/",
+    imageAttributionText: "Photo by Chle ass / Wikimedia Commons / Wikimedia Commons / CC BY-SA 3.0"
+  },
+  // Pygmy Cory Catfish
+  "Corydoras pygmaeus": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Corydoras_pygmaeus.jpg/330px-Corydoras_pygmaeus.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Corydoras_pygmaeus.jpg/960px-Corydoras_pygmaeus.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3ACorydoras_pygmaeus.jpg",
+    imageLicenseType: "CC BY-SA 3.0",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/3.0",
+    imageAttributionText: "Photo by Sesarma / Wikimedia Commons / CC BY-SA 3.0"
+  },
+  // Siamese Algae Eater (SAE)
+  "Crossocheilus siamensis": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Crossocheilus_siamensis_%282%29_by_Ark.jpg/330px-Crossocheilus_siamensis_%282%29_by_Ark.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Crossocheilus_siamensis_%282%29_by_Ark.jpg/960px-Crossocheilus_siamensis_%282%29_by_Ark.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3ACrossocheilus_siamensis_%282%29_by_Ark.jpg",
+    imageLicenseType: "CC BY 3.0",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by/3.0",
+    imageAttributionText: "Photo by User:Ark pl wiki / Wikimedia Commons / CC BY 3.0"
+  },
+  // Sterbai Cory Catfish
+  "Corydoras sterbai": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Corydoras_sterbai.jpg/330px-Corydoras_sterbai.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/d/df/Corydoras_sterbai.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3ACorydoras_sterbai.jpg",
+    imageLicenseType: "CC BY 2.5",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by/2.5",
+    imageAttributionText: "Photo by Wikimedia Commons contributor / Wikimedia Commons / CC BY 2.5"
+  },
+  // Von Rio / Flame Tetra
+  "Hyphessobrycon flammeus": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Hyphessobrycon_flammeus.jpg/330px-Hyphessobrycon_flammeus.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/c/cb/Hyphessobrycon_flammeus.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AHyphessobrycon_flammeus.jpg",
+    imageLicenseType: "CC BY 2.5",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by/2.5",
+    imageAttributionText: "Photo by Wikimedia Commons contributor / Wikimedia Commons / CC BY 2.5"
+  },
+  // Yoyo Loach
+  "Botia almorhae": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Botia_almorhae.jpg/330px-Botia_almorhae.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Botia_almorhae.jpg/960px-Botia_almorhae.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3ABotia_almorhae.jpg",
+    imageLicenseType: "CC BY-SA 2.5",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/2.5",
+    imageAttributionText: "Photo by Lukáš Mižoch / Wikimedia Commons / CC BY-SA 2.5"
+  },
+
 };
 
 /* Tier assignments — strings keyed by scientific name to keep FISHDB clean.

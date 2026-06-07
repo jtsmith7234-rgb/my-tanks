@@ -47,3 +47,11 @@ This folder provides:
 - **Species:** 29 Tier 2 species (all approved, all Wikimedia Commons)
 - **Licenses:** CC BY 2.0, CC BY 2.5, CC BY-SA 2.5, CC BY-SA 3.0, CC BY-SA 3.0 de, CC BY-SA 4.0, Public Domain
 - **Combined total:** 55 approved entries in FISH_IMAGES (Tier 1 + Tier 2)
+
+## Tier 3 Audit (2026-06-07)
+- **File:** `tier3_license_audit_20260607.json`
+- **PDF:** `TankCareBuddy_Image_License_Audit_Tier3_20260607.pdf`
+- **Species:** 19 Tier 3 species (all approved, all Wikimedia Commons)
+- **Licenses:** CC BY 2.5, CC BY 3.0, CC BY-SA 2.5, CC BY-SA 3.0, CC BY-SA 4.0, CC0, Public Domain
+- **Combined total:** 75 approved entries in FISH_IMAGES (Tier 1 + Tier 2 + Tier 3)
+- **Silhouette placeholders remaining:** 0 — all 73 FISHDB species have real photos
