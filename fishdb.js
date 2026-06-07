@@ -574,10 +574,15 @@ function fishCompatibility(candidate, tank){
 /* Keyed by scientific name (canonical) so renaming common names does
    not break image links. Empty by default — curators fill this in. */
 const FISH_IMAGES = {
+  /* NOTE: Thumb URLs use the pixel width returned by the Wikimedia API
+     (iiurlwidth=320 → 330px for most files). Hero URLs use iiurlwidth=640
+     → 960px. Never hand-craft 200px/640px — those sizes are often not
+     pre-cached and return HTTP 400. Always use API-verified widths. */
+
   // Betta (Siamese Fighting Fish)
   "Betta splendens": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Betta_splendens_-_Flickr_-_Nippyfish.jpg/200px-Betta_splendens_-_Flickr_-_Nippyfish.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Betta_splendens_-_Flickr_-_Nippyfish.jpg/640px-Betta_splendens_-_Flickr_-_Nippyfish.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Betta_splendens_-_Flickr_-_Nippyfish.jpg/330px-Betta_splendens_-_Flickr_-_Nippyfish.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/9/9e/Betta_splendens_-_Flickr_-_Nippyfish.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Betta_splendens_-_Flickr_-_Nippyfish.jpg",
@@ -587,30 +592,30 @@ const FISH_IMAGES = {
   },
   // Dwarf Gourami
   "Trichogaster lalius": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Colisa_lalia_-_Trichogaster_lalius_%28aka%29.jpg/200px-Colisa_lalia_-_Trichogaster_lalius_%28aka%29.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Colisa_lalia_-_Trichogaster_lalius_%28aka%29.jpg/640px-Colisa_lalia_-_Trichogaster_lalius_%28aka%29.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Colisa_lalia_-_Trichogaster_lalius_%28aka%29.jpg/330px-Colisa_lalia_-_Trichogaster_lalius_%28aka%29.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Colisa_lalia_-_Trichogaster_lalius_%28aka%29.jpg/960px-Colisa_lalia_-_Trichogaster_lalius_%28aka%29.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Colisa_lalia_-_Trichogaster_lalius_(aka).jpg",
     imageLicenseType: "CC BY-SA 2.5",
     imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/2.5",
-    imageAttributionText: "Photo by André Karwath (Aka) / Wikimedia Commons / CC BY-SA 2.5"
+    imageAttributionText: "Photo by André Karwath / Wikimedia Commons / CC BY-SA 2.5"
   },
   // Neon Tetra
   "Paracheirodon innesi": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Paracheirodon_innesi_%28aka%29.jpg/200px-Paracheirodon_innesi_%28aka%29.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Paracheirodon_innesi_%28aka%29.jpg/640px-Paracheirodon_innesi_%28aka%29.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Paracheirodon_innesi_%28aka%29.jpg/330px-Paracheirodon_innesi_%28aka%29.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Paracheirodon_innesi_%28aka%29.jpg/960px-Paracheirodon_innesi_%28aka%29.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Paracheirodon_innesi_(aka).jpg",
     imageLicenseType: "CC BY-SA 2.5",
     imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/2.5",
-    imageAttributionText: "Photo by André Karwath (Aka) / Wikimedia Commons / CC BY-SA 2.5"
+    imageAttributionText: "Photo by André Karwath / Wikimedia Commons / CC BY-SA 2.5"
   },
   // Cardinal Tetra
   "Paracheirodon axelrodi": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Cardinal_Tetra_2.jpg/200px-Cardinal_Tetra_2.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Cardinal_Tetra_2.jpg/640px-Cardinal_Tetra_2.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Cardinal_Tetra_2.jpg/330px-Cardinal_Tetra_2.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/8/8f/Cardinal_Tetra_2.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Cardinal_Tetra_2.jpg",
@@ -620,8 +625,8 @@ const FISH_IMAGES = {
   },
   // Harlequin Rasbora
   "Trigonostigma heteromorpha": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Cyprinidae_Trigonostigma_heteromorpha_3.jpg/200px-Cyprinidae_Trigonostigma_heteromorpha_3.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Cyprinidae_Trigonostigma_heteromorpha_3.jpg/640px-Cyprinidae_Trigonostigma_heteromorpha_3.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Cyprinidae_Trigonostigma_heteromorpha_3.jpg/330px-Cyprinidae_Trigonostigma_heteromorpha_3.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Cyprinidae_Trigonostigma_heteromorpha_3.jpg/960px-Cyprinidae_Trigonostigma_heteromorpha_3.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Cyprinidae_Trigonostigma_heteromorpha_3.jpg",
@@ -631,30 +636,30 @@ const FISH_IMAGES = {
   },
   // Zebra Danio
   "Danio rerio": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/201108_zebrafish.png/200px-201108_zebrafish.png",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/201108_zebrafish.png/640px-201108_zebrafish.png",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/201108_zebrafish.png/330px-201108_zebrafish.png",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/6/61/201108_zebrafish.png",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:201108_zebrafish.png",
     imageLicenseType: "CC BY 4.0",
     imageLicenseUrl:  "https://creativecommons.org/licenses/by/4.0",
-    imageAttributionText: "Photo by DataBase Center for Life Science (DBCLS) / Wikimedia Commons / CC BY 4.0"
+    imageAttributionText: "Photo by DBCLS / Wikimedia Commons / CC BY 4.0"
   },
   // Guppy
   "Poecilia reticulata": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Poecilia_reticulata_090510_0171_kdBdk.jpg/200px-Poecilia_reticulata_090510_0171_kdBdk.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Poecilia_reticulata_090510_0171_kdBdk.jpg/640px-Poecilia_reticulata_090510_0171_kdBdk.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Poecilia_reticulata_090510_0171_kdBdk.jpg/330px-Poecilia_reticulata_090510_0171_kdBdk.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Poecilia_reticulata_090510_0171_kdBdk.jpg/960px-Poecilia_reticulata_090510_0171_kdBdk.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Poecilia_reticulata_090510_0171_kdBdk.jpg",
     imageLicenseType: "CC BY-SA 3.0",
     imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/3.0",
-    imageAttributionText: "Photo by Wibowo Djatmiko (Wie146) / Wikimedia Commons / CC BY-SA 3.0"
+    imageAttributionText: "Photo by Wibowo Djatmiko / Wikimedia Commons / CC BY-SA 3.0"
   },
   // Platy
   "Xiphophorus maculatus": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/24karat_platy.jpg/200px-24karat_platy.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/24karat_platy.jpg/640px-24karat_platy.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/24karat_platy.jpg/330px-24karat_platy.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/6/67/24karat_platy.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:24karat_platy.jpg",
@@ -664,8 +669,8 @@ const FISH_IMAGES = {
   },
   // Swordtail
   "Xiphophorus hellerii": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Pair_of_Red_Wag_Swordtails.jpg/200px-Pair_of_Red_Wag_Swordtails.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Pair_of_Red_Wag_Swordtails.jpg/640px-Pair_of_Red_Wag_Swordtails.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Pair_of_Red_Wag_Swordtails.jpg/330px-Pair_of_Red_Wag_Swordtails.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Pair_of_Red_Wag_Swordtails.jpg/960px-Pair_of_Red_Wag_Swordtails.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Pair_of_Red_Wag_Swordtails.jpg",
@@ -675,8 +680,8 @@ const FISH_IMAGES = {
   },
   // Molly
   "Poecilia sphenops": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Poecilia_sphenops_9830047.jpg/200px-Poecilia_sphenops_9830047.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Poecilia_sphenops_9830047.jpg/640px-Poecilia_sphenops_9830047.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Poecilia_sphenops_9830047.jpg/330px-Poecilia_sphenops_9830047.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Poecilia_sphenops_9830047.jpg/960px-Poecilia_sphenops_9830047.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Poecilia_sphenops_9830047.jpg",
@@ -684,186 +689,186 @@ const FISH_IMAGES = {
     imageLicenseUrl:  "https://creativecommons.org/licenses/by/4.0",
     imageAttributionText: "Photo by Tereso Hernández Morales / Wikimedia Commons / CC BY 4.0"
   },
-  // Bronze Cory Catfish
+  // Bronze Cory
   "Corydoras aeneus": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Corydoras_aeneus_01.jpg/200px-Corydoras_aeneus_01.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Corydoras_aeneus_01.jpg/640px-Corydoras_aeneus_01.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Corydoras_aeneus_01.jpg/330px-Corydoras_aeneus_01.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Corydoras_aeneus_01.jpg/960px-Corydoras_aeneus_01.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Corydoras_aeneus_01.jpg",
     imageLicenseType: "CC BY-SA 4.0",
     imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/4.0",
-    imageAttributionText: "Photo by Gabriel Resende Veiga (User:GABS) / Wikimedia Commons / CC-BY-SA 4.0"
+    imageAttributionText: "Photo by Gabriel Resende Veiga / Wikimedia Commons / CC BY-SA 4.0"
   },
   // Common Pleco
   "Hypostomus plecostomus": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Hypostomus_plecostomus_-_Rapha%C3%ABl_Covain.png/200px-Hypostomus_plecostomus_-_Rapha%C3%ABl_Covain.png",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Hypostomus_plecostomus_-_Rapha%C3%ABl_Covain.png/640px-Hypostomus_plecostomus_-_Rapha%C3%ABl_Covain.png",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Hypostomus_plecostomus_-_Rapha%C3%ABl_Covain.png/330px-Hypostomus_plecostomus_-_Rapha%C3%ABl_Covain.png",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/c/c1/Hypostomus_plecostomus_-_Rapha%C3%ABl_Covain.png",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Hypostomus_plecostomus_-_Rapha%C3%ABl_Covain.png",
     imageLicenseType: "CC BY-SA 4.0",
     imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/4.0",
-    imageAttributionText: "Photo by Raphaël Covain, Natural History Museum of Geneva / Wikimedia Commons / CC-BY-SA 4.0"
+    imageAttributionText: "Photo by Raphaël Covain / NHM Geneva / Wikimedia Commons / CC BY-SA 4.0"
   },
   // Clown Loach
   "Chromobotia macracanthus": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Chromobotia_macracanthus_%28Bleeker%2C_1852%29_Clown_loach.jpg/200px-Chromobotia_macracanthus_%28Bleeker%2C_1852%29_Clown_loach.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Chromobotia_macracanthus_%28Bleeker%2C_1852%29_Clown_loach.jpg/640px-Chromobotia_macracanthus_%28Bleeker%2C_1852%29_Clown_loach.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Chromobotia_macracanthus_%28Bleeker%2C_1852%29_Clown_loach.jpg/330px-Chromobotia_macracanthus_%28Bleeker%2C_1852%29_Clown_loach.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Chromobotia_macracanthus_%28Bleeker%2C_1852%29_Clown_loach.jpg/960px-Chromobotia_macracanthus_%28Bleeker%2C_1852%29_Clown_loach.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Chromobotia_macracanthus_(Bleeker,_1852)_Clown_loach.jpg",
     imageLicenseType: "CC BY-SA 4.0",
     imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/4.0",
-    imageAttributionText: "Photo by Andrej Jakubík / Wikimedia Commons / CC-BY-SA 4.0"
+    imageAttributionText: "Photo by Andrej Jakubík / Wikimedia Commons / CC BY-SA 4.0"
   },
   // Angelfish
   "Pterophyllum scalare": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Angelfish_-_Marble_%28Pterophyllum_scalare%29.jpg/200px-Angelfish_-_Marble_%28Pterophyllum_scalare%29.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Angelfish_-_Marble_%28Pterophyllum_scalare%29.jpg/640px-Angelfish_-_Marble_%28Pterophyllum_scalare%29.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Angelfish_-_Marble_%28Pterophyllum_scalare%29.jpg/330px-Angelfish_-_Marble_%28Pterophyllum_scalare%29.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Angelfish_-_Marble_%28Pterophyllum_scalare%29.jpg/960px-Angelfish_-_Marble_%28Pterophyllum_scalare%29.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Angelfish_-_Marble_(Pterophyllum_scalare).jpg",
     imageLicenseType: "CC BY-SA 3.0",
     imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/3.0",
-    imageAttributionText: "Photo by Fish-Hed / Wikimedia Commons / CC-BY-SA 3.0"
+    imageAttributionText: "Photo by Fish-Hed / Wikimedia Commons / CC BY-SA 3.0"
   },
   // Jack Dempsey
   "Rocio octofasciata": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Jack_Dempsey_%28Rocio_octofasciata%29_-_Carwash_Cenote_QR.jpg/200px-Jack_Dempsey_%28Rocio_octofasciata%29_-_Carwash_Cenote_QR.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Jack_Dempsey_%28Rocio_octofasciata%29_-_Carwash_Cenote_QR.jpg/640px-Jack_Dempsey_%28Rocio_octofasciata%29_-_Carwash_Cenote_QR.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Jack_Dempsey_%28Rocio_octofasciata%29_-_Carwash_Cenote_QR.jpg/330px-Jack_Dempsey_%28Rocio_octofasciata%29_-_Carwash_Cenote_QR.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Jack_Dempsey_%28Rocio_octofasciata%29_-_Carwash_Cenote_QR.jpg/960px-Jack_Dempsey_%28Rocio_octofasciata%29_-_Carwash_Cenote_QR.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Jack_Dempsey_(Rocio_octofasciata)_-_Carwash_Cenote_QR.jpg",
     imageLicenseType: "CC BY-SA 2.0",
     imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/2.0",
-    imageAttributionText: "Photo by Bernard DUPONT / Wikimedia Commons / CC-BY-SA 2.0"
+    imageAttributionText: "Photo by Bernard DUPONT / Wikimedia Commons / CC BY-SA 2.0"
   },
   // Firemouth Cichlid
   "Thorichthys meeki": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Cichlasoma_meeki.jpg/200px-Cichlasoma_meeki.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Cichlasoma_meeki.jpg/640px-Cichlasoma_meeki.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Cichlasoma_meeki.jpg/330px-Cichlasoma_meeki.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/Cichlasoma_meeki.jpg/960px-Cichlasoma_meeki.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Cichlasoma_meeki.jpg",
     imageLicenseType: "CC BY 3.0",
     imageLicenseUrl:  "https://creativecommons.org/licenses/by/3.0",
-    imageAttributionText: "Doronenko / Wikimedia Commons / CC BY 3.0"
+    imageAttributionText: "Photo by Doronenko / Wikimedia Commons / CC BY 3.0"
   },
   // Discus
   "Symphysodon aequifasciatus": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Symphysodon_aequifasciatus_-_Karlsruhe_Zoo_01.jpg/200px-Symphysodon_aequifasciatus_-_Karlsruhe_Zoo_01.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Symphysodon_aequifasciatus_-_Karlsruhe_Zoo_01.jpg/640px-Symphysodon_aequifasciatus_-_Karlsruhe_Zoo_01.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Symphysodon_aequifasciatus_-_Karlsruhe_Zoo_01.jpg/330px-Symphysodon_aequifasciatus_-_Karlsruhe_Zoo_01.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Symphysodon_aequifasciatus_-_Karlsruhe_Zoo_01.jpg/960px-Symphysodon_aequifasciatus_-_Karlsruhe_Zoo_01.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Symphysodon_aequifasciatus_-_Karlsruhe_Zoo_01.jpg",
     imageLicenseType: "CC BY-SA 3.0",
     imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/3.0",
-    imageAttributionText: "H. Zell / Wikimedia Commons / CC BY-SA 3.0"
+    imageAttributionText: "Photo by H. Zell / Wikimedia Commons / CC BY-SA 3.0"
   },
   // Oscar
   "Astronotus ocellatus": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Oscar_fish_%28Astronotus_ocellatus%29.jpg/200px-Oscar_fish_%28Astronotus_ocellatus%29.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Oscar_fish_%28Astronotus_ocellatus%29.jpg/640px-Oscar_fish_%28Astronotus_ocellatus%29.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Oscar_fish_%28Astronotus_ocellatus%29.jpg/330px-Oscar_fish_%28Astronotus_ocellatus%29.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Oscar_fish_%28Astronotus_ocellatus%29.jpg/960px-Oscar_fish_%28Astronotus_ocellatus%29.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Oscar_fish_(Astronotus_ocellatus).jpg",
     imageLicenseType: "CC BY-SA 4.0",
     imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/4.0",
-    imageAttributionText: "Clément Bardot / Wikimedia Commons / CC BY-SA 4.0"
+    imageAttributionText: "Photo by Clément Bardot / Wikimedia Commons / CC BY-SA 4.0"
   },
   // Cherry Barb
   "Puntius titteya": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Cherry_barb%2C_Puntius_titteya.jpg/200px-Cherry_barb%2C_Puntius_titteya.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Cherry_barb%2C_Puntius_titteya.jpg/640px-Cherry_barb%2C_Puntius_titteya.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Cherry_barb%2C_Puntius_titteya.jpg/330px-Cherry_barb%2C_Puntius_titteya.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Cherry_barb%2C_Puntius_titteya.jpg/960px-Cherry_barb%2C_Puntius_titteya.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Cherry_barb,_Puntius_titteya.jpg",
     imageLicenseType: "CC BY 2.0",
     imageLicenseUrl:  "https://creativecommons.org/licenses/by/2.0",
-    imageAttributionText: "Brian Gratwicke / Wikimedia Commons / CC BY 2.0"
+    imageAttributionText: "Photo by Brian Gratwicke / Wikimedia Commons / CC BY 2.0"
   },
   // Tiger Barb
   "Puntigrus tetrazona": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Tiger_Barb_700.jpg/200px-Tiger_Barb_700.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Tiger_Barb_700.jpg/640px-Tiger_Barb_700.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Tiger_Barb_700.jpg/330px-Tiger_Barb_700.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/1/12/Tiger_Barb_700.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Tiger_Barb_700.jpg",
     imageLicenseType: "CC BY-SA 2.5",
     imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/2.5",
-    imageAttributionText: "Derek Ramsey (Ram-Man) / Wikimedia Commons / CC BY-SA 2.5"
+    imageAttributionText: "Photo by Derek Ramsey / Wikimedia Commons / CC BY-SA 2.5"
   },
   // Rosy Barb
   "Pethia conchonius": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Puntius_conchonius.jpg/200px-Puntius_conchonius.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Puntius_conchonius.jpg/640px-Puntius_conchonius.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Puntius_conchonius.jpg/330px-Puntius_conchonius.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Puntius_conchonius.jpg/960px-Puntius_conchonius.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Puntius_conchonius.jpg",
     imageLicenseType: "CC BY-SA 4.0",
     imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/4.0",
-    imageAttributionText: "Marrabbio2 / Wikimedia Commons / CC BY-SA 4.0"
+    imageAttributionText: "Photo by Marrabbio2 / Wikimedia Commons / CC BY-SA 4.0"
   },
   // Rainbow Shark
   "Epalzeorhynchos frenatum": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Fransenlipper.JPG/200px-Fransenlipper.JPG",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Fransenlipper.JPG/640px-Fransenlipper.JPG",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Epalzeorhynchos_frenatum.jpg/330px-Epalzeorhynchos_frenatum.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Epalzeorhynchos_frenatum.jpg/960px-Epalzeorhynchos_frenatum.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
-    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Fransenlipper.JPG",
-    imageLicenseType: "CC BY-SA 3.0",
-    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/3.0",
-    imageAttributionText: "Photo by MerlinSenger / Wikimedia Commons / CC-BY-SA 3.0"
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Epalzeorhynchos_frenatum.jpg",
+    imageLicenseType: "CC BY-SA 2.0",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/2.0",
+    imageAttributionText: "Photo by MerlinSenger / Wikimedia Commons / CC BY-SA 2.0"
   },
   // Red-tailed Black Shark
   "Epalzeorhynchos bicolor": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Epalzeorhynchos_bicolor.jpg/200px-Epalzeorhynchos_bicolor.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Epalzeorhynchos_bicolor.jpg/640px-Epalzeorhynchos_bicolor.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Epalzeorhynchos_bicolor.jpg/330px-Epalzeorhynchos_bicolor.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/Epalzeorhynchos_bicolor.jpg/960px-Epalzeorhynchos_bicolor.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Epalzeorhynchos_bicolor.jpg",
     imageLicenseType: "CC BY-SA 3.0",
     imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/3.0",
-    imageAttributionText: "Photo by Caveman99 / Wikimedia Commons / CC-BY-SA 3.0"
+    imageAttributionText: "Photo by Caveman99 / Wikimedia Commons / CC BY-SA 3.0"
   },
-  // Common Goldfish
+  // Common / Comet Goldfish
   "Carassius auratus": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Goldfish_carassius_auratus.jpg/200px-Goldfish_carassius_auratus.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Goldfish_carassius_auratus.jpg/640px-Goldfish_carassius_auratus.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Goldfish3.jpg/330px-Goldfish3.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/e/e9/Goldfish3.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
-    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Goldfish_carassius_auratus.jpg",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Goldfish3.jpg",
     imageLicenseType: "Public Domain",
     imageLicenseUrl:  "https://creativecommons.org/publicdomain/zero/1.0",
     imageAttributionText: "Duane Raver, U.S. Fish and Wildlife Service / Wikimedia Commons / Public Domain"
   },
   // Amano Shrimp
   "Caridina multidentata": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Amano_Shrimp.jpg/200px-Amano_Shrimp.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Amano_Shrimp.jpg/640px-Amano_Shrimp.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Amano_Shrimp.jpg/330px-Amano_Shrimp.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Amano_Shrimp.jpg/960px-Amano_Shrimp.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Amano_Shrimp.jpg",
     imageLicenseType: "CC BY-SA 4.0",
     imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/4.0",
-    imageAttributionText: "Photo by Atulbhats / Wikimedia Commons / CC-BY-SA 4.0"
+    imageAttributionText: "Photo by Atulbhats / Wikimedia Commons / CC BY-SA 4.0"
   },
   // Mystery Snail
   "Pomacea bridgesii": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Pomacea_bridgesii.jpg/200px-Pomacea_bridgesii.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Pomacea_bridgesii.jpg/640px-Pomacea_bridgesii.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/Pomacea_bridgesii.jpg/330px-Pomacea_bridgesii.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/d/d5/Pomacea_bridgesii.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Pomacea_bridgesii.jpg",
     imageLicenseType: "CC BY-SA 4.0",
     imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/4.0",
-    imageAttributionText: "Photo by BrittanyU / Wikimedia Commons / CC-BY-SA 4.0"
+    imageAttributionText: "Photo by BrittanyU / Wikimedia Commons / CC BY-SA 4.0"
   },
-  // Fancy Goldfish (shares the Carassius auratus image)
+  // Fancy Goldfish (shares image with Carassius auratus — different variety)
   "Carassius auratus (fancy)": {
-    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Goldfish_carassius_auratus.jpg/200px-Goldfish_carassius_auratus.jpg",
-    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Goldfish_carassius_auratus.jpg/640px-Goldfish_carassius_auratus.jpg",
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Goldfish_carassius_auratus.jpg/330px-Goldfish_carassius_auratus.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/6/62/Goldfish_carassius_auratus.jpg",
     imageStatus:   "approved",
     imageSourceName: "Wikimedia Commons",
     imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:Goldfish_carassius_auratus.jpg",
@@ -947,7 +952,7 @@ function fishTier(f){
    detail hero when no approved image is available. Inline (no network)
    so we never flash a broken-image icon. Currentcolor lets dark/light
    themes restyle without swapping the source. */
-const FISH_SILHOUETTE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 40" aria-hidden="true" focusable="false"><path fill="currentColor" d="M40 20c0-8-9-14-19-14-7 0-13 3-17 7 4 1 7 4 7 7s-3 6-7 7c4 4 10 7 17 7 10 0 19-6 19-14zm-25-2a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm32-6 13-7c1-.5 2 .3 2 1.4v27.2c0 1.1-1.1 1.9-2 1.4l-13-7c-1-.5-1-2 0-2.5l4.5-2.4c.6-.3.6-1.2 0-1.5L47 14.5c-1-.5-1-2 0-2.5z"/></svg>`;
+const FISH_SILHOUETTE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 56" width="80" height="56" aria-hidden="true" focusable="false"><g fill="currentColor" opacity="0.9"><!-- tail fin --><path d="M62 28 L76 16 L78 20 L70 28 L78 36 L76 40 Z"/><!-- body --><ellipse cx="36" cy="28" rx="22" ry="14"/><!-- dorsal fin --><path d="M26 14 Q34 6 46 10 L44 14 Z"/><!-- pectoral fin --><path d="M32 32 Q28 40 22 38 Q26 34 30 32 Z"/><!-- eye --><circle cx="20" cy="25" r="3"/><circle cx="19.5" cy="24.5" r="1.2" fill="white" opacity="0.7"/><!-- mouth --><path d="M12 28 Q14 30 12 32" stroke="currentColor" stroke-width="1.2" fill="none" opacity="0.6"/></g></svg>`;
 
 /* Fallback fired when an approved image URL fails to load (404, blocked,
    offline). Swap the broken <img> for the inline silhouette, mark the

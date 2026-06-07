@@ -2598,8 +2598,12 @@ html[data-skin="dark"] .compat-bad{ color:#ffb0b0 }
   background:rgba(255,255,255,.04);
 }
 .species-thumb-placeholder svg{
-  width:62%; height:auto;
-  opacity:.65;
+  /* Lock the SVG to a fixed pixel size so every placeholder slot is
+     identical regardless of the SVG's own width/height attributes.
+     overflow:hidden on .species-thumb clips anything larger. */
+  width:28px; height:20px;
+  flex:none;
+  opacity:.6;
 }
 
 /* Hero on the detail / profile card. 16:9 fixed ratio so layout is
