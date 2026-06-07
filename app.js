@@ -3090,7 +3090,7 @@ function openSettingsSheet(){
         <button class="settings-action" id="settings-feature" type="button">
           <span class="settings-label">Suggest a feature</span><span class="settings-chev">›</span>
         </button>
-        <p class="settings-note">Feedback and bug reports help improve Tank Care Buddy. Direct email support is coming — check back soon.</p>
+        <p class="settings-note">Feedback and bug reports help improve Tank Care Buddy. Email us at <a href="mailto:tankcarebuddy@outlook.com" style="color:var(--accent);">tankcarebuddy@outlook.com</a> — we read every message.</p>
       </section>
 
       <section class="settings-group">
@@ -3179,8 +3179,8 @@ function openSettingsSheet(){
       if (window.TUTORIAL) window.TUTORIAL.openTutorial({ markSeen: false, onFinish: handleAddTankTap });
     });
 
-    const bugMsg = "Bug reports help a ton. Email coming soon — for now, try a fresh reload and check if it persists.";
-    const featureMsg = "Feature ideas are always welcome. Direct email support is on the way — stay tuned.";
+    const bugMsg = "Bug reports help a ton. Email us at tankcarebuddy@outlook.com — include your device and iOS version and we\'ll look into it.";
+    const featureMsg = "Feature ideas are always welcome. Email us at tankcarebuddy@outlook.com and we\'d love to hear what you\'d like to see.";
     const bugBtn = $("#settings-bug"); if (bugBtn) bugBtn.addEventListener("click", () => toast(bugMsg));
     const featBtn = $("#settings-feature"); if (featBtn) featBtn.addEventListener("click", () => toast(featureMsg));
 
