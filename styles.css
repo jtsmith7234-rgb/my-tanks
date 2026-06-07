@@ -16,10 +16,10 @@
 
 :root{
   /* Shared layout tokens (theme-agnostic) */
-  --radius:22px;
+  --radius:24px;
   --radius-sm:14px;
-  --font-body: -apple-system, "SF Pro Text", system-ui, "Inter", "Segoe UI", Roboto, sans-serif;
-  --font-display: -apple-system, "SF Pro Display", system-ui, "Inter", "Segoe UI", Roboto, sans-serif;
+  --font-body: "Inter", -apple-system, "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Plus Jakarta Sans", -apple-system, "SF Pro Display", system-ui, "Segoe UI", Roboto, sans-serif;
 }
 
 /* ---------- THEME: MIDNIGHT REEF (dark, default) ----------
@@ -324,7 +324,7 @@ html[data-theme="planted"] .fx-plants .blade::after{
 .topbar-right{justify-content:flex-end;}
 .topbar h1{
   font-family: var(--font-display);
-  font-weight:700;letter-spacing:.3px;
+  font-weight:800;letter-spacing:-.2px;
   font-size:19px;margin:0;
   flex:0 1 auto;text-align:center;
   min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
@@ -414,7 +414,7 @@ html[data-skin="dark"] .topbar h1{
 .tank-card h3{
   position:relative;margin:0 0 4px;
   font-family:var(--font-display);
-  font-size:22px;font-weight:700;letter-spacing:-.2px;color:var(--ink);
+  font-size:22px;font-weight:800;letter-spacing:-.3px;color:var(--ink);
 }
 .tank-card .meta{position:relative;color:var(--ink-dim);font-size:13.5px;font-weight:500}
 .tank-card .pill-row{position:relative;margin-top:14px;display:flex;flex-wrap:wrap;gap:6px}
@@ -432,8 +432,8 @@ html[data-skin="dark"] .topbar h1{
   margin:0;
   font-family:var(--font-display);
   font-size:22px;
-  font-weight:700;
-  letter-spacing:-.2px;
+  font-weight:800;
+  letter-spacing:-.3px;
   color:var(--ink);
   min-width:0;
   overflow:hidden;
@@ -562,7 +562,7 @@ html[data-skin="light"] .tab.active{
 }
 .section h2{
   margin:0 0 12px;font-family:var(--font-display);
-  font-size:20px;font-weight:700;letter-spacing:.2px;color:var(--ink);
+  font-size:20px;font-weight:800;letter-spacing:-.2px;color:var(--ink);
 }
 .section h3{
   margin:16px 0 10px;font-size:11px;color:var(--sakura);
@@ -635,12 +635,12 @@ label.field span{display:block;font-size:11px;color:var(--sakura);margin-bottom:
    ============================================================ */
 .btn{
   position:relative;
-  appearance:none;border:0;cursor:pointer;font-family:inherit;
+  appearance:none;border:0;cursor:pointer;font-family:var(--font-display);
   padding:12px 16px;border-radius:14px;font-weight:700;font-size:14.5px;
-  background:linear-gradient(180deg, var(--koi) 0%, #d65a32 100%);
+  background:linear-gradient(180deg, #009898 0%, #006868 100%);
   color:#fff;
-  border:1px solid rgba(255,180,140,.55);
-  box-shadow:0 1px 0 rgba(255,255,255,.30) inset, 0 8px 22px rgba(255,122,74,.32);
+  border:1px solid rgba(0,180,180,.35);
+  box-shadow:0 1px 0 rgba(255,255,255,.20) inset, 0 8px 22px rgba(0,120,120,.30);
   transition:.18s cubic-bezier(.2,.8,.2,1);
   letter-spacing:.1px;
   text-shadow:0 1px 0 rgba(0,0,0,.15);
@@ -705,7 +705,7 @@ html[data-skin="light"] .dose-card{
 .dose-card .big{
   font-family:var(--font-display);
   font-size:34px;font-weight:800;margin-top:4px;color:var(--ink);
-  letter-spacing:-.5px;
+  letter-spacing:-.6px;
   background:linear-gradient(180deg, #fff5f7 0%, #ffae87 100%);
   -webkit-background-clip:text;background-clip:text;
   -webkit-text-fill-color:transparent;
@@ -786,7 +786,7 @@ html[data-skin="light"] .modal-backdrop{
   width:38px;height:5px;border-radius:3px;
   background:rgba(255,200,215,.25);
 }
-.modal h3{margin:6px 0 14px;font-family:var(--font-display);font-size:22px;font-weight:700;letter-spacing:.3px}
+.modal h3{margin:6px 0 14px;font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:-.2px}
 
 /* ============================================================
    SETTINGS SHEET
@@ -1375,7 +1375,7 @@ input[type=time].input{ font-family:inherit }
 .graph-num{
   font-family:var(--font-display);
   font-size:20px; font-weight:800; color:var(--ink);
-  letter-spacing:-.3px;
+  letter-spacing:-.4px;
 }
 .graph-unit{ font-size:11px; font-weight:600; color:var(--ink-dim) }
 .graph-status{

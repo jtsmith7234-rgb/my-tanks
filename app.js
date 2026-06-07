@@ -2877,7 +2877,7 @@ function openBackupModal(){
       <p>Load a few example tanks to explore the app, or wipe everything to start fresh.</p>
       <div class="row" style="gap:8px;flex-wrap:wrap">
         <button class="btn small secondary" id="do-load-sample">Load sample tanks</button>
-        <button class="btn small secondary" id="do-wipe-all" style="color:#ff7a4a">Wipe all my data</button>
+        <button class="btn small secondary danger" id="do-wipe-all">Wipe all my data</button>
       </div>
     </div>
 
