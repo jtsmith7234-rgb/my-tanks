@@ -806,15 +806,18 @@ function renderTank(){
 
 /* ============================================================
    STANDALONE SPECIES BROWSER
-   Reachable from the home-page fish button. Mirrors the in-tank
-   Browse panel: search input + tappable list + expanded profile.
-   Does not require a tank to be selected.
+   Reachable from the home-page fish button. Categorized list:
+   top-level shows category buckets (Tetras, Cichlids, ...), tap
+   to expand into species. Each species row has a quick-add (+)
+   button that opens a tank picker, runs the compatibility check,
+   and lets the user add the fish to a tank without leaving the
+   browser.
    ============================================================ */
 function renderSpeciesBrowser(){
   const main = $("#main");
   main.innerHTML = `
     <div class="section">
-      <p class="muted" style="margin:0 0 10px">Tap a fish for a quick expert profile. Care basics, tank size, temperature, and pH — straight from the database.</p>
+      <p class="muted" style="margin:0 0 10px">Tap a category to expand. Tap a fish for a full profile, or use <b>+</b> to add it to one of your tanks.</p>
       <label class="field">
         <input class="input" id="species-browser-search" placeholder="Search species" autocomplete="off" />
       </label>
@@ -825,55 +828,239 @@ function renderSpeciesBrowser(){
   const searchEl = $("#species-browser-search");
   const listEl   = $("#species-browser-list");
 
+  // Track which categories are open by name. Persisted only for this render,
+  // not across navigations — keeps state simple.
+  const openCats = new Set();
+
   function renderList(q){
     if (!window.FISHDB_API || !listEl) return;
-    const list = window.FISHDB_API.browse(q);
-    if (!list.length){
+    const groups = window.FISHDB_API.categories(q);
+    if (!groups.length){
       listEl.innerHTML = `<p class="muted browse-empty">No species match that search.</p>`;
       return;
     }
-    listEl.innerHTML = list.map(f => `
-      <button type="button" class="browse-row" data-name="${escapeHTML(f.name)}">
-        <span class="browse-row-main">
-          <span class="browse-row-name">${escapeHTML(f.name)}</span>
-          ${f.sci ? `<span class="browse-row-sci">${escapeHTML(f.sci)}</span>` : ""}
-        </span>
-        <span class="browse-row-chev">›</span>
-      </button>
-      <div class="browse-detail" data-detail="${escapeHTML(f.name)}" hidden></div>
-    `).join("");
+    // When searching, auto-expand every matching category so results are visible
+    // without an extra tap. When not searching, respect the openCats set.
+    const isSearching = !!q;
+    listEl.innerHTML = groups.map(g => {
+      const expanded = isSearching || openCats.has(g.name);
+      const speciesHTML = g.species.map(f => `
+        <div class="browse-row-wrap">
+          <button type="button" class="browse-row browse-row-species" data-name="${escapeHTML(f.name)}">
+            <span class="browse-row-main">
+              <span class="browse-row-name">${escapeHTML(f.name)}</span>
+              ${f.sci ? `<span class="browse-row-sci">${escapeHTML(f.sci)}</span>` : ""}
+            </span>
+            <span class="browse-row-actions">
+              <span class="browse-row-quickadd" data-quickadd="${escapeHTML(f.name)}" role="button" tabindex="0" aria-label="Add ${escapeHTML(f.name)} to a tank" title="Add to a tank">+</span>
+              <span class="browse-row-chev">›</span>
+            </span>
+          </button>
+          <div class="browse-detail" data-detail="${escapeHTML(f.name)}" hidden></div>
+        </div>
+      `).join("");
+      return `
+        <div class="browse-cat" data-cat="${escapeHTML(g.name)}">
+          <button type="button" class="browse-row browse-row-cat${expanded ? " open" : ""}" data-cat-toggle="${escapeHTML(g.name)}">
+            <span class="browse-row-main">
+              <span class="browse-row-name">${escapeHTML(g.name)}</span>
+              <span class="browse-row-sci browse-cat-count">${g.species.length} ${g.species.length === 1 ? "species" : "species"}</span>
+            </span>
+            <span class="browse-row-chev">›</span>
+          </button>
+          <div class="browse-cat-body" ${expanded ? "" : "hidden"}>${speciesHTML}</div>
+        </div>
+      `;
+    }).join("");
 
-    $$(".browse-row", listEl).forEach(row => row.addEventListener("click", () => {
-      const name = row.dataset.name;
-      const detail = listEl.querySelector(`[data-detail="${CSS.escape(name)}"]`);
-      const isOpen = row.classList.contains("open");
-      // Single-open accordion — close any open profile first.
-      $$(".browse-row.open", listEl).forEach(r => r.classList.remove("open"));
-      $$(".browse-detail", listEl).forEach(d => { d.hidden = true; d.innerHTML = ""; });
-      if (!isOpen){
-        const f = window.FISHDB_API.byName(name);
-        detail.innerHTML = window.FISHDB_API.profileCard(f);
-        detail.hidden = false;
-        row.classList.add("open");
-        // Wire any sources-toggle inside the profile card.
-        const toggle = detail.querySelector("[data-sources-toggle]");
-        const drawer = detail.querySelector("[data-sources-drawer]");
-        if (toggle && drawer){
-          toggle.addEventListener("click", () => {
-            const open = drawer.hidden;
-            drawer.hidden = !open;
-            toggle.setAttribute("aria-expanded", String(open));
-            toggle.classList.toggle("open", open);
-          });
+    // Category toggle
+    $$(".browse-row-cat", listEl).forEach(catBtn => {
+      catBtn.addEventListener("click", () => {
+        const cat = catBtn.dataset.catToggle;
+        const body = catBtn.nextElementSibling;
+        const willOpen = body.hidden;
+        body.hidden = !willOpen;
+        catBtn.classList.toggle("open", willOpen);
+        if (willOpen) openCats.add(cat); else openCats.delete(cat);
+      });
+    });
+
+    // Species row tap -> expand profile
+    $$(".browse-row-species", listEl).forEach(row => {
+      row.addEventListener("click", (ev) => {
+        // Quick-add icon handled separately — don't trigger the profile open.
+        if (ev.target && ev.target.closest("[data-quickadd]")) return;
+        const name = row.dataset.name;
+        const detail = row.parentElement.querySelector(`[data-detail="${CSS.escape(name)}"]`);
+        const isOpen = row.classList.contains("open");
+        // Single-open accordion across the whole list.
+        $$(".browse-row-species.open", listEl).forEach(r => r.classList.remove("open"));
+        $$(".browse-detail", listEl).forEach(d => { d.hidden = true; d.innerHTML = ""; });
+        if (!isOpen){
+          const f = window.FISHDB_API.byName(name);
+          detail.innerHTML = window.FISHDB_API.profileCard(f);
+          detail.hidden = false;
+          row.classList.add("open");
+          const toggle = detail.querySelector("[data-sources-toggle]");
+          const drawer = detail.querySelector("[data-sources-drawer]");
+          if (toggle && drawer){
+            toggle.addEventListener("click", (e) => {
+              e.stopPropagation();
+              const open = drawer.hidden;
+              drawer.hidden = !open;
+              toggle.setAttribute("aria-expanded", String(open));
+              toggle.classList.toggle("open", open);
+            });
+          }
         }
-      }
-    }));
+      });
+    });
+
+    // Quick-add (+) button — opens tank picker / compat check / confirm.
+    $$("[data-quickadd]", listEl).forEach(el => {
+      const trigger = (ev) => {
+        ev.stopPropagation();
+        ev.preventDefault();
+        openQuickAddSheet(el.dataset.quickadd);
+      };
+      el.addEventListener("click", trigger);
+      el.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter" || ev.key === " ") trigger(ev);
+      });
+    });
   }
 
   if (searchEl){
     searchEl.addEventListener("input", () => renderList(searchEl.value.trim()));
   }
   renderList("");
+}
+
+/* ----- Quick-add flow: pick a tank, see compat, confirm or back out ----- */
+function openQuickAddSheet(speciesName){
+  const f = window.FISHDB_API && window.FISHDB_API.byName(speciesName);
+  if (!f){ toast("Species not found"); return; }
+
+  if (!tanks || !tanks.length){
+    openModal(`
+      <div class="action-sheet">
+        <div class="action-sheet-head">
+          <h3 style="margin:0 0 4px">Add ${escapeHTML(f.name)}</h3>
+          <p class="muted small" style="margin:0">You don't have any tanks yet.</p>
+        </div>
+        <p class="muted" style="padding:0 6px">Create a tank first by tapping the <b>+</b> button on the home screen, then come back to add this fish.</p>
+        <button class="action-row cancel" id="qa-close">Close</button>
+      </div>
+    `, () => {
+      $("#qa-close").addEventListener("click", closeModal);
+    });
+    return;
+  }
+
+  // Step 1: pick a tank.
+  const tankRows = tanks.map(t => `
+    <button class="action-row" data-tank-id="${t.id}">
+      <span class="action-ico">💧</span>
+      <span class="action-label" style="display:flex;flex-direction:column;align-items:flex-start;gap:2px;flex:1">
+        <span>${escapeHTML(t.name)}</span>
+        <span class="muted small">${t.gallons} gal &middot; ${escapeHTML(t.type || "Freshwater")}</span>
+      </span>
+    </button>
+  `).join("");
+
+  openModal(`
+    <div class="action-sheet" id="qa-sheet">
+      <div class="action-sheet-head">
+        <h3 style="margin:0 0 4px">Add ${escapeHTML(f.name)}</h3>
+        <p class="muted small" style="margin:0">Pick a tank to check the fit.</p>
+      </div>
+      ${tankRows}
+      <button class="action-row cancel" id="qa-cancel">Cancel</button>
+    </div>
+  `, () => {
+    $("#qa-cancel").addEventListener("click", closeModal);
+    $$("[data-tank-id]", $("#qa-sheet")).forEach(btn => {
+      btn.addEventListener("click", () => {
+        const tankId = btn.dataset.tankId;
+        const tank = getTank(tankId);
+        if (!tank){ toast("Tank not found"); closeModal(); return; }
+        showQuickAddCompat(f, tank);
+      });
+    });
+  });
+}
+
+function showQuickAddCompat(f, tank){
+  const compat = window.FISHDB_API.compatibility(f, tank);
+  const level = compat ? compat.level : "good";
+  const label = compat ? compat.label : "Good fit";
+  const reasons = (compat && compat.reasons) || [];
+
+  // Friendly recommendation copy per level.
+  const headlineMap = {
+    good:    `Looks good for <b>${escapeHTML(tank.name)}</b>.`,
+    caution: `Possible for <b>${escapeHTML(tank.name)}</b>, with a few cautions.`,
+    bad:     `Not recommended for <b>${escapeHTML(tank.name)}</b>.`
+  };
+  const ctaLabelMap = {
+    good:    "Add to tank",
+    caution: "Add anyway",
+    bad:     "Add anyway"
+  };
+  const badgeClass = `compat-badge compat-${level}`;
+
+  const reasonItems = reasons.length
+    ? `<ul class="qa-reasons">${reasons.map(r => `<li>${escapeHTML(r)}</li>`).join("")}</ul>`
+    : `<p class="muted" style="margin:6px 0 0">No obvious conflicts.</p>`;
+
+  closeModal();
+  openModal(`
+    <div class="action-sheet" id="qa-compat">
+      <div class="action-sheet-head">
+        <h3 style="margin:0 0 4px">${escapeHTML(f.name)}</h3>
+        <p class="muted small" style="margin:0">${escapeHTML(f.sci || "")}</p>
+      </div>
+      <div style="padding:6px 8px 4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span class="${badgeClass}">${escapeHTML(label)}</span>
+        <span class="muted small">${tank.gallons} gal &middot; ${escapeHTML(tank.type || "Freshwater")}</span>
+      </div>
+      <p style="padding:4px 8px;margin:0">${headlineMap[level] || ""}</p>
+      <div style="padding:0 8px 4px">${reasonItems}</div>
+      <div class="qa-count-row">
+        <label for="qa-count" class="qa-count-label">How many?</label>
+        <input id="qa-count" class="input" type="number" min="1" max="99" value="${f.school && f.school > 1 ? f.school : 1}" inputmode="numeric" />
+      </div>
+      <button class="action-row" id="qa-confirm" style="font-weight:600">
+        <span class="action-ico">✅</span>
+        <span class="action-label">${ctaLabelMap[level]}</span>
+      </button>
+      <button class="action-row" id="qa-back">
+        <span class="action-ico">←</span>
+        <span class="action-label">Pick a different tank</span>
+      </button>
+      <button class="action-row cancel" id="qa-cancel2">Cancel</button>
+    </div>
+  `, () => {
+    $("#qa-cancel2").addEventListener("click", closeModal);
+    $("#qa-back").addEventListener("click", () => {
+      closeModal();
+      openQuickAddSheet(f.name);
+    });
+    $("#qa-confirm").addEventListener("click", () => {
+      const countEl = $("#qa-count");
+      const count = Math.max(1, Math.min(99, parseInt(countEl && countEl.value, 10) || 1));
+      quickAddFishToTank(f, tank, count);
+    });
+  });
+}
+
+function quickAddFishToTank(f, tank, count){
+  tank.fish = tank.fish || [];
+  tank.fish.push({ id: uid(), species: f.name, count: count, name: "" });
+  saveTanks(tanks);
+  logEvent(tank.id, "fish_add", { species: f.name, count: count, name: "" });
+  closeModal();
+  toast(`Added ${count}× ${f.name} to ${tank.name}`);
 }
 
 /* ------------------------------------------------------------

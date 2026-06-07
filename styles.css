@@ -2471,3 +2471,97 @@ input[type=time].input{ font-family:inherit }
   .tut-snap{ margin-bottom:12px; }
   .tut-card-label{ margin-bottom:8px; }
 }
+
+/* ============================================================
+   SPECIES BROWSER — categorized list + quick-add
+   ============================================================ */
+.browse-row-cat{
+  background:rgba(255,255,255,.03);
+  font-weight:700;
+}
+.browse-row-cat .browse-row-name{ font-size:15px }
+.browse-cat-count{ font-style:normal; font-weight:500 }
+.browse-row-cat .browse-row-chev{ font-size:22px }
+.browse-row-cat.open .browse-row-chev{ transform:rotate(90deg) }
+
+.browse-cat-body{
+  background:rgba(0,0,0,.04);
+  animation:profileFade .18s ease;
+}
+.browse-cat-body[hidden]{ display:none }
+
+/* Species rows live one nesting level inside their category bucket. */
+.browse-cat-body .browse-row-species{
+  padding-left:22px;
+}
+
+.browse-row-actions{
+  display:flex; align-items:center; gap:6px; flex:none;
+}
+.browse-row-quickadd{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:32px; height:32px;
+  border-radius:10px;
+  background:var(--glass-fill, rgba(255,255,255,.08));
+  border:1px solid var(--glass-stroke, rgba(255,255,255,.14));
+  color:var(--ink);
+  font-size:18px; font-weight:600; line-height:1;
+  cursor:pointer;
+  transition:transform .12s cubic-bezier(.2,.8,.2,1), background .15s ease;
+  user-select:none;
+}
+.browse-row-quickadd:hover,
+.browse-row-quickadd:focus{
+  background:var(--glass-fill-strong, rgba(255,255,255,.14));
+  outline:none;
+}
+.browse-row-quickadd:active{ transform:scale(.92) }
+
+/* ----- Quick-add compatibility sheet ----- */
+.compat-badge{
+  display:inline-block;
+  font-size:12px; font-weight:700;
+  padding:3px 10px;
+  border-radius:999px;
+  text-transform:uppercase;
+  letter-spacing:.3px;
+}
+.compat-good{
+  color:#1f7a3a;
+  background:rgba(80,200,120,.18);
+  border:1px solid rgba(80,200,120,.4);
+}
+.compat-caution{
+  color:#a07300;
+  background:rgba(245,180,30,.18);
+  border:1px solid rgba(245,180,30,.45);
+}
+.compat-bad{
+  color:#a02929;
+  background:rgba(230,80,80,.18);
+  border:1px solid rgba(230,80,80,.45);
+}
+html[data-skin="dark"] .compat-good{ color:#9ee7b6 }
+html[data-skin="dark"] .compat-caution{ color:#ffd673 }
+html[data-skin="dark"] .compat-bad{ color:#ffb0b0 }
+
+.qa-reasons{
+  margin:6px 0 0; padding:0 0 0 18px;
+  font-size:13px; line-height:1.5;
+  color:var(--ink);
+}
+.qa-reasons li{ margin:2px 0 }
+
+.qa-count-row{
+  display:flex; align-items:center; gap:10px;
+  padding:8px 8px 4px;
+}
+.qa-count-label{
+  font-size:13px; color:var(--ink-dim);
+}
+.qa-count-row .input{
+  width:80px; flex:none;
+  text-align:center;
+  font-size:16px;
+  padding:8px 10px;
+}
