@@ -40,3 +40,10 @@ This folder provides:
 - The attribution text displayed in the app
 - A timestamped API query (not a screenshot) confirming license status
 - Git commit history proving when the audit was performed
+
+## Tier 2 Audit (2026-06-07)
+- **File:** `tier2_license_audit_20260607.json`
+- **PDF:** `TankCareBuddy_Image_License_Audit_Tier2_20260607.pdf`
+- **Species:** 29 Tier 2 species (all approved, all Wikimedia Commons)
+- **Licenses:** CC BY 2.0, CC BY 2.5, CC BY-SA 2.5, CC BY-SA 3.0, CC BY-SA 3.0 de, CC BY-SA 4.0, Public Domain
+- **Combined total:** 55 approved entries in FISH_IMAGES (Tier 1 + Tier 2)

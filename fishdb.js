@@ -876,6 +876,328 @@ const FISH_IMAGES = {
     imageLicenseUrl:  "https://creativecommons.org/publicdomain/zero/1.0",
     imageAttributionText: "Duane Raver, U.S. Fish and Wildlife Service / Wikimedia Commons / Public Domain"
   },
+  // ===== TIER 2 SPECIES IMAGES =====
+
+  // Pearl Gourami
+  "Trichopodus leerii": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Trichopodus_leerii.jpg/330px-Trichopodus_leerii.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/9/97/Trichopodus_leerii.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3ATrichopodus_leerii.jpg",
+    imageLicenseType: "CC BY-SA 4.0",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/4.0",
+    imageAttributionText: "Photo by BEDO (Thailand) / Wikimedia Commons / CC BY-SA 4.0"
+  },
+  // Honey Gourami
+  "Trichogaster chuna": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Colisa_chuna_male.jpg/330px-Colisa_chuna_male.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Colisa_chuna_male.jpg/960px-Colisa_chuna_male.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AColisa_chuna_male.jpg",
+    imageLicenseType: "CC BY-SA 3.0",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/3.0",
+    imageAttributionText: "Photo by Wilder (Wikimedia Commons) / Wikimedia Commons / CC BY-SA 3.0"
+  },
+  // Paradise Fish
+  "Macropodus opercularis": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Macropodus_opercularis_-_front_%28aka%29.jpg/330px-Macropodus_opercularis_-_front_%28aka%29.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Macropodus_opercularis_-_front_%28aka%29.jpg/960px-Macropodus_opercularis_-_front_%28aka%29.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AMacropodus_opercularis_-_front_%28aka%29.jpg",
+    imageLicenseType: "CC BY-SA 2.5",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/2.5",
+    imageAttributionText: "Photo by André Karwath aka Aka / Wikimedia Commons / CC BY-SA 2.5"
+  },
+  // Ember Tetra
+  "Hyphessobrycon amandae": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Hyphessobrycon_amandae_%28Amber_tetra%29.jpg/330px-Hyphessobrycon_amandae_%28Amber_tetra%29.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Hyphessobrycon_amandae_%28Amber_tetra%29.jpg/960px-Hyphessobrycon_amandae_%28Amber_tetra%29.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AHyphessobrycon_amandae_%28Amber_tetra%29.jpg",
+    imageLicenseType: "CC BY-SA 3.0",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/3.0",
+    imageAttributionText: "Photo by Pascal Wolterman / Wikimedia Commons / CC BY-SA 3.0"
+  },
+  // Black Skirt Tetra
+  "Gymnocorymbus ternetzi": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Gymnocorymbus_ternetzi.JPG/330px-Gymnocorymbus_ternetzi.JPG",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Gymnocorymbus_ternetzi.JPG/960px-Gymnocorymbus_ternetzi.JPG",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AGymnocorymbus_ternetzi.JPG",
+    imageLicenseType: "CC BY-SA 3.0",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/3.0",
+    imageAttributionText: "Photo by emptyvi / Wikimedia Commons / CC BY-SA 3.0"
+  },
+  // Serpae Tetra
+  "Hyphessobrycon eques": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Hyphessobrycon_eques.jpg/330px-Hyphessobrycon_eques.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/4/4c/Hyphessobrycon_eques.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AHyphessobrycon_eques.jpg",
+    imageLicenseType: "Public domain",
+    imageLicenseUrl:  "https://creativecommons.org/publicdomain/zero/1.0",
+    imageAttributionText: "Photo by Dubrovsky Alexander (Aledubr) / Wikimedia Commons / Public domain"
+  },
+  // Rummy-nose Tetra
+  "Hemigrammus rhodostomus": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Hemigrammus_rhodostomus.jpg/330px-Hemigrammus_rhodostomus.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Hemigrammus_rhodostomus.jpg/960px-Hemigrammus_rhodostomus.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AHemigrammus_rhodostomus.jpg",
+    imageLicenseType: "CC BY-SA 3.0",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/3.0",
+    imageAttributionText: "Photo by Gavinevans / Wikimedia Commons / CC BY-SA 3.0"
+  },
+  // Black Neon Tetra
+  "Hyphessobrycon herbertaxelrodi": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Black_neon_tetra.jpg/330px-Black_neon_tetra.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Black_neon_tetra.jpg/960px-Black_neon_tetra.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3ABlack_neon_tetra.jpg",
+    imageLicenseType: "CC BY-SA 3.0",
+    imageLicenseUrl:  "http://creativecommons.org/licenses/by-sa/3.0/",
+    imageAttributionText: "Photo by Debivort / Wikimedia Commons / CC BY-SA 3.0"
+  },
+  // Glowlight Tetra
+  "Hemigrammus erythrozonus": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Tetra_Glowlight_cropped.jpg/330px-Tetra_Glowlight_cropped.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/b/b4/Tetra_Glowlight_cropped.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3ATetra_Glowlight_cropped.jpg",
+    imageLicenseType: "CC BY 2.0",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by/2.0",
+    imageAttributionText: "Photo by gonzalovalenzuela (Flickr) / Wikimedia Commons / CC BY 2.0"
+  },
+  // Congo Tetra
+  "Phenacogrammus interruptus": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Phenacogrammus_interruptus_%28aka%29.jpg/330px-Phenacogrammus_interruptus_%28aka%29.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Phenacogrammus_interruptus_%28aka%29.jpg/960px-Phenacogrammus_interruptus_%28aka%29.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3APhenacogrammus_interruptus_%28aka%29.jpg",
+    imageLicenseType: "CC BY-SA 2.5",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/2.5",
+    imageAttributionText: "Photo by André Karwath aka Aka / Wikimedia Commons / CC BY-SA 2.5"
+  },
+  // Pearl Danio
+  "Danio albolineatus": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Danio_albolineatus.jpg/330px-Danio_albolineatus.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Danio_albolineatus.jpg/960px-Danio_albolineatus.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3ADanio_albolineatus.jpg",
+    imageLicenseType: "Public domain",
+    imageLicenseUrl:  "https://creativecommons.org/publicdomain/zero/1.0",
+    imageAttributionText: "Photo by Sc99cs / Wikimedia Commons / Wikimedia Commons / Public domain"
+  },
+  // Giant Danio
+  "Devario aequipinnatus": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Devario_aequipinnatus.JPG/330px-Devario_aequipinnatus.JPG",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Devario_aequipinnatus.JPG/960px-Devario_aequipinnatus.JPG",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3ADevario_aequipinnatus.JPG",
+    imageLicenseType: "CC BY-SA 2.5",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/2.5",
+    imageAttributionText: "Photo by Faucon / Wikimedia Commons / CC BY-SA 2.5"
+  },
+  // Endler's Livebearer
+  "Poecilia wingei": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Poecilia_wingei_Tres_picos.jpg/330px-Poecilia_wingei_Tres_picos.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Poecilia_wingei_Tres_picos.jpg/960px-Poecilia_wingei_Tres_picos.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3APoecilia_wingei_Tres_picos.jpg",
+    imageLicenseType: "CC BY 2.5",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by/2.5",
+    imageAttributionText: "Photo by Fernando JMago / Wikimedia Commons / CC BY 2.5"
+  },
+  // Sailfin Molly
+  "Poecilia latipinna": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Poecilia_latipinna.jpg/330px-Poecilia_latipinna.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/1/16/Poecilia_latipinna.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3APoecilia_latipinna.jpg",
+    imageLicenseType: "Public domain",
+    imageLicenseUrl:  "https://creativecommons.org/publicdomain/zero/1.0",
+    imageAttributionText: "Photo by Wikimedia Commons contributor / Wikimedia Commons / Public domain"
+  },
+  // Panda Cory
+  "Corydoras panda": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/97/Corydoras_panda_01.jpg/330px-Corydoras_panda_01.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/9/97/Corydoras_panda_01.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3ACorydoras_panda_01.jpg",
+    imageLicenseType: "Public domain",
+    imageLicenseUrl:  "https://creativecommons.org/publicdomain/zero/1.0",
+    imageAttributionText: "Photo by Calilasseia / Wikimedia Commons / Wikimedia Commons / Public domain"
+  },
+  // Bristlenose Pleco
+  "Ancistrus cirrhosus": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Ancistrus_cirrhosus.jpg/330px-Ancistrus_cirrhosus.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Ancistrus_cirrhosus.jpg/960px-Ancistrus_cirrhosus.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AAncistrus_cirrhosus.jpg",
+    imageLicenseType: "CC BY-SA 3.0 de",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/3.0/de",
+    imageAttributionText: "Photo by The Last 99 / Wikimedia Commons / CC BY-SA 3.0 de"
+  },
+  // Kuhli Loach
+  "Pangio kuhlii": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Pangio_kuhlii.jpg/330px-Pangio_kuhlii.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/9/9e/Pangio_kuhlii.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3APangio_kuhlii.jpg",
+    imageLicenseType: "CC BY-SA 3.0",
+    imageLicenseUrl:  "http://creativecommons.org/licenses/by-sa/3.0/",
+    imageAttributionText: "Photo by User:Louie / Wikimedia Commons / CC BY-SA 3.0"
+  },
+  // Weather Loach
+  "Misgurnus anguillicaudatus": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Misgurnus_anguillicaudatus.jpg/330px-Misgurnus_anguillicaudatus.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/8/86/Misgurnus_anguillicaudatus.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AMisgurnus_anguillicaudatus.jpg",
+    imageLicenseType: "Public domain",
+    imageLicenseUrl:  "https://creativecommons.org/publicdomain/zero/1.0",
+    imageAttributionText: "Photo by Wikimedia Commons contributor / Wikimedia Commons / Public domain"
+  },
+  // German Blue Ram
+  "Mikrogeophagus ramirezi": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Mikrogeophagus_ramirezi_%28cropped%29%2C_2017.jpg/330px-Mikrogeophagus_ramirezi_%28cropped%29%2C_2017.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Mikrogeophagus_ramirezi_%28cropped%29%2C_2017.jpg/960px-Mikrogeophagus_ramirezi_%28cropped%29%2C_2017.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AMikrogeophagus_ramirezi_%28cropped%29%2C_2017.jpg",
+    imageLicenseType: "Public domain",
+    imageLicenseUrl:  "https://creativecommons.org/publicdomain/zero/1.0",
+    imageAttributionText: "Photo by Eric Mengel / Wikimedia Commons / Public domain"
+  },
+  // Bolivian Ram
+  "Mikrogeophagus altispinosus": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Mikrogeophagus_altispinosus_male.jpg/330px-Mikrogeophagus_altispinosus_male.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Mikrogeophagus_altispinosus_male.jpg/960px-Mikrogeophagus_altispinosus_male.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AMikrogeophagus_altispinosus_male.jpg",
+    imageLicenseType: "CC BY 2.0",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by/2.0",
+    imageAttributionText: "Photo by úlfhams_víkingur / Wikimedia Commons / CC BY 2.0"
+  },
+  // Kribensis
+  "Pelvicachromis pulcher": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Pelvicachromis_pulcher_%28aka%29.jpg/330px-Pelvicachromis_pulcher_%28aka%29.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Pelvicachromis_pulcher_%28aka%29.jpg/960px-Pelvicachromis_pulcher_%28aka%29.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3APelvicachromis_pulcher_%28aka%29.jpg",
+    imageLicenseType: "CC BY-SA 2.5",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/2.5",
+    imageAttributionText: "Photo by André Karwath aka Aka / Wikimedia Commons / CC BY-SA 2.5"
+  },
+  // Convict Cichlid
+  "Amatitlania nigrofasciata": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Convict_cichlid_%28Amatitlania_nigrofasciata%29.jpg/330px-Convict_cichlid_%28Amatitlania_nigrofasciata%29.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Convict_cichlid_%28Amatitlania_nigrofasciata%29.jpg/960px-Convict_cichlid_%28Amatitlania_nigrofasciata%29.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AConvict_cichlid_%28Amatitlania_nigrofasciata%29.jpg",
+    imageLicenseType: "CC BY-SA 4.0",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/4.0",
+    imageAttributionText: "Photo by JSutton93 / Wikimedia Commons / CC BY-SA 4.0"
+  },
+  // Yellow Lab Cichlid
+  "Labidochromis caeruleus": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Labidochromis_caeruleus_%28male%29.jpg/330px-Labidochromis_caeruleus_%28male%29.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Labidochromis_caeruleus_%28male%29.jpg/960px-Labidochromis_caeruleus_%28male%29.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3ALabidochromis_caeruleus_%28male%29.jpg",
+    imageLicenseType: "CC BY-SA 3.0",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/3.0",
+    imageAttributionText: "Photo by Jmatz / Wikimedia Commons / CC BY-SA 3.0"
+  },
+  // White Cloud Mountain Minnow
+  "Tanichthys albonubes": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/White_Cloud_Mountain_Minnow_1.jpg/330px-White_Cloud_Mountain_Minnow_1.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/c/c8/White_Cloud_Mountain_Minnow_1.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AWhite_Cloud_Mountain_Minnow_1.jpg",
+    imageLicenseType: "CC BY-SA 3.0",
+    imageLicenseUrl:  "http://creativecommons.org/licenses/by-sa/3.0/",
+    imageAttributionText: "Photo by Wikimedia Commons contributor / Wikimedia Commons / CC BY-SA 3.0"
+  },
+  // Green / Gold Barb
+  "Puntius semifasciolatus": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Gold_Barb_Puntius_semifasciolatus_6.png/330px-Gold_Barb_Puntius_semifasciolatus_6.png",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/b/bf/Gold_Barb_Puntius_semifasciolatus_6.png",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AGold_Barb_Puntius_semifasciolatus_6.png",
+    imageLicenseType: "CC BY-SA 3.0",
+    imageLicenseUrl:  "http://creativecommons.org/licenses/by-sa/3.0/",
+    imageAttributionText: "Photo by Fred Hsu / Wikimedia Commons / CC BY-SA 3.0"
+  },
+  // Siamese Algae Eater
+  "Crossocheilus oblongus": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Siamese_algae_eater_%28Crossocheilus_oblongus%29.jpg/330px-Siamese_algae_eater_%28Crossocheilus_oblongus%29.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Siamese_algae_eater_%28Crossocheilus_oblongus%29.jpg/960px-Siamese_algae_eater_%28Crossocheilus_oblongus%29.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3ASiamese_algae_eater_%28Crossocheilus_oblongus%29.jpg",
+    imageLicenseType: "CC BY-SA 4.0",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/4.0",
+    imageAttributionText: "Photo by aleander2137 / Wikimedia Commons / CC BY-SA 4.0"
+  },
+  // Cherry Shrimp
+  "Neocaridina davidi": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Female_Neocaridina_davidi_shrimp_with_eggs.jpg/330px-Female_Neocaridina_davidi_shrimp_with_eggs.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Female_Neocaridina_davidi_shrimp_with_eggs.jpg/960px-Female_Neocaridina_davidi_shrimp_with_eggs.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AFemale_Neocaridina_davidi_shrimp_with_eggs.jpg",
+    imageLicenseType: "CC BY-SA 4.0",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/4.0",
+    imageAttributionText: "Photo by TonyZimbinski / Wikimedia Commons / CC BY-SA 4.0"
+  },
+  // Ghost Shrimp
+  "Palaemonetes paludosus": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Glass-shrimp-close.jpg/330px-Glass-shrimp-close.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/6/67/Glass-shrimp-close.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3AGlass-shrimp-close.jpg",
+    imageLicenseType: "Public domain",
+    imageLicenseUrl:  "https://creativecommons.org/publicdomain/zero/1.0",
+    imageAttributionText: "Photo by Enziarro / Joseph Stansbury Rosin / Wikimedia Commons / Public domain"
+  },
+  // Zebra Nerite Snail
+  "Neritina natalensis": {
+    imageThumbUrl: "https://upload.wikimedia.org/wikipedia/commons/1/15/Neritina-natalensis_cropped.jpg",
+    imageHeroUrl:  "https://upload.wikimedia.org/wikipedia/commons/1/15/Neritina-natalensis_cropped.jpg",
+    imageStatus:   "approved",
+    imageSourceName: "Wikimedia Commons",
+    imageSourceUrl:  "https://commons.wikimedia.org/wiki/File%3ANeritina-natalensis_cropped.jpg",
+    imageLicenseType: "CC BY-SA 4.0",
+    imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/4.0",
+    imageAttributionText: "Photo by Holger Krisp / Wikimedia Commons / CC BY-SA 4.0"
+  },
+
 };
 
 /* Tier assignments — strings keyed by scientific name to keep FISHDB clean.
