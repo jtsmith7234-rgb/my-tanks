@@ -3181,3 +3181,78 @@ html[data-theme="clean"] .ft-do .ft-block-list li::before { color: var(--clean-p
 
 /* ── HR / DIVIDER ────────────────────────────────────────── */
 html[data-theme="clean"] .hr { background: linear-gradient(90deg, transparent, var(--clean-divider), transparent); }
+
+/* ============================================================
+   SVG ICON SYSTEM
+   Three sizes used throughout the app. All inherit stroke color
+   from their parent so they adapt to every theme automatically.
+   ============================================================ */
+
+/* Topbar ghost buttons */
+.btn-icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+/* Action sheet rows */
+.act-icon {
+  width: 20px;
+  height: 20px;
+  display: block;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+.action-ico {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.06);
+  flex-shrink: 0;
+  color: var(--sakura);
+}
+html[data-skin="light"] .action-ico {
+  background: rgba(0,0,0,.05);
+}
+html[data-theme="clean"] .action-ico {
+  background: var(--clean-primary-lt);
+  color: var(--clean-primary);
+}
+.action-row.danger .action-ico {
+  background: rgba(255,122,138,.12);
+  color: var(--bad);
+}
+html[data-theme="clean"] .action-row.danger .action-ico {
+  background: var(--clean-bad-bg);
+  color: var(--clean-bad);
+}
+
+/* Event / history row icons */
+.evt-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+/* event-icon already has sizing + background — just make sure SVG fills it */
+.event-icon .evt-icon,
+.event-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Clean theme: teal icon badges on event rows */
+html[data-theme="clean"] .event-icon {
+  color: var(--clean-primary);
+}
+html[data-theme="clean"] .event-icon.water_change { color: #1a7aab; }
+html[data-theme="clean"] .event-icon.water_test   { color: var(--clean-good); }
+html[data-theme="clean"] .event-icon.fish_add     { color: var(--clean-primary); }
+html[data-theme="clean"] .event-icon.fish_remove  { color: var(--clean-bad); }
+html[data-theme="clean"] .event-icon.tank_edit    { color: var(--clean-warn); }

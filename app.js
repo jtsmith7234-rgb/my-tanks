@@ -387,23 +387,23 @@ function openTankActions(tankId){
         <p class="muted small" style="margin:0">${t.gallons} gal &middot; ${escapeHTML(t.type||"Freshwater")}</p>
       </div>
       <button class="action-row" id="act-open">
-        <span class="action-ico">📂</span>
+        <span class="action-ico"><svg class="act-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
         <span class="action-label">Open tank</span>
       </button>
       <button class="action-row" id="act-edit">
-        <span class="action-ico">✏️</span>
+        <span class="action-ico"><svg class="act-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>
         <span class="action-label">Edit tank info</span>
       </button>
       <button class="action-row" id="act-clean">
-        <span class="action-ico">🧹</span>
+        <span class="action-ico"><svg class="act-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></span>
         <span class="action-label">Log water change</span>
       </button>
       <button class="action-row" id="act-test">
-        <span class="action-ico">🧪</span>
+        <span class="action-ico"><svg class="act-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v11m0 0H5m4 0h10m-6 4v4m-4-4v4m8-4v4"/></svg></span>
         <span class="action-label">Log water test</span>
       </button>
       <button class="action-row danger" id="act-delete">
-        <span class="action-ico">🗑️</span>
+        <span class="action-ico"><svg class="act-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></span>
         <span class="action-label">Delete tank</span>
       </button>
       <button class="action-row cancel" id="act-cancel">Cancel</button>
@@ -962,7 +962,7 @@ function openQuickAddSheet(speciesName){
   // Step 1: pick a tank.
   const tankRows = tanks.map(t => `
     <button class="action-row" data-tank-id="${t.id}">
-      <span class="action-ico">💧</span>
+      <span class="action-ico"><svg class="act-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></span>
       <span class="action-label" style="display:flex;flex-direction:column;align-items:flex-start;gap:2px;flex:1">
         <span>${escapeHTML(t.name)}</span>
         <span class="muted small">${t.gallons} gal &middot; ${escapeHTML(t.type || "Freshwater")}</span>
@@ -1033,11 +1033,11 @@ function showQuickAddCompat(f, tank){
         <input id="qa-count" class="input" type="number" min="1" max="99" value="${f.school && f.school > 1 ? f.school : 1}" inputmode="numeric" />
       </div>
       <button class="action-row" id="qa-confirm" style="font-weight:600">
-        <span class="action-ico">✅</span>
+        <span class="action-ico"><svg class="act-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
         <span class="action-label">${ctaLabelMap[level]}</span>
       </button>
       <button class="action-row" id="qa-back">
-        <span class="action-ico">←</span>
+        <span class="action-ico"><svg class="act-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg></span>
         <span class="action-label">Pick a different tank</span>
       </button>
       <button class="action-row cancel" id="qa-cancel2">Cancel</button>
@@ -2361,19 +2361,21 @@ function eventDetailFull(e){
   ).join("");
 }
 
+const EVT_ICONS = {
+  water_change:   `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>`,
+  water_test:     `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v11m0 0H5m4 0h10m-6 4v4m-4-4v4m8-4v4"/></svg>`,
+  fish_add:       `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+  fish_remove:    `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+  fish_edit:      `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+  tank_edit:      `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>`,
+  advisor:        `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+  reminder_fired: `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`,
+  chem_add:       `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6m-5 0v6l-4 9a1 1 0 0 0 .9 1.45h10.2A1 1 0 0 0 18 18L14 9V3"/><line x1="7" y1="13" x2="17" y2="13"/></svg>`,
+  first_tank:     `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12m0 0C12 7 7 5 7 5s2 4 5 7zm0 0c0-5 5-7 5-7s-2 4-5 7z"/></svg>`,
+  daily_checkin:  `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`,
+};
 function eventIcon(type){
-  if (type === "water_change") return "💧";
-  if (type === "water_test")   return "🧪";
-  if (type === "fish_add")     return "➕";
-  if (type === "fish_remove")  return "✖";
-  if (type === "fish_edit")    return "✏️";
-  if (type === "tank_edit")    return "🔧";
-  if (type === "advisor")      return "🌸";
-  if (type === "reminder_fired") return "🔔";
-  if (type === "chem_add")       return "🧪";
-  if (type === "first_tank")     return "🌱";
-  if (type === "daily_checkin")  return "👀";
-  return "•";
+  return EVT_ICONS[type] || `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/></svg>`;
 }
 function eventTitle(e){
   const d = e.data || {};
