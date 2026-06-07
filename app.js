@@ -847,6 +847,7 @@ function renderSpeciesBrowser(){
       const speciesHTML = g.species.map(f => `
         <div class="browse-row-wrap">
           <button type="button" class="browse-row browse-row-species" data-name="${escapeHTML(f.name)}">
+            ${window.FISHDB_API.thumbHTML(f)}
             <span class="browse-row-main">
               <span class="browse-row-name">${escapeHTML(f.name)}</span>
               ${f.sci ? `<span class="browse-row-sci">${escapeHTML(f.sci)}</span>` : ""}
@@ -1672,6 +1673,7 @@ function bindFish(t){
     }
     browseList.innerHTML = list.map(f => `
       <button type="button" class="browse-row" data-name="${escapeHTML(f.name)}">
+        ${window.FISHDB_API.thumbHTML(f)}
         <span class="browse-row-main">
           <span class="browse-row-name">${escapeHTML(f.name)}</span>
           ${f.sci ? `<span class="browse-row-sci">${escapeHTML(f.sci)}</span>` : ""}

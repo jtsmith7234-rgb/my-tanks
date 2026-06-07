@@ -306,6 +306,44 @@ function fishCard(f){
   `;
 }
 
+/* HTML for the thumbnail slot used in the species card list.
+   Always returns the same outer markup so card-list layout stays
+   stable whether or not an approved image is available. */
+function fishThumbHTML(f){
+  // Reference fishImage lazily so callers without a sci field still work.
+  const img = fishImage(f, "thumb");
+  if (img.isPlaceholder){
+    return `<span class="species-thumb species-thumb-placeholder" aria-hidden="true">${img.silhouette}</span>`;
+  }
+  // decoding=async + loading=lazy keep the card list fast on long scrolls.
+  // onerror calls fishImageError() which swaps in the silhouette so a
+  // broken URL never shows a native broken-image icon.
+  const alt = (f && f.name) ? `${f.name} thumbnail` : "Species thumbnail";
+  const safeSrc = String(img.src).replace(/"/g, "&quot;");
+  const safeAlt = alt.replace(/"/g, "&quot;");
+  return `<span class="species-thumb species-thumb-img">`
+       + `<img src="${safeSrc}" alt="${safeAlt}" loading="lazy" decoding="async" onerror="window.fishImageError(this)" />`
+       + `</span>`;
+}
+
+/* HTML for the larger hero slot used on the detail/profile card. */
+function fishHeroHTML(f){
+  const img = fishImage(f, "hero");
+  if (img.isPlaceholder){
+    return `<div class="species-hero species-hero-placeholder" aria-hidden="true">${img.silhouette}</div>`;
+  }
+  const alt = (f && f.name) ? `${f.name}` : "Species image";
+  const safeSrc = String(img.src).replace(/"/g, "&quot;");
+  const safeAlt = alt.replace(/"/g, "&quot;");
+  // Attribution: escape HTML to avoid injection from source records.
+  const attrText = (img.attribution || "").replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"})[c]);
+  const attribution = attrText ? `<div class="species-hero-attr">${attrText}</div>` : "";
+  return `<div class="species-hero species-hero-img">`
+       + `<img src="${safeSrc}" alt="${safeAlt}" loading="lazy" decoding="async" onerror="window.fishImageError(this)" />`
+       + `${attribution}`
+       + `</div>`;
+}
+
 /* Expert-style species profile for Browse mode. Compact rows, a short
    summary line, and a minimal trust section with an expandable Sources
    drawer (toggled in app.js). */
@@ -315,6 +353,7 @@ function fishProfileCard(f){
   const sci = f.sci ? `<div class="profile-sci">${f.sci}</div>` : "";
   const conservation = fishConservation(f);
   const sciVerified = f.sci ? `<span class="trust-chip">Scientific name verified</span>` : "";
+  const hero = fishHeroHTML(f);
 
   const rows = [
     ["Adult size",   `${f.adult}"`],
@@ -340,6 +379,7 @@ function fishProfileCard(f){
 
   return `
     <div class="profile-card" data-profile>
+      ${hero}
       <div class="profile-head">
         <div class="profile-name">${f.name}</div>
         ${sci}
@@ -502,6 +542,187 @@ function fishCompatibility(candidate, tank){
   return { level, label, reasons: shown };
 }
 
+/* ============================================================
+   SPECIES IMAGE SYSTEM (v1 — conservative rollout)
+
+   Image policy:
+     - No auto-import of random web images. Curated, manually
+       approved URLs only.
+     - Coverage is partial in v1. Any species without an
+       "approved" entry renders a silhouette placeholder.
+     - Layout stays stable in both states; no broken-image icons.
+
+   Per-species fields (all optional):
+     imageThumbUrl       small image for the card list (~56–88px)
+     imageHeroUrl        larger image for the detail screen
+     imageStatus         "approved" | "needs_review" | "placeholder"
+     imageSourceName     human-readable source (e.g. "Wikimedia Commons")
+     imageSourceUrl      URL of the source file/page
+     imageLicenseType    e.g. "CC-BY-SA 4.0", "Public Domain"
+     imageLicenseUrl     URL of the license text
+     imageAttributionText  attribution string to display under the hero
+
+   Tier metadata drives the curator workflow (not the renderer):
+     Tier 1 = prioritized for sourcing & approval
+     Tier 2 = possible, placeholder until manually reviewed
+     Tier 3 = placeholder first
+
+   Renderer rule: image is shown ONLY when imageStatus === "approved"
+   AND the matching URL is present. Anything else => silhouette.
+   ============================================================ */
+
+/* Keyed by scientific name (canonical) so renaming common names does
+   not break image links. Empty by default — curators fill this in. */
+const FISH_IMAGES = {
+  // Example skeleton (commented out so v1 ships placeholder-only and
+  // every approval is a deliberate, reviewed addition):
+  //
+  // "Betta splendens": {
+  //   imageThumbUrl: "https://.../betta_thumb.jpg",
+  //   imageHeroUrl:  "https://.../betta_hero.jpg",
+  //   imageStatus:   "approved",
+  //   imageSourceName: "Wikimedia Commons",
+  //   imageSourceUrl:  "https://commons.wikimedia.org/wiki/File:...",
+  //   imageLicenseType: "CC-BY-SA 4.0",
+  //   imageLicenseUrl:  "https://creativecommons.org/licenses/by-sa/4.0/",
+  //   imageAttributionText: "Photo by ... / Wikimedia / CC-BY-SA 4.0"
+  // },
+};
+
+/* Tier assignments — strings keyed by scientific name to keep FISHDB clean.
+   These reflect the curator's prioritization, not the runtime behavior. */
+const FISH_TIERS = {
+  // Tier 1 — prioritize for free-use image sourcing & approval
+  "Betta splendens": 1,
+  "Trichogaster lalius": 1,
+  "Paracheirodon innesi": 1,
+  "Paracheirodon axelrodi": 1,
+  "Trigonostigma heteromorpha": 1,
+  "Danio rerio": 1,
+  "Poecilia reticulata": 1,
+  "Xiphophorus maculatus": 1,
+  "Xiphophorus hellerii": 1,
+  "Poecilia sphenops": 1,
+  "Corydoras aeneus": 1,
+  "Hypostomus plecostomus": 1,
+  "Chromobotia macracanthus": 1,
+  "Pterophyllum scalare": 1,
+  "Rocio octofasciata": 1,
+  "Thorichthys meeki": 1,
+  "Symphysodon aequifasciatus": 1,
+  "Astronotus ocellatus": 1,
+  "Puntius titteya": 1,
+  "Puntigrus tetrazona": 1,
+  "Pethia conchonius": 1,
+  "Epalzeorhynchos frenatum": 1,
+  "Epalzeorhynchos bicolor": 1,
+  "Carassius auratus": 1,
+  "Carassius auratus (fancy)": 1,
+  "Caridina multidentata": 1,
+  "Pomacea bridgesii": 1,
+
+  // Tier 2 — possible, placeholder until manually reviewed
+  "Trichopodus leerii": 2,
+  "Trichogaster chuna": 2,
+  "Macropodus opercularis": 2,
+  "Hyphessobrycon amandae": 2,
+  "Gymnocorymbus ternetzi": 2,
+  "Hyphessobrycon eques": 2,
+  "Hemigrammus rhodostomus": 2,
+  "Hyphessobrycon herbertaxelrodi": 2,
+  "Hemigrammus erythrozonus": 2,
+  "Phenacogrammus interruptus": 2,
+  "Danio albolineatus": 2,
+  "Devario aequipinnatus": 2,
+  "Poecilia wingei": 2,
+  "Poecilia latipinna": 2,
+  "Corydoras panda": 2,
+  "Ancistrus cirrhosus": 2,
+  "Pangio kuhlii": 2,
+  "Misgurnus anguillicaudatus": 2,
+  "Mikrogeophagus ramirezi": 2,
+  "Mikrogeophagus altispinosus": 2,
+  "Pelvicachromis pulcher": 2,
+  "Amatitlania nigrofasciata": 2,
+  "Labidochromis caeruleus": 2,
+  "Tanichthys albonubes": 2,
+  "Puntius semifasciolatus": 2,
+  "Crossocheilus oblongus": 2,
+  "Neocaridina davidi": 2,
+  "Palaemonetes paludosus": 2,
+  "Neritina natalensis": 2
+  // Everything else defaults to Tier 3 (placeholder first).
+};
+
+function fishTier(f){
+  if (!f || !f.sci) return 3;
+  return FISH_TIERS[f.sci] || 3;
+}
+
+/* Inline SVG silhouette — used both for the list thumbnail slot and the
+   detail hero when no approved image is available. Inline (no network)
+   so we never flash a broken-image icon. Currentcolor lets dark/light
+   themes restyle without swapping the source. */
+const FISH_SILHOUETTE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 40" aria-hidden="true" focusable="false"><path fill="currentColor" d="M40 20c0-8-9-14-19-14-7 0-13 3-17 7 4 1 7 4 7 7s-3 6-7 7c4 4 10 7 17 7 10 0 19-6 19-14zm-25-2a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm32-6 13-7c1-.5 2 .3 2 1.4v27.2c0 1.1-1.1 1.9-2 1.4l-13-7c-1-.5-1-2 0-2.5l4.5-2.4c.6-.3.6-1.2 0-1.5L47 14.5c-1-.5-1-2 0-2.5z"/></svg>`;
+
+/* Fallback fired when an approved image URL fails to load (404, blocked,
+   offline). Swap the broken <img> for the inline silhouette, mark the
+   parent as a placeholder, and ensure we never show a broken-image icon.
+   Exposed on window so the simple onerror="" attribute can call it. */
+function fishImageError(imgEl){
+  if (!imgEl || imgEl.dataset.fallback) return;
+  imgEl.dataset.fallback = "1";
+  const parent = imgEl.parentNode;
+  if (parent){
+    parent.classList.add("species-thumb-placeholder", "species-hero-placeholder");
+    parent.classList.remove("species-thumb-img", "species-hero-img");
+    // Drop any sibling attribution if present.
+    const attr = parent.querySelector(".species-hero-attr");
+    if (attr) attr.remove();
+  }
+  // Replace the <img> with the inline silhouette markup.
+  const tmp = document.createElement("div");
+  tmp.innerHTML = FISH_SILHOUETTE_SVG;
+  const svg = tmp.firstChild;
+  if (svg && parent) parent.replaceChild(svg, imgEl);
+}
+window.fishImageError = fishImageError;
+
+/* Image resolution. Returns a normalized record describing what to show.
+   Used by both the card list (thumb) and the detail screen (hero). */
+function fishImage(f, variant){
+  // variant: "thumb" | "hero"
+  const v = variant === "hero" ? "hero" : "thumb";
+  const empty = {
+    isPlaceholder: true,
+    src: "",
+    silhouette: FISH_SILHOUETTE_SVG,
+    status: "placeholder",
+    sourceName: "",
+    sourceUrl: "",
+    licenseType: "",
+    licenseUrl: "",
+    attribution: ""
+  };
+  if (!f) return empty;
+  const rec = (f.sci && FISH_IMAGES[f.sci]) || null;
+  if (!rec) return empty;
+  if (rec.imageStatus !== "approved") return { ...empty, status: rec.imageStatus || "placeholder" };
+  const src = v === "hero" ? rec.imageHeroUrl : rec.imageThumbUrl;
+  if (!src) return { ...empty, status: rec.imageStatus };
+  return {
+    isPlaceholder: false,
+    src,
+    silhouette: FISH_SILHOUETTE_SVG,
+    status: "approved",
+    sourceName:  rec.imageSourceName  || "",
+    sourceUrl:   rec.imageSourceUrl   || "",
+    licenseType: rec.imageLicenseType || "",
+    licenseUrl:  rec.imageLicenseUrl  || "",
+    attribution: rec.imageAttributionText || ""
+  };
+}
+
 window.FISHDB_API = {
   all: FISHDB,
   search: fishSearch,
@@ -514,5 +735,10 @@ window.FISHDB_API = {
   sources: fishSources,
   conservation: fishConservation,
   profileSummary: fishProfileSummary,
-  compatibility: fishCompatibility
+  compatibility: fishCompatibility,
+  image: fishImage,
+  tier: fishTier,
+  silhouette: FISH_SILHOUETTE_SVG,
+  thumbHTML: fishThumbHTML,
+  heroHTML: fishHeroHTML
 };

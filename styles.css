@@ -2492,7 +2492,7 @@ input[type=time].input{ font-family:inherit }
 
 /* Species rows live one nesting level inside their category bucket. */
 .browse-cat-body .browse-row-species{
-  padding-left:22px;
+  padding-left:14px;
 }
 
 .browse-row-actions{
@@ -2564,4 +2564,89 @@ html[data-skin="dark"] .compat-bad{ color:#ffb0b0 }
   text-align:center;
   font-size:16px;
   padding:8px 10px;
+}
+
+/* ============================================================
+   Species image system (v1)
+   - Thumbnail in card list (left of name)
+   - Hero on detail/profile card (top of card)
+   - Silhouette placeholder for everything not yet approved
+   - Layout is stable in both states; no broken-image fallbacks
+   ============================================================ */
+
+/* Thumbnail slot (used in both the standalone categorized browser
+   and the in-tank Browse panel). Fixed size keeps row height constant
+   regardless of whether an image loads. */
+.species-thumb{
+  flex:none;
+  width:40px; height:40px;
+  border-radius:9px;
+  overflow:hidden;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--glass-stroke, rgba(255,255,255,.08));
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+.species-thumb img{
+  width:100%; height:100%;
+  object-fit:cover;
+  display:block;
+}
+.species-thumb-placeholder{
+  color:var(--ink-dim, rgba(255,255,255,.45));
+  background:rgba(255,255,255,.04);
+}
+.species-thumb-placeholder svg{
+  width:62%; height:auto;
+  opacity:.65;
+}
+
+/* Hero on the detail / profile card. 16:9 fixed ratio so layout is
+   stable when the silhouette is shown instead of a photo. */
+.species-hero{
+  position:relative;
+  width:100%;
+  aspect-ratio:16 / 9;
+  border-radius:12px;
+  overflow:hidden;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--glass-stroke, rgba(255,255,255,.08));
+  margin:0 0 12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.species-hero img{
+  width:100%; height:100%;
+  object-fit:cover;
+  display:block;
+}
+.species-hero-placeholder{
+  color:var(--ink-dim, rgba(255,255,255,.45));
+}
+.species-hero-placeholder svg{
+  width:38%;
+  max-width:160px;
+  height:auto;
+  opacity:.55;
+}
+.species-hero-attr{
+  position:absolute;
+  left:0; right:0; bottom:0;
+  padding:4px 8px;
+  font-size:10px;
+  color:rgba(255,255,255,.85);
+  background:linear-gradient(to top, rgba(0,0,0,.55), rgba(0,0,0,0));
+  text-align:right;
+  pointer-events:none;
+}
+
+/* Light-mode tuning (the app uses currentColor + a light-themed override
+   elsewhere; keep the placeholder subtle on light too). */
+@media (prefers-color-scheme: light){
+  .species-thumb-placeholder{ background:rgba(0,0,0,.04); color:rgba(0,0,0,.45) }
+  .species-hero-placeholder{ color:rgba(0,0,0,.35) }
+  .species-thumb{ border-color:rgba(0,0,0,.08) }
+  .species-hero{ border-color:rgba(0,0,0,.08); background:rgba(0,0,0,.03) }
 }
