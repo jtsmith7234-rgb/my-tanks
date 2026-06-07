@@ -295,8 +295,8 @@ html[data-theme="planted"] .fx-plants .blade::after{
    TOP BAR — washi paper bar
    ============================================================ */
 .topbar{
-  display:flex;align-items:center;gap:8px;
-  padding:10px 14px;
+  display:flex;align-items:center;gap:6px;
+  padding:10px 12px;
   margin:0 10px 12px;
   position:relative;
   z-index:30;
@@ -325,7 +325,7 @@ html[data-theme="planted"] .fx-plants .blade::after{
 .topbar h1{
   font-family: var(--font-display);
   font-weight:700;letter-spacing:.3px;
-  font-size:22px;margin:0;
+  font-size:19px;margin:0;
   flex:0 1 auto;text-align:center;
   min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   color: var(--ink);

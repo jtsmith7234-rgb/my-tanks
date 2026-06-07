@@ -352,18 +352,27 @@ function render(){
   const titleEl = $("#title");
   const backBtn = $("#back-btn");
   const addBtn  = $("#add-tank-btn");
+  const browseBtn = $("#browse-species-btn");
 
   if(view.screen === "home"){
     titleEl.textContent = "Tank Care Buddy";
     backBtn.hidden = true;
     addBtn.hidden = false;
+    if (browseBtn) browseBtn.hidden = false;
     renderHome();
   } else if(view.screen === "tank"){
     const t = getTank(view.tankId);
     titleEl.textContent = t ? t.name : "Tank";
     backBtn.hidden = false;
     addBtn.hidden = true;
+    if (browseBtn) browseBtn.hidden = true;
     renderTank();
+  } else if(view.screen === "species"){
+    titleEl.textContent = "Browse species";
+    backBtn.hidden = false;
+    addBtn.hidden = true;
+    if (browseBtn) browseBtn.hidden = true;
+    renderSpeciesBrowser();
   }
 }
 
@@ -793,6 +802,78 @@ function renderTank(){
 
   // After a navigation that requested a highlight, scroll to + flash the target
   _consumeReminderHighlight();
+}
+
+/* ============================================================
+   STANDALONE SPECIES BROWSER
+   Reachable from the home-page fish button. Mirrors the in-tank
+   Browse panel: search input + tappable list + expanded profile.
+   Does not require a tank to be selected.
+   ============================================================ */
+function renderSpeciesBrowser(){
+  const main = $("#main");
+  main.innerHTML = `
+    <div class="section">
+      <p class="muted" style="margin:0 0 10px">Tap a fish for a quick expert profile. Care basics, tank size, temperature, and pH — straight from the database.</p>
+      <label class="field">
+        <input class="input" id="species-browser-search" placeholder="Search species" autocomplete="off" />
+      </label>
+      <div id="species-browser-list" class="browse-list"></div>
+    </div>
+  `;
+
+  const searchEl = $("#species-browser-search");
+  const listEl   = $("#species-browser-list");
+
+  function renderList(q){
+    if (!window.FISHDB_API || !listEl) return;
+    const list = window.FISHDB_API.browse(q);
+    if (!list.length){
+      listEl.innerHTML = `<p class="muted browse-empty">No species match that search.</p>`;
+      return;
+    }
+    listEl.innerHTML = list.map(f => `
+      <button type="button" class="browse-row" data-name="${escapeHTML(f.name)}">
+        <span class="browse-row-main">
+          <span class="browse-row-name">${escapeHTML(f.name)}</span>
+          ${f.sci ? `<span class="browse-row-sci">${escapeHTML(f.sci)}</span>` : ""}
+        </span>
+        <span class="browse-row-chev">›</span>
+      </button>
+      <div class="browse-detail" data-detail="${escapeHTML(f.name)}" hidden></div>
+    `).join("");
+
+    $$(".browse-row", listEl).forEach(row => row.addEventListener("click", () => {
+      const name = row.dataset.name;
+      const detail = listEl.querySelector(`[data-detail="${CSS.escape(name)}"]`);
+      const isOpen = row.classList.contains("open");
+      // Single-open accordion — close any open profile first.
+      $$(".browse-row.open", listEl).forEach(r => r.classList.remove("open"));
+      $$(".browse-detail", listEl).forEach(d => { d.hidden = true; d.innerHTML = ""; });
+      if (!isOpen){
+        const f = window.FISHDB_API.byName(name);
+        detail.innerHTML = window.FISHDB_API.profileCard(f);
+        detail.hidden = false;
+        row.classList.add("open");
+        // Wire any sources-toggle inside the profile card.
+        const toggle = detail.querySelector("[data-sources-toggle]");
+        const drawer = detail.querySelector("[data-sources-drawer]");
+        if (toggle && drawer){
+          toggle.addEventListener("click", () => {
+            const open = drawer.hidden;
+            drawer.hidden = !open;
+            toggle.setAttribute("aria-expanded", String(open));
+            toggle.classList.toggle("open", open);
+          });
+        }
+      }
+    }));
+  }
+
+  if (searchEl){
+    searchEl.addEventListener("input", () => renderList(searchEl.value.trim()));
+  }
+  renderList("");
 }
 
 /* ------------------------------------------------------------
@@ -2433,6 +2514,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     render();
   });
   $("#add-tank-btn").addEventListener("click", handleAddTankTap);
+  { const bs = $("#browse-species-btn"); if (bs) bs.addEventListener("click", () => {
+    view = { screen:"species", tankId:null, tab:"details" };
+    render();
+  }); }
   { const sb = $("#settings-btn"); if (sb) sb.addEventListener("click", openSettingsSheet); }
   $("#import-file").addEventListener("change", handleImportFile);
 
