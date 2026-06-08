@@ -355,21 +355,32 @@ function render(){
   const addBtn  = $("#add-tank-btn");
   const browseBtn = $("#browse-species-btn");
 
+  // Helper: swap between brand lockup (home) and plain title (inner screens)
+  function setTitleText(text, showLogo) {
+    if (showLogo) {
+      titleEl.innerHTML = `<img src="apple-touch-icon.png" class="topbar-logo-img" width="30" height="30" alt="" aria-hidden="true" draggable="false">${escapeHTML(text)}`;
+      titleEl.classList.add("topbar-brand");
+    } else {
+      titleEl.textContent = text;
+      titleEl.classList.remove("topbar-brand");
+    }
+  }
+
   if(view.screen === "home"){
-    titleEl.textContent = "Tank Care Buddy";
+    setTitleText("Tank Care Buddy", true);
     backBtn.hidden = true;
     addBtn.hidden = false;
     if (browseBtn) browseBtn.hidden = false;
     renderHome();
   } else if(view.screen === "tank"){
     const t = getTank(view.tankId);
-    titleEl.textContent = t ? t.name : "Tank";
+    setTitleText(t ? t.name : "Tank", false);
     backBtn.hidden = false;
     addBtn.hidden = true;
     if (browseBtn) browseBtn.hidden = true;
     renderTank();
   } else if(view.screen === "species"){
-    titleEl.textContent = "Browse species";
+    setTitleText("Browse species", false);
     backBtn.hidden = false;
     addBtn.hidden = true;
     if (browseBtn) browseBtn.hidden = true;

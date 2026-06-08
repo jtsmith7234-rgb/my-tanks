@@ -3256,3 +3256,41 @@ html[data-theme="clean"] .event-icon.water_test   { color: var(--clean-good); }
 html[data-theme="clean"] .event-icon.fish_add     { color: var(--clean-primary); }
 html[data-theme="clean"] .event-icon.fish_remove  { color: var(--clean-bad); }
 html[data-theme="clean"] .event-icon.tank_edit    { color: var(--clean-warn); }
+
+/* ============================================================
+   TOPBAR BRAND LOGO
+   Icon + text lockup, mirrors the website header exactly.
+   Logo only visible on the home screen (title = "Tank Care Buddy").
+   On inner screens the title text alone is shown (no logo).
+   ============================================================ */
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  flex: 0 1 auto;
+  text-align: center;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0;
+  -webkit-text-fill-color: var(--ink);
+  background: none;
+  text-shadow: none;
+}
+.topbar-logo-img {
+  border-radius: 7px;
+  flex-shrink: 0;
+  display: block;
+  object-fit: cover;
+}
+/* Hide logo when on inner screens (title changes via JS) */
+#title:not(.topbar-brand) .topbar-logo-img,
+.topbar-inner-title .topbar-logo-img {
+  display: none;
+}
