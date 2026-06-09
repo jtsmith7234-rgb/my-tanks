@@ -358,7 +358,7 @@ function render(){
   // Helper: swap between brand lockup (home) and plain title (inner screens)
   function setTitleText(text, showLogo) {
     if (showLogo) {
-      titleEl.innerHTML = `<img src="apple-touch-icon.png" class="topbar-logo-img" width="30" height="30" alt="" aria-hidden="true" draggable="false">${escapeHTML(text)}`;
+      titleEl.innerHTML = `<span class="topbar-logo-wrap"><img src="header-icon.png" class="topbar-logo-img" width="22" height="22" alt="" aria-hidden="true" draggable="false"></span>${escapeHTML(text)}`;
       titleEl.classList.add("topbar-brand");
     } else {
       titleEl.textContent = text;
