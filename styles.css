@@ -3310,3 +3310,46 @@ html[data-theme="midnight-reef"] .topbar-logo-img {
 .topbar-inner-title .topbar-logo-img {
   display: none;
 }
+
+/* ============================================================
+   QUICK LOG — Water Care tab
+   ============================================================ */
+.ql-section {
+  padding-bottom: 12px;
+}
+.ql-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ql-btn {
+  flex: 1 1 auto;
+  min-width: 100px;
+  text-align: center;
+  white-space: nowrap;
+}
+.ql-btn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+/* Water test section header with inline field helpers */
+.wt-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 0;
+}
+.wt-helpers {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.wt-helper {
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}

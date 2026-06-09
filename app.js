@@ -1761,6 +1761,69 @@ function recomputeTankAlerts(tankId){
 }
 
 /* ============================================================
+   WATER CARE — PREFILL HELPERS
+   Each returns a plain object with the subset of fields it knows
+   about, or null if no prior data exists for that tank.
+   Backward-compat: reads water_care, water_change, water_test.
+   ============================================================ */
+function _lastCarePrefill(tankId){
+  // Most recent event that has BOTH a gallons value AND at least one test reading
+  const evs = tankEvents(tankId);
+  const combined = evs.find(e =>
+    (e.type === "water_care") &&
+    e.data && e.data.gallons > 0 &&
+    (e.data.ph !== "" && e.data.ph != null ||
+     e.data.ammonia !== "" && e.data.ammonia != null ||
+     e.data.nitrite !== "" && e.data.nitrite != null ||
+     e.data.nitrate !== "" && e.data.nitrate != null)
+  );
+  if (!combined) return null;
+  const d = combined.data;
+  return {
+    gallons: d.gallons,
+    ph:      d.ph,
+    ammonia: d.ammonia,
+    nitrite: d.nitrite,
+    nitrate: d.nitrate,
+    temp_f:  d.temp_f,
+    notes:   ""   // intentionally blank — notes are session-specific
+  };
+}
+
+function _lastChangePrefill(tankId){
+  // Most recent event that has a gallons value (water_care or water_change)
+  const evs = tankEvents(tankId);
+  const ev = evs.find(e =>
+    (e.type === "water_care" || e.type === "water_change") &&
+    e.data && e.data.gallons > 0
+  );
+  if (!ev) return null;
+  return { gallons: ev.data.gallons };
+}
+
+function _lastTestPrefill(tankId){
+  // Most recent event that has any test reading
+  const evs = tankEvents(tankId);
+  const ev = evs.find(e =>
+    (e.type === "water_care" || e.type === "water_test") &&
+    e.data &&
+    (e.data.ph !== "" && e.data.ph != null ||
+     e.data.ammonia !== "" && e.data.ammonia != null ||
+     e.data.nitrite !== "" && e.data.nitrite != null ||
+     e.data.nitrate !== "" && e.data.nitrate != null)
+  );
+  if (!ev) return null;
+  const d = ev.data;
+  return {
+    ph:      d.ph,
+    ammonia: d.ammonia,
+    nitrite: d.nitrite,
+    nitrate: d.nitrate,
+    temp_f:  d.temp_f
+  };
+}
+
+/* ============================================================
    WATER CARE TAB — merged Water Change + Tests
    Saves as water_care event (gallons + test readings + doses).
    Backward-compat: old water_change and water_test records are
@@ -1770,12 +1833,38 @@ function renderWaterCare(t){
   const suggested = Math.round(t.gallons * 0.5);
   if (!t.chemicals) t.chemicals = [];
 
+  // Prefill data for Quick Log buttons
+  const prefillCare   = _lastCarePrefill(t.id);
+  const prefillChange = _lastChangePrefill(t.id);
+  const prefillTest   = _lastTestPrefill(t.id);
+
   // Pull last readings for most-recent display
   const lastTest   = lastEventOfType(t.id, "water_test")   || lastEventOfType(t.id, "water_care");
   const lastChange = lastEventOfType(t.id, "water_change") || lastEventOfType(t.id, "water_care");
   const ld = lastTest ? lastTest.data : null;
 
+  // Quick Log — repeat last care button (disabled + hint if no combined history)
+  const repeatBtn = prefillCare
+    ? `<button class="btn small ql-btn" id="ql-repeat" type="button">Repeat last care</button>`
+    : `<button class="btn small ql-btn" disabled title="No combined care session found yet">Repeat last care</button>`;
+
   return `
+    <!-- QUICK LOG SECTION -->
+    <div class="section ql-section" id="ql-section">
+      <h2>Quick log</h2>
+      <p class="muted small" style="margin:-2px 0 10px">Prefills the form below — review and tap Save when ready.</p>
+      <div class="ql-row">
+        ${repeatBtn}
+        <button class="btn small ql-btn" id="ql-change" type="button"
+          ${prefillChange ? "" : ""}
+        >Water change only</button>
+        <button class="btn small ql-btn" id="ql-test" type="button"
+          ${prefillTest ? "" : ""}
+        >Test only</button>
+      </div>
+      ${!prefillCare && !prefillChange && !prefillTest ? `<p class="muted small" style="margin:8px 0 0">No history yet for this tank — fill in the form below to get started.</p>` : ""}
+    </div>
+
     <!-- WATER CHANGE SECTION -->
     <div class="section" id="wc-section">
       <h2>Water change</h2>
@@ -1800,8 +1889,15 @@ function renderWaterCare(t){
 
     <!-- WATER TEST SECTION -->
     <div class="section" id="wt-section">
-      <h2>Water test</h2>
-      <p class="muted" style="margin-top:0">Leave any field blank if you didn't test it.</p>
+      <div class="wt-section-head">
+        <h2 style="margin:0">Water test</h2>
+        <div class="wt-helpers">
+          ${prefillTest ? `<button class="btn small ghost wt-helper" id="wth-same" type="button">Same as last</button>` : ""}
+          <button class="btn small ghost wt-helper" id="wth-normal" type="button">Normal</button>
+          <button class="btn small ghost wt-helper" id="wth-clear" type="button">Clear</button>
+        </div>
+      </div>
+      <p class="muted" style="margin-top:6px">Leave any field blank if you didn't test it.</p>
       <div class="row">
         <label class="field"><span>pH</span><input class="input" id="wt-ph" type="number" step="0.1" inputmode="decimal" placeholder="e.g. 7.2" /></label>
         <label class="field"><span>Ammonia (ppm)</span><input class="input" id="wt-ammonia" type="number" step="0.25" inputmode="decimal" placeholder="e.g. 0" /></label>
@@ -1910,6 +2006,114 @@ function bindWaterCare(t){
   }
   inp.addEventListener("input", paint);
   paint();
+
+  // ----------------------------------------------------------------
+  // QUICK LOG — prefill helpers
+  // Sets form fields from a data object; never saves.
+  // Only keys present in `fields` are written; missing keys untouched.
+  // ----------------------------------------------------------------
+  function setField(id, val){
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = (val != null && val !== "") ? String(val) : "";
+    // Trigger input event so dose calculator repaints if gallons changed
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+
+  function prefillForm(fields){
+    if (fields.gallons != null) setField("wc-gallons", fields.gallons);
+    if ("ph"      in fields)   setField("wt-ph",      fields.ph);
+    if ("ammonia" in fields)   setField("wt-ammonia", fields.ammonia);
+    if ("nitrite" in fields)   setField("wt-nitrite", fields.nitrite);
+    if ("nitrate" in fields)   setField("wt-nitrate", fields.nitrate);
+    if ("temp_f"  in fields)   setField("wt-temp",    fields.temp_f);
+    if ("notes"   in fields)   setField("wc-notes",   fields.notes);
+    // Scroll smoothly to the form so the user sees what was filled
+    const sec = document.getElementById("wc-section");
+    if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  // Quick Log buttons
+  const qlRepeat = document.getElementById("ql-repeat");
+  const qlChange = document.getElementById("ql-change");
+  const qlTest   = document.getElementById("ql-test");
+
+  if (qlRepeat){
+    const data = _lastCarePrefill(t.id);
+    if (data){
+      qlRepeat.addEventListener("click", () => {
+        prefillForm(data);
+        toast("Prefilled from last care session");
+      });
+    }
+  }
+
+  if (qlChange){
+    qlChange.addEventListener("click", () => {
+      const data = _lastChangePrefill(t.id);
+      // Prefill gallons from last change; clear test fields so it reads as change-only
+      prefillForm({
+        gallons: data ? data.gallons : Math.round(t.gallons * 0.5),
+        ph: "", ammonia: "", nitrite: "", nitrate: "", temp_f: ""
+      });
+      toast("Water change prefilled — test fields cleared");
+      // Scroll to wc-section
+      const sec = document.getElementById("wc-section");
+      if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  if (qlTest){
+    qlTest.addEventListener("click", () => {
+      const data = _lastTestPrefill(t.id);
+      // Set gallons to 0 / blank (test-only session), prefill test readings
+      prefillForm(Object.assign(
+        { gallons: 0 },
+        data || { ph: "", ammonia: "", nitrite: "", nitrate: "", temp_f: "" }
+      ));
+      toast(data ? "Test prefilled from last reading" : "Test fields ready");
+      // Scroll to test section
+      const sec = document.getElementById("wt-section");
+      if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  // Field helpers — Same as last / Normal / Clear (test fields only)
+  const wthSame   = document.getElementById("wth-same");
+  const wthNormal = document.getElementById("wth-normal");
+  const wthClear  = document.getElementById("wth-clear");
+
+  if (wthSame){
+    wthSame.addEventListener("click", () => {
+      const data = _lastTestPrefill(t.id);
+      if (!data){ toast("No previous test found"); return; }
+      setField("wt-ph",      data.ph);
+      setField("wt-ammonia", data.ammonia);
+      setField("wt-nitrite", data.nitrite);
+      setField("wt-nitrate", data.nitrate);
+      setField("wt-temp",    data.temp_f);
+      toast("Test fields filled from last reading");
+    });
+  }
+
+  if (wthNormal){
+    // Normal = freshwater "all-clear" ideal midpoints from SAFE ranges
+    wthNormal.addEventListener("click", () => {
+      setField("wt-ph",      7.2);   // midpoint of 6.5–7.8 ideal
+      setField("wt-ammonia", 0);
+      setField("wt-nitrite", 0);
+      setField("wt-nitrate", 10);    // low end of acceptable (under 20 ideal)
+      // Leave temp untouched — it's tank-specific
+      toast("Normal freshwater values filled in");
+    });
+  }
+
+  if (wthClear){
+    wthClear.addEventListener("click", () => {
+      ["wt-ph","wt-ammonia","wt-nitrite","wt-nitrate","wt-temp"].forEach(id => setField(id, ""));
+      toast("Test fields cleared");
+    });
+  }
 
   // Verify / manual dose prompts (reuse same helpers from bindClean closure)
   function openVerifyPrompt(entry){
