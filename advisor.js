@@ -56,9 +56,10 @@ function computeAdvice(tank){
   const evs = (window.events && window.events[tank.id]) ? window.events[tank.id] : [];
   // Ignore advisor events themselves when looking at "real" activity
   const real = evs.filter(e => e.type !== "advisor");
-  const lastChange = real.find(e => e.type === "water_change") || null;
-  const lastTest   = real.find(e => e.type === "water_test")   || null;
-  const recentTests= real.filter(e => e.type === "water_test").slice(0, 4);
+  // Accept both legacy event types and the new combined water_care event
+  const lastChange = real.find(e => e.type === "water_change" || (e.type === "water_care" && e.data && e.data.gallons)) || null;
+  const lastTest   = real.find(e => e.type === "water_test"   || (e.type === "water_care" && e.data && (e.data.ph !== "" && e.data.ph != null || e.data.ammonia !== "" && e.data.ammonia != null || e.data.nitrite !== "" && e.data.nitrite != null || e.data.nitrate !== "" && e.data.nitrate != null))) || null;
+  const recentTests= real.filter(e => e.type === "water_test"  || (e.type === "water_care" && e.data && (e.data.ph !== "" && e.data.ph != null || e.data.ammonia !== "" && e.data.ammonia != null || e.data.nitrite !== "" && e.data.nitrite != null || e.data.nitrate !== "" && e.data.nitrate != null))).slice(0, 4);
 
   const out = [];
 
@@ -359,12 +360,12 @@ function adviceTarget(adv){
       || title.includes("test data")
       || rule.includes("water_test")
       || rule.includes("last test")) {
-    return { tab: "tests", remType: null };
+    return { tab: "water-care", remType: null };
   }
   // Everything else the advisor raises (ammonia, nitrite, nitrate, pH,
   // temperature, water-change cadence, stocking, dosing) is addressed by
-  // a water change → Details tab, highlight the water_change "Up next" row.
-  return { tab: "details", remType: "water_change" };
+  // a water change → Water Care tab (log a change + test together).
+  return { tab: "water-care", remType: "water_change" };
 }
 
 /* expose */

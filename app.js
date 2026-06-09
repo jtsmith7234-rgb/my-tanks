@@ -429,8 +429,8 @@ function openTankActions(tankId){
     };
     $("#act-open").addEventListener("click",  () => go("details"));
     $("#act-edit").addEventListener("click",  () => go("details"));
-    $("#act-clean").addEventListener("click", () => go("clean"));
-    $("#act-test").addEventListener("click",  () => go("tests"));
+    $("#act-clean").addEventListener("click", () => go("water-care"));
+    $("#act-test").addEventListener("click",  () => go("water-care"));
     $("#act-cancel").addEventListener("click",() => closeModal());
     $("#act-delete").addEventListener("click", () => {
       if(!confirm(`Delete "${t.name}"? This can't be undone.`)) return;
@@ -755,8 +755,7 @@ function renderTank(){
     <div class="tabs" role="tablist">
       <button class="tab ${view.tab==='details'?'active':''}" data-tab="details">Details</button>
       <button class="tab ${view.tab==='fish'?'active':''}" data-tab="fish">Fish</button>
-      <button class="tab ${view.tab==='clean'?'active':''}" data-tab="clean">Care</button>
-      <button class="tab ${view.tab==='tests'?'active':''}" data-tab="tests">Tests</button>
+      <button class="tab ${view.tab==='water-care'?'active':''}" data-tab="water-care">Water Care</button>
       <button class="tab ${view.tab==='history'?'active':''}" data-tab="history">History</button>
     </div>
     <div id="tab-body"></div>
@@ -768,14 +767,12 @@ function renderTank(){
   const body = $("#tab-body");
   if(view.tab === "details") body.innerHTML = renderDetails(t);
   if(view.tab === "fish")    body.innerHTML = renderFish(t);
-  if(view.tab === "clean")   body.innerHTML = renderClean(t);
-  if(view.tab === "tests")   body.innerHTML = renderTests(t);
+  if(view.tab === "water-care") body.innerHTML = renderWaterCare(t);
   if(view.tab === "history") body.innerHTML = renderHistory(t);
 
   if(view.tab === "details") bindDetails(t);
   if(view.tab === "fish")    bindFish(t);
-  if(view.tab === "clean")   bindClean(t);
-  if(view.tab === "tests")   bindTests(t);
+  if(view.tab === "water-care") bindWaterCare(t);
   if(view.tab === "history") bindHistory(t);
 
   // Wire up advisor dismiss button
@@ -1088,8 +1085,8 @@ function openReminderTarget(t, tab, remType){
   if (!t) return;
   const goTab = tab || "details";
   // Stash what to highlight; consumed by _consumeReminderHighlight() post-render
-  window._reminderHighlight = goTab === "tests"
-    ? { sel: "#tests-log" }
+  window._reminderHighlight = goTab === "water-care"
+    ? { sel: "#wt-section", focusId: "wt-ph" }
     : remType
       ? { sel: `.upn-row[data-rem="${remType}"]` }
       : { sel: ".upn-list" };
@@ -1171,8 +1168,8 @@ function _friendlyShortDate(ts){
    focus:  input ID to auto-focus and select after the tab is rendered (optional)
    label:  short tab label used in row aria/hint text */
 const UPN_NAV = {
-  water_change: { tab: "clean",   sel: "#wc-section", focus: "wc-gallons", label: "Care"    },
-  water_test:   { tab: "tests",   sel: "#tests-log",  focus: "wt-ph",      label: "Tests"   },
+  water_change: { tab: "water-care", sel: "#wc-section",  focus: "wc-gallons", label: "Water Care" },
+  water_test:   { tab: "water-care", sel: "#wt-section",  focus: "wt-ph",       label: "Water Care" },
   daily:        { tab: "history", sel: null,          focus: null,         label: "History" }
 };
 
@@ -1752,6 +1749,348 @@ function openFishEditor(t, f){
 }
 
 /* ============================================================
+   ALERT RECOMPUTE — call after logging water_care / water_test
+   Derives condition alerts from latest readings, clears stale
+   advisor dismissals so the banner reflects the new data.
+   ============================================================ */
+function recomputeTankAlerts(tankId){
+  // Clear any session-scoped dismiss so the banner re-evaluates
+  if (window._advisorDismissed) delete window._advisorDismissed[tankId];
+  // Re-expose events so advisor.js picks up the new reading immediately
+  window.events = events;
+}
+
+/* ============================================================
+   WATER CARE TAB — merged Water Change + Tests
+   Saves as water_care event (gallons + test readings + doses).
+   Backward-compat: old water_change and water_test records are
+   preserved and still render correctly in history.
+   ============================================================ */
+function renderWaterCare(t){
+  const suggested = Math.round(t.gallons * 0.5);
+  if (!t.chemicals) t.chemicals = [];
+
+  // Pull last readings for most-recent display
+  const lastTest   = lastEventOfType(t.id, "water_test")   || lastEventOfType(t.id, "water_care");
+  const lastChange = lastEventOfType(t.id, "water_change") || lastEventOfType(t.id, "water_care");
+  const ld = lastTest ? lastTest.data : null;
+
+  return `
+    <!-- WATER CHANGE SECTION -->
+    <div class="section" id="wc-section">
+      <h2>Water change</h2>
+      <p class="muted" style="margin-top:0">${suggested} gal would be a ~50% change on this tank. Leave gallons at 0 if you're only logging a test.</p>
+      <div class="row">
+        <label class="field"><span>Gallons changed</span>
+          <input class="input" id="wc-gallons" type="number" min="0" step="0.5" value="${suggested}" />
+        </label>
+        <label class="field"><span>Date</span>
+          <input class="input" id="wc-date" type="date" value="${new Date().toISOString().slice(0,10)}" />
+        </label>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="chem-section-head">
+        <h2>Your chemicals</h2>
+        <button class="btn small" id="add-chem-btn">+ Add</button>
+      </div>
+      <div id="dose-out"></div>
+    </div>
+
+    <!-- WATER TEST SECTION -->
+    <div class="section" id="wt-section">
+      <h2>Water test</h2>
+      <p class="muted" style="margin-top:0">Leave any field blank if you didn't test it.</p>
+      <div class="row">
+        <label class="field"><span>pH</span><input class="input" id="wt-ph" type="number" step="0.1" inputmode="decimal" placeholder="e.g. 7.2" /></label>
+        <label class="field"><span>Ammonia (ppm)</span><input class="input" id="wt-ammonia" type="number" step="0.25" inputmode="decimal" placeholder="e.g. 0" /></label>
+      </div>
+      <div class="row">
+        <label class="field"><span>Nitrite (ppm)</span><input class="input" id="wt-nitrite" type="number" step="0.25" inputmode="decimal" placeholder="e.g. 0" /></label>
+        <label class="field"><span>Nitrate (ppm)</span><input class="input" id="wt-nitrate" type="number" step="5" inputmode="decimal" placeholder="e.g. 10" /></label>
+      </div>
+      <div class="row">
+        <label class="field"><span>Temp °F (optional)</span><input class="input" id="wt-temp" type="number" step="0.1" inputmode="decimal" placeholder="e.g. 78" /></label>
+      </div>
+    </div>
+
+    <!-- NOTES + SAVE -->
+    <div class="section">
+      <label class="field"><span>Session notes (optional)</span>
+        <input class="input" id="wc-notes" placeholder="e.g. trimmed moss, vacuumed substrate" /></label>
+      <button class="btn block" id="log-wc-btn" style="margin-top:10px">Save to history</button>
+    </div>
+
+    <!-- LAST READING SUMMARY -->
+    ${ld ? `
+      <div class="section">
+        <h2>Most recent reading</h2>
+        <div class="kv">
+          <b>When</b><span>${formatTS(lastTest.ts)}</span>
+          ${renderReadingRow("pH",       "ph",      ld.ph)}
+          ${renderReadingRow("Ammonia",  "ammonia", ld.ammonia, "ppm")}
+          ${renderReadingRow("Nitrite",  "nitrite", ld.nitrite, "ppm")}
+          ${renderReadingRow("Nitrate",  "nitrate", ld.nitrate, "ppm")}
+          ${ld.temp_f != null && ld.temp_f !== "" ? `<b>Temp</b><span>${escapeHTML(String(ld.temp_f))} \u00b0F</span>` : ""}
+          ${ld.notes ? `<b>Notes</b><span>${escapeHTML(ld.notes)}</span>` : ""}
+        </div>
+      </div>` : ""}
+
+    ${window.GRAPHS ? window.GRAPHS.renderGraphsSection(t) : ""}
+
+    <div class="section">
+      <h2>Safe ranges (freshwater)</h2>
+      <ul class="muted" style="line-height:1.7;margin:0;padding-left:18px">
+        <li><b style="color:var(--ink)">pH</b> \u2014 6.5\u20137.8 ideal (most species tolerate 6.0\u20138.4)</li>
+        <li><b style="color:var(--ink)">Ammonia</b> \u2014 0 ppm. Any reading means trouble.</li>
+        <li><b style="color:var(--ink)">Nitrite</b> \u2014 0 ppm. Toxic above 0.</li>
+        <li><b style="color:var(--ink)">Nitrate</b> \u2014 under 20 ppm ideal; over 40 = water change.</li>
+      </ul>
+    </div>
+  `;
+}
+
+function bindWaterCare(t){
+  const inp = $("#wc-gallons");
+  const out = $("#dose-out");
+
+  // --- Dose calculator (identical to bindClean) ---
+  function doseCard(c, gallons){
+    const spec = chemResolve(c);
+    if (!spec) return "";
+    const verified = !!c.verified;
+    const amount = (spec.mlPerGallon || 0) * gallons;
+    const caps = spec.capSize ? amount / spec.capSize : 0;
+    const unit = spec.unit || "mL";
+    const inline = (spec.capSize && spec.capSize > 1)
+      ? `<span class="sub-inline">(${fmt(caps)} cap${caps===1?"":"s"})</span>`
+      : "";
+    const valueHTML = `${fmt(amount)}<span class="unit">${unit}</span> ${inline}`;
+    const action = verified
+      ? `<span class="verify-badge verified">\u2713 Verified</span>`
+      : `<button class="btn small ghost" data-verify-now="${c.instanceId}">Verify dose</button>`;
+    return `
+      <div class="dose-card ${verified ? "verified" : ""}">
+        <div class="dose-card-head">
+          <div class="label">${escapeHTML(spec.brand || "")} ${escapeHTML(spec.name || "")}</div>
+          ${action}
+        </div>
+        <div class="dose-heading">Dose</div>
+        <div class="big">${valueHTML}</div>
+        <div class="sub">${escapeHTML(spec.rule || "")}</div>
+        <button class="chem-remove" data-remove="${c.instanceId}" title="Remove from tank">\u00d7</button>
+      </div>
+    `;
+  }
+
+  function paint(){
+    const g = parseFloat(inp.value);
+    const list = t.chemicals || [];
+    if (!list.length){
+      out.innerHTML = `<p class="muted center" style="margin:10px 0 0">No chemicals added. Tap <b>+ Add</b> to pick what you use.</p>`;
+      return;
+    }
+    if(!g || g <= 0){
+      out.innerHTML = `<p class="muted center" style="margin:10px 0 0">Enter a gallon amount above to see your doses.</p>`;
+      return;
+    }
+    out.innerHTML = `<div class="dose-grid">${list.map(c => doseCard(c, g)).join("")}</div>`;
+    $$("button[data-verify-now]", out).forEach(b => b.addEventListener("click", () => {
+      const id = b.dataset.verifyNow;
+      const entry = (t.chemicals || []).find(c => c.instanceId === id);
+      if (entry) openVerifyPrompt(entry);
+    }));
+    $$("button[data-remove]", out).forEach(b => b.addEventListener("click", () => {
+      const id = b.dataset.remove;
+      t.chemicals = (t.chemicals || []).filter(c => c.instanceId !== id);
+      saveTanks(tanks);
+      paint();
+    }));
+  }
+  inp.addEventListener("input", paint);
+  paint();
+
+  // Verify / manual dose prompts (reuse same helpers from bindClean closure)
+  function openVerifyPrompt(entry){
+    const spec = chemResolve(entry);
+    if (!spec) return;
+    const title = `${escapeHTML(spec.brand || "")} ${escapeHTML(spec.name || "")}`.trim();
+    const srcLink = spec.source
+      ? `<a class="chem-source" href="${spec.source}" target="_blank" rel="noopener">Source</a>`
+      : "";
+    openModal(`
+      <h3 style="margin:0 0 6px">${title}</h3>
+      <p class="muted small" style="margin:0 0 10px">Check this against your bottle label before confirming.</p>
+      <div class="verify-prompt-rule">${escapeHTML(spec.rule || "")} ${srcLink}</div>
+      <button class="btn block" id="vp-confirm" style="margin-top:14px">Confirm \u2014 matches my bottle</button>
+      <button class="btn block link-btn" id="vp-manual" style="margin-top:8px">Not the correct dosage</button>
+    `, () => {
+      $("#vp-confirm").addEventListener("click", () => {
+        entry.verified = true;
+        entry.doseSource = entry.doseSource === "manual" ? "manual" : "researched";
+        entry.savedDose = { mlPerGallon: spec.mlPerGallon, unit: spec.unit, rule: spec.rule, capSize: spec.capSize };
+        entry.verifiedAt = new Date().toISOString();
+        saveTanks(tanks);
+        logEvent(t.id, "chem_verify", { name: title, source: entry.doseSource });
+        closeModal(); paint();
+      });
+      $("#vp-manual").addEventListener("click", () => { closeModal(); openManualDose(entry); });
+    });
+  }
+
+  function openManualDose(entry){
+    const spec = chemResolve(entry);
+    if (!spec) return;
+    const title = `${escapeHTML(spec.brand || "")} ${escapeHTML(spec.name || "")}`.trim();
+    const units = ["mL","pumps","drops","g","tsp","oz"];
+    if (spec.unit && !units.includes(spec.unit)) units.unshift(spec.unit);
+    openModal(`
+      <h3 style="margin:0 0 6px">${title} \u2014 manual dose</h3>
+      <p class="muted small" style="margin:0 0 10px">Enter the dose exactly as your bottle states.</p>
+      <div class="row">
+        <label class="field"><span>Amount per gallon</span>
+          <input class="input" id="md-amount" type="number" step="0.01" placeholder="e.g. 0.1" /></label>
+        <label class="field"><span>Unit</span>
+          <select class="input" id="md-unit">
+            ${units.map(u => `<option ${u===spec.unit?"selected":""}>${u}</option>`).join("")}
+          </select>
+        </label>
+      </div>
+      <label class="field"><span>Bottle directions (optional)</span>
+        <input class="input" id="md-rule" placeholder="e.g. 1 mL per 10 gal" /></label>
+      <div class="row" style="margin-top:6px">
+        <button class="btn" id="md-save">Save &amp; mark verified</button>
+        <button class="btn secondary" id="md-cancel">Cancel</button>
+      </div>
+    `, () => {
+      $("#md-save").addEventListener("click", () => {
+        const amt = parseFloat($("#md-amount").value);
+        const unit = $("#md-unit").value;
+        const rule = $("#md-rule").value.trim();
+        if (!amt || amt <= 0){ alert("Enter the amount per gallon"); return; }
+        entry.savedDose = { mlPerGallon: amt, unit, rule: rule || `${amt} ${unit} per gallon`, capSize: 0 };
+        entry.doseSource = "manual";
+        entry.verified = true;
+        entry.verifiedAt = new Date().toISOString();
+        saveTanks(tanks);
+        logEvent(t.id, "chem_verify", { name: title, source: "manual" });
+        closeModal(); paint();
+      });
+      $("#md-cancel").addEventListener("click", closeModal);
+    });
+  }
+
+  // Chemical picker (reuse same modal builders)
+  function openChemPicker(){
+    openModal(renderChemPickerModal(), () => {
+      const search = $("#chem-search");
+      const list   = $("#chem-picker-list");
+      function filter(q){
+        const norm = (q || "").toLowerCase().trim();
+        $$(".chem-picker-item", list).forEach(item => {
+          const txt = item.textContent.toLowerCase();
+          item.style.display = (!norm || txt.includes(norm)) ? "" : "none";
+        });
+        $$(".chem-picker-section", list).forEach(sec => {
+          const visible = $$(".chem-picker-item", sec).some(i => i.style.display !== "none");
+          sec.style.display = visible ? "" : "none";
+        });
+      }
+      if (search) search.addEventListener("input", e => filter(e.target.value));
+      $$(".chem-picker-item").forEach(b => b.addEventListener("click", () => {
+        const libId = b.dataset.lib;
+        const entry = { instanceId: uid(), libraryId: libId, custom: null };
+        t.chemicals = t.chemicals || [];
+        if (t.chemicals.some(c => c.libraryId === libId)){ toast("Already added"); closeModal(); return; }
+        t.chemicals.push(entry);
+        saveTanks(tanks);
+        const spec = window.CHEMICALS && window.CHEMICALS.byId(libId);
+        logEvent(t.id, "chem_add", { name: spec ? `${spec.brand} ${spec.name}` : libId });
+        closeModal(); paint(); openVerifyPrompt(entry);
+      }));
+      $("#chem-custom-btn").addEventListener("click", () => { closeModal(); openCustom(); });
+      $("#chem-cancel-btn").addEventListener("click", closeModal);
+    });
+  }
+
+  function openCustom(){
+    openModal(renderChemCustomModal(), () => {
+      $("#cc-save").addEventListener("click", () => {
+        const brand = $("#cc-brand").value.trim();
+        const name  = $("#cc-name").value.trim();
+        const type  = $("#cc-type").value;
+        const amt   = parseFloat($("#cc-amount").value);
+        const unit  = $("#cc-unit").value;
+        const rule  = $("#cc-rule").value.trim();
+        if (!brand || !name){ alert("Brand and name are required"); return; }
+        if (!amt || amt <= 0){ alert("Enter the amount per gallon"); return; }
+        const custom = { brand, name, type, unit, mlPerGallon: amt, capSize: 0,
+          rule: rule || `${amt} ${unit} per gallon`, when: "", source: "" };
+        const entry = { instanceId: uid(), libraryId: null, custom };
+        t.chemicals = t.chemicals || [];
+        t.chemicals.push(entry);
+        saveTanks(tanks);
+        logEvent(t.id, "chem_add", { name: `${brand} ${name}`, custom: true });
+        closeModal(); paint(); openVerifyPrompt(entry);
+      });
+      $("#cc-cancel").addEventListener("click", closeModal);
+    });
+  }
+
+  $("#add-chem-btn").addEventListener("click", openChemPicker);
+
+  // --- Save handler ---
+  $("#log-wc-btn").addEventListener("click", () => {
+    const g       = parseFloat($("#wc-gallons").value);
+    const ph      = $("#wt-ph").value;
+    const ammonia = $("#wt-ammonia").value;
+    const nitrite = $("#wt-nitrite").value;
+    const nitrate = $("#wt-nitrate").value;
+    const temp_f  = $("#wt-temp").value;
+    const notes   = $("#wc-notes").value.trim();
+    const date    = $("#wc-date").value || new Date().toISOString().slice(0,10);
+
+    const hasTest = ph || ammonia || nitrite || nitrate || temp_f;
+    if (!g && !hasTest) {
+      alert("Enter gallons changed, at least one test reading, or both.");
+      return;
+    }
+
+    const list = t.chemicals || [];
+    const dosesLogged = (g > 0) ? list.map(c => {
+      const spec = chemResolve(c);
+      if (!spec) return null;
+      return {
+        name: `${spec.brand || ""} ${spec.name || ""}`.trim(),
+        amount: +((spec.mlPerGallon || 0) * g).toFixed(2),
+        unit: spec.unit || "mL",
+        verified: !!c.verified,
+        dose_source: c.doseSource || ""
+      };
+    }).filter(Boolean) : [];
+
+    logEvent(t.id, "water_care", {
+      date,
+      gallons:  g > 0 ? g : null,
+      ph:       ph      === "" ? "" : (ph      ? Number(ph)      : ""),
+      ammonia:  ammonia === "" ? "" : (ammonia ? Number(ammonia) : ""),
+      nitrite:  nitrite === "" ? "" : (nitrite ? Number(nitrite) : ""),
+      nitrate:  nitrate === "" ? "" : (nitrate ? Number(nitrate) : ""),
+      temp_f:   temp_f  === "" ? "" : (temp_f  ? Number(temp_f)  : ""),
+      doses: dosesLogged,
+      notes
+    });
+
+    // Clear stale advisor alert so it re-evaluates from new data
+    recomputeTankAlerts(t.id);
+
+    toast("Saved");
+    view.tab = "history"; render();
+  });
+}
+
+/* ============================================================
    CLEAN & DOSE TAB
    ============================================================ */
 function calcDoses(gallons){
@@ -2236,6 +2575,7 @@ function bindTests(t){
    ============================================================ */
 const HISTORY_FILTERS = [
   { id: "all",          label: "All"           },
+  { id: "water_care",   label: "Water care"    },
   { id: "water_change", label: "Water changes" },
   { id: "water_test",   label: "Water tests"   },
   { id: "fish",         label: "Fish"          },
@@ -2300,8 +2640,9 @@ function renderEventRow(e){
         <div class="event-expand-inner">
           ${full || `<div class="event-field"><span class="event-fval muted">No additional details saved.</span></div>`}
           <div class="event-actions">
-            ${e.type === "water_change" ? `<button class="btn small secondary event-repeat-btn" data-repeat-tab="clean" type="button">Log another change</button>` : ""}
-            ${e.type === "water_test"   ? `<button class="btn small secondary event-repeat-btn" data-repeat-tab="tests" type="button">Log another test</button>` : ""}
+            ${e.type === "water_change" ? `<button class="btn small secondary event-repeat-btn" data-repeat-tab="water-care" type="button">Log another change</button>` : ""}
+            ${e.type === "water_test"   ? `<button class="btn small secondary event-repeat-btn" data-repeat-tab="water-care" type="button">Log another test</button>` : ""}
+            ${e.type === "water_care"   ? `<button class="btn small secondary event-repeat-btn" data-repeat-tab="water-care" type="button">Log another</button>` : ""}
             <button class="btn small danger event-del-btn" data-del="${e.id}">Remove entry</button>
           </div>
         </div>
@@ -2317,7 +2658,22 @@ function eventDetailFull(e){
   const rows = [];
   const add = (label, val) => { if (val != null && val !== "") rows.push({ label, val }); };
 
-  if (e.type === "water_test") {
+  if (e.type === "water_care") {
+    if (d.gallons) add("Amount changed", `${fmt(d.gallons)} gal`);
+    add("Change date", d.date);
+    add("pH", d.ph);
+    add("Ammonia (NH₃)", d.ammonia);
+    add("Nitrite (NO₂)", d.nitrite);
+    add("Nitrate (NO₃)", d.nitrate);
+    add("Temperature", d.temp_f != null && d.temp_f !== "" ? `${d.temp_f}°F` : "");
+    if (Array.isArray(d.doses) && d.doses.length){
+      const lines = d.doses.map(dose =>
+        `${escapeHTML(dose.name)} — ${fmt(dose.amount)} ${escapeHTML(dose.unit || "")}${dose.verified ? " ✓" : ""}`
+      );
+      rows.push({ label: "Doses", val: lines.join("<br>") });
+    }
+    add("Notes", d.notes ? escapeHTML(d.notes) : "");
+  } else if (e.type === "water_test") {
     add("pH", d.ph);
     add("Ammonia (NH₃)", d.ammonia);
     add("Nitrite (NO₂)", d.nitrite);
@@ -2373,6 +2729,7 @@ function eventDetailFull(e){
 }
 
 const EVT_ICONS = {
+  water_care:     `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/><line x1="12" y1="22" x2="12" y2="14"/></svg>`,
   water_change:   `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>`,
   water_test:     `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v11m0 0H5m4 0h10m-6 4v4m-4-4v4m8-4v4"/></svg>`,
   fish_add:       `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
@@ -2390,6 +2747,7 @@ function eventIcon(type){
 }
 function eventTitle(e){
   const d = e.data || {};
+  if (e.type === "water_care")   return `Water care — ${d.gallons ? d.gallons + " gal" : "test"}${(d.ph !== "" && d.ph != null) ? " · pH " + d.ph : ""}`;
   if (e.type === "water_change") return `Water change — ${d.gallons} gal`;
   if (e.type === "water_test")   return `Water test`;
   if (e.type === "fish_add")     return `Added ${d.count}× ${escapeHTML(d.species)}${d.name?` (“${escapeHTML(d.name)}”)`:""}`;
@@ -2405,6 +2763,15 @@ function eventTitle(e){
 }
 function eventDetail(e){
   const d = e.data || {};
+  if (e.type === "water_care") {
+    const bits = [];
+    if (e.data.gallons) bits.push(`${fmt(e.data.gallons)} gal changed`);
+    const rd = { ph: e.data.ph, ammonia: e.data.ammonia, nitrite: e.data.nitrite, nitrate: e.data.nitrate, temp_f: e.data.temp_f };
+    const inline = renderReadingsInline(rd);
+    if (inline && inline !== '<span class="muted">no values</span>') bits.push(inline);
+    if (e.data.notes) bits.push(escapeHTML(e.data.notes));
+    return bits.join(" · ");
+  }
   if (e.type === "water_change") {
     const bits = [];
     if (Array.isArray(d.doses) && d.doses.length){
@@ -3008,18 +3375,18 @@ function openSettingsSheet(){
     {
       q: "Water change reminders",
       where: "“Up next” at the top of each tank’s Details tab.",
-      how: "When a reminder is due, tap “Go do it” to jump straight to the Care tab. Log your water change there and the reminder resets automatically.",
+      how: "When a reminder is due, tap “Go do it” to jump straight to the Water Care tab. Log your water change there and the reminder resets automatically.",
       tip: "Tap “Snooze 1 day” if you need a little more time. “Skip once” pushes it a full cycle without logging.",
     },
     {
       q: "Logging a water change",
-      where: "Inside a tank, under the Care tab.",
+      where: "Inside a tank, under the Water Care tab.",
       how: "Enter the gallons being changed, pick your chemicals, add any notes, then tap “Save to history.” The water-change reminder resets from that moment.",
       tip: "Dosing auto-calculates from the gallons you enter — you don’t have to do the math.",
     },
     {
       q: "Logging a water test",
-      where: "Inside a tank, under the Tests tab.",
+      where: "Inside a tank, under the Water Care tab.",
       how: "Enter any readings you have (you don’t need all of them) and tap Save. The app color-codes each value — green is safe, red needs attention.",
       tip: "API Master Test Kit values. Leave any field blank if you didn’t test that parameter.",
     },
@@ -3178,8 +3545,8 @@ function openSettingsSheet(){
           case "addtank":      closeModal(); handleAddTankTap(); break;
           case "home":         closeModal(); view = { screen:"home", tankId:null, tab:"details" }; render(); break;
           case "tank-details": goToTank("details"); break;
-          case "tank-care":    goToTank("clean"); break;
-          case "tank-tests":   goToTank("tests"); break;
+          case "tank-care":    goToTank("water-care"); break;
+          case "tank-tests":   goToTank("water-care"); break;
           case "tank-history": goToTank("history"); break;
           case "tank-fish":    goToTank("fish"); break;
           case "home-species": closeModal(); view = { screen:"species", tankId:null, tab:"details" }; render(); break;
