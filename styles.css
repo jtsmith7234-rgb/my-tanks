@@ -3283,53 +3283,27 @@ html[data-theme="clean"] .event-icon.tank_edit    { color: var(--clean-warn); }
   background: none;
   text-shadow: none;
 }
-/* Logo wrapper — provides the themed background behind the transparent icon mark */
-.topbar-logo-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Topbar logo image — full teal PNG, no wrapper needed.
+   border-radius clips it to match the iOS icon shape.
+   Each theme gets a slight shadow tweak to feel natural. */
+.topbar-logo-img {
   width: 30px;
   height: 30px;
-  border-radius: 8px;
-  flex-shrink: 0;
-  background: #007878; /* teal — default for all themes */
-  box-shadow: 0 1px 4px rgba(0,0,0,0.20);
-  overflow: hidden;
-}
-
-/* The actual white mark image */
-.topbar-logo-img {
-  width: 22px;
-  height: 22px;
+  border-radius: 7px;
   flex-shrink: 0;
   display: block;
-  object-fit: contain;
+  object-fit: cover;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.22);
 }
 
-/* ── Per-theme logo background colors ────────────────────────────── */
-
-/* Clean — white topbar: teal badge matches the brand primary exactly */
-html[data-theme="clean"] .topbar-logo-wrap {
-  background: #007878;
-  box-shadow: none;
+/* Clean & light themes — very subtle shadow, icon stands on its own */
+html[data-skin="light"] .topbar-logo-img {
+  box-shadow: 0 1px 5px rgba(0,60,60,0.25);
 }
 
-/* Tropical Pop — light aqua topbar: slightly deeper teal badge */
-html[data-theme="tropical-pop"] .topbar-logo-wrap {
-  background: #006868;
-  box-shadow: 0 1px 4px rgba(0,60,60,0.20);
-}
-
-/* Planted — light green topbar: jade-toned badge */
-html[data-theme="planted"] .topbar-logo-wrap {
-  background: #2d6a4f;
-  box-shadow: 0 1px 4px rgba(0,40,20,0.22);
-}
-
-/* Midnight Reef — dark navy topbar: teal badge with a soft glow ring */
-html[data-theme="midnight-reef"] .topbar-logo-wrap {
-  background: #007878;
-  box-shadow: 0 0 0 1.5px rgba(0,200,200,0.18), 0 2px 8px rgba(0,0,0,0.35);
+/* Midnight Reef (dark) — soft teal glow ring to lift it off the dark bar */
+html[data-theme="midnight-reef"] .topbar-logo-img {
+  box-shadow: 0 0 0 1.5px rgba(0,200,200,0.20), 0 2px 8px rgba(0,0,0,0.35);
 }
 /* Hide logo when on inner screens (title changes via JS) */
 #title:not(.topbar-brand) .topbar-logo-img,
