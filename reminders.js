@@ -211,7 +211,18 @@ function scheduleAllReminders(){
 function _lastEventTs(tankId, type){
   if (typeof events === "undefined") return 0;
   const list = events[tankId] || [];
-  const last = list.find(e => e.type === type);
+  // water_care events count as both water_change and water_test completions
+  // (the app saves combined sessions as water_care, not the legacy split types)
+  const last = list.find(e => {
+    if (e.type === type) return true;
+    if (type === "water_change" && e.type === "water_care" && e.data && e.data.gallons > 0) return true;
+    if (type === "water_test"   && e.type === "water_care" && e.data &&
+        (e.data.ph !== "" && e.data.ph != null ||
+         e.data.ammonia !== "" && e.data.ammonia != null ||
+         e.data.nitrite !== "" && e.data.nitrite != null ||
+         e.data.nitrate !== "" && e.data.nitrate != null)) return true;
+    return false;
+  });
   return last ? last.ts : 0;
 }
 function _nextDailyTs(hour, minute){

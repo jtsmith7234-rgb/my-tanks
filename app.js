@@ -731,7 +731,8 @@ function renderAdvisorBanner(t){
   if (!adv) return "";
   // Signature uses ruleId when available (new advisor), falls back to title+rule
   const sig = adv.ruleId ? (adv.ruleId + " | " + adv.rule) : (adv.title + " | " + adv.rule);
-  if (window._advisorDismissed && window._advisorDismissed[t.id] === sig) return "";
+  // Check persistent dismiss store — survives tab switches and re-renders
+  if (_isAdvisorDismissed(t.id, sig)) return "";
   // Tag label (Risk / Insight / Reminder / Tip) — only shown when present
   const tagLabel = adv.tag ? `<span class="adv-tag adv-tag-${adv.sev}">${escapeHTML(adv.tag)}</span>` : "";
   const target = (window.ADVISOR.adviceTarget && window.ADVISOR.adviceTarget(adv)) || null;
@@ -799,8 +800,7 @@ function renderTank(){
       const banner = dismiss.closest(".advisor-banner");
       if (!banner) return;
       const sig = banner.getAttribute("data-sig") || "";
-      window._advisorDismissed = window._advisorDismissed || {};
-      window._advisorDismissed[t.id] = sig;
+      _dismissAdvisor(t.id, sig);  // persisted — survives navigation
       banner.remove();
     });
   }
@@ -1765,13 +1765,83 @@ function openFishEditor(t, f){
 }
 
 /* ============================================================
-   ALERT RECOMPUTE — call after logging water_care / water_test
-   Derives condition alerts from latest readings, clears stale
-   advisor dismissals so the banner reflects the new data.
+   ADVISOR DISMISS — persistent per-(tank, sig) store
+   Called after logging water_care to auto-resolve stale banners.
+   Survives tab switches and re-renders within the same session.
+   Persisted to localStorage so X stays gone across page reloads.
+   Auto-expiry: entries older than 7 days are pruned on read.
    ============================================================ */
+const ADV_DISMISS_KEY = "tm.advisorDismiss.v1";
+const ADV_DISMISS_TTL = 7 * 86400000; // 7 days
+
+function _loadAdvisorDismiss(){
+  try { return JSON.parse(localStorage.getItem(ADV_DISMISS_KEY) || "{}"); }
+  catch { return {}; }
+}
+function _saveAdvisorDismiss(d){
+  try { localStorage.setItem(ADV_DISMISS_KEY, JSON.stringify(d)); } catch {}
+}
+function _isAdvisorDismissed(tankId, sig){
+  const d = _loadAdvisorDismiss();
+  const entries = d[tankId];
+  if (!entries) return false;
+  const now = Date.now();
+  // Each entry: { sig, ts }
+  return entries.some(e => e.sig === sig && (now - e.ts) < ADV_DISMISS_TTL);
+}
+function _dismissAdvisor(tankId, sig){
+  const d = _loadAdvisorDismiss();
+  const now = Date.now();
+  // Prune expired entries for this tank, then add new one
+  const existing = (d[tankId] || []).filter(e => (now - e.ts) < ADV_DISMISS_TTL && e.sig !== sig);
+  existing.push({ sig, ts: now });
+  d[tankId] = existing;
+  _saveAdvisorDismiss(d);
+}
+function _clearAdvisorDismissals(tankId, filterFn){
+  // filterFn(entry) -> true = keep (do NOT clear), false = clear
+  // If filterFn is omitted, clears all entries for the tank
+  const d = _loadAdvisorDismiss();
+  if (!d[tankId]) return;
+  if (typeof filterFn === 'function') {
+    d[tankId] = d[tankId].filter(filterFn);
+  } else {
+    delete d[tankId];
+  }
+  _saveAdvisorDismiss(d);
+}
+
 function recomputeTankAlerts(tankId){
-  // Clear any session-scoped dismiss so the banner re-evaluates
-  if (window._advisorDismissed) delete window._advisorDismissed[tankId];
+  // When new data is saved, clear ONLY dismissals for rules whose trigger
+  // condition may now be resolved. Preserve dismissals the user explicitly set
+  // for unrelated insights (so manually dismissed fyi insights stay gone).
+  //
+  // Rules cleared automatically after data save:
+  //   - water_change_cadence  (a new water change resolves it)
+  //   - nitrate_current       (new test data may have changed it)
+  //   - nitrite_current
+  //   - ammonia_current
+  //   - ph_current
+  //   - temp_current
+  //   - test_staleness        (a new test resolves it)
+  //   - combined_overdue_nitrate_stocking
+  //   - stability_shift
+  const AUTO_CLEAR_RULES = new Set([
+    "water_change_cadence",
+    "nitrate_current",
+    "nitrite_current",
+    "ammonia_current",
+    "ph_current",
+    "temp_current",
+    "test_staleness",
+    "combined_overdue_nitrate_stocking",
+    "stability_shift",
+  ]);
+  // Clear only entries whose ruleId is in the auto-clear set
+  _clearAdvisorDismissals(tankId, entry => {
+    const ruleId = entry.sig.split(" | ")[0];
+    return !AUTO_CLEAR_RULES.has(ruleId);  // keep = true means NOT auto-cleared
+  });
   // Re-expose events so advisor.js picks up the new reading immediately
   window.events = events;
 }
