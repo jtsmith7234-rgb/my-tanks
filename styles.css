@@ -3397,3 +3397,290 @@ html[data-skin="dark"] .fish-btn-icon {
   border-radius: 999px;
   white-space: nowrap;
 }
+
+/* ============================================================
+   EQUIPMENT & MAINTENANCE DASHBOARD
+   ============================================================ */
+
+/* Section wrapper */
+.eq-section { padding-bottom: 80px; }
+
+/* ── Summary chips bar ── */
+.eq-summary-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 14px;
+}
+.eq-chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  line-height: 1;
+}
+.eq-chip-bad     { background: color-mix(in srgb, var(--bad)    30%, transparent); color: var(--bad); }
+.eq-chip-warn    { background: color-mix(in srgb, var(--warn)   30%, transparent); color: var(--warn); }
+.eq-chip-soon    { background: color-mix(in srgb, var(--gold)   28%, transparent); color: color-mix(in srgb, var(--gold) 70%, var(--ink)); }
+.eq-chip-expiry  { background: color-mix(in srgb, var(--koi)    28%, transparent); color: var(--koi); }
+.eq-chip-ok      { background: color-mix(in srgb, var(--jade)   25%, transparent); color: var(--jade); }
+
+/* ── Filter pill strip ── */
+.eq-filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 0 0 16px;
+}
+.eq-filter-btn {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--glass-stroke);
+  background: var(--glass-fill);
+  color: var(--ink-dim);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+.eq-filter-btn.active,
+.eq-filter-btn:active {
+  background: var(--jade);
+  border-color: var(--jade);
+  color: #fff;
+}
+
+/* ── Equipment card ── */
+.eq-card {
+  background: var(--glass-fill);
+  border: 1.5px solid var(--glass-stroke);
+  border-radius: 14px;
+  padding: 14px 14px 12px;
+  margin-bottom: 10px;
+  box-shadow: var(--glass-shadow-sm);
+  transition: box-shadow 0.15s;
+}
+.eq-card:last-child { margin-bottom: 0; }
+
+/* Left-border accent by status */
+.eq-card-overdue,
+.eq-card-expired    { border-left: 3px solid var(--bad); }
+.eq-card-due_week   { border-left: 3px solid var(--warn); }
+.eq-card-due_month  { border-left: 3px solid var(--gold); }
+.eq-card-expiring_soon { border-left: 3px solid var(--koi); }
+.eq-card-ok         { border-left: 3px solid var(--jade); }
+.eq-card-no_schedule,
+.eq-card-archived   { border-left: 3px solid var(--glass-stroke); opacity: 0.72; }
+
+.eq-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.eq-card-left { flex: 1; min-width: 0; }
+
+.eq-type-chip {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--ink-soft);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+.eq-card-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.3;
+  word-break: break-word;
+}
+.eq-card-brand {
+  margin-top: 2px;
+  color: var(--ink-soft);
+}
+
+/* Status chip (right side of card top) */
+.eq-status-chip {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1;
+  margin-top: 2px;
+}
+.eq-status-ok      { background: color-mix(in srgb, var(--jade) 22%, transparent); color: var(--jade); }
+.eq-status-warn    { background: color-mix(in srgb, var(--warn) 25%, transparent); color: var(--warn); }
+.eq-status-soon    { background: color-mix(in srgb, var(--gold) 25%, transparent); color: color-mix(in srgb, var(--gold) 80%, var(--ink)); }
+.eq-status-bad     { background: color-mix(in srgb, var(--bad)  25%, transparent); color: var(--bad); }
+.eq-status-expiry  { background: color-mix(in srgb, var(--koi)  22%, transparent); color: var(--koi); }
+.eq-status-neutral { background: var(--glass-stroke); color: var(--ink-soft); }
+
+/* Due-date line */
+.eq-due-line {
+  font-size: 13px;
+  color: var(--ink-dim);
+  margin: 8px 0 10px;
+  font-weight: 500;
+}
+
+/* Card action row */
+.eq-card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 4px;
+}
+.eq-mark-btn   { font-weight: 600; }
+.eq-edit-btn   {}
+.eq-more-btn   {
+  font-size: 17px;
+  letter-spacing: 2px;
+  padding: 5px 10px;
+  min-width: 0;
+  color: var(--ink-dim);
+}
+
+/* ── Add button ── */
+.eq-add-row {
+  margin-top: 18px;
+  text-align: center;
+}
+.eq-add-btn {
+  width: 100%;
+  max-width: 360px;
+  font-weight: 600;
+}
+
+/* ── Empty state ── */
+.eq-empty {
+  text-align: center;
+  padding: 32px 20px 16px;
+}
+.eq-empty-icon {
+  font-size: 36px;
+  margin-bottom: 10px;
+  line-height: 1;
+}
+.eq-empty-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 6px;
+}
+.eq-empty p { max-width: 280px; margin: 0 auto; }
+
+/* ── Archived toggle ── */
+.eq-archived-toggle {
+  margin: 18px 0 8px;
+  text-align: center;
+}
+#eq-archived-list {
+  margin-top: 8px;
+}
+
+/* ── Type picker grid (add modal) ── */
+.eq-type-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.eq-type-pick-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 12px 8px 10px;
+  border-radius: 12px;
+  border: 1.5px solid var(--glass-stroke);
+  background: var(--glass-fill);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s;
+  -webkit-tap-highlight-color: transparent;
+  text-align: center;
+  min-height: 64px;
+}
+.eq-type-pick-btn:active,
+.eq-type-pick-btn:focus-visible {
+  background: color-mix(in srgb, var(--jade) 15%, var(--glass-fill));
+  border-color: var(--jade);
+}
+.eq-type-pick-icon { font-size: 22px; line-height: 1; }
+.eq-type-pick-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+/* ── Form guidance box ── */
+.eq-form-guidance {
+  background: color-mix(in srgb, var(--jade) 12%, var(--glass-fill));
+  border: 1px solid color-mix(in srgb, var(--jade) 30%, transparent);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--ink-dim);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+/* ── Form fields in eq modal ── */
+.eq-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.eq-form .field-label { margin-top: 8px; margin-bottom: 3px; }
+.eq-form .field-label:first-child { margin-top: 0; }
+
+/* ── More-actions modal list ── */
+.eq-more-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+.eq-more-row {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 13px 14px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.eq-more-row:active,
+.eq-more-row:hover { background: var(--glass-fill); }
+.eq-more-delete { color: var(--bad); }
+
+/* ── Home card equipment hint ── */
+.tc-eq-hint {
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 5px;
+  padding: 3px 0 0;
+  border-top: 1px solid var(--glass-stroke);
+  letter-spacing: 0.01em;
+}
+.tc-eq-hint-bad   { color: var(--bad); }
+.tc-eq-hint-warn  { color: var(--warn); }
+.tc-eq-hint-soon  { color: color-mix(in srgb, var(--gold) 80%, var(--ink)); }
+.tc-eq-hint-ok    { color: var(--jade); }

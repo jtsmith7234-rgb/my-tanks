@@ -463,6 +463,25 @@ function _tankStatus(t){
   return { tone:"ok", label:"Looking good", hint:"" };
 }
 
+function _renderEqHint(t) {
+  if (typeof EQ === "undefined") return "";
+  const s = EQ.tankSummary(t.id);
+  if (s.total === 0) return "";
+  if (s.overdue > 0) {
+    return `<div class="tc-eq-hint tc-eq-hint-bad">${s.overdue} equipment item${s.overdue === 1 ? "" : "s"} overdue</div>`;
+  }
+  if (s.dueThisWeek > 0) {
+    return `<div class="tc-eq-hint tc-eq-hint-warn">${s.dueThisWeek} due this week</div>`;
+  }
+  if (s.expiringSoon > 0) {
+    return `<div class="tc-eq-hint tc-eq-hint-warn">${s.expiringSoon} expiring soon</div>`;
+  }
+  if (s.dueThisMonth > 0) {
+    return `<div class="tc-eq-hint tc-eq-hint-soon">${s.dueThisMonth} due this month</div>`;
+  }
+  return `<div class="tc-eq-hint tc-eq-hint-ok">Equipment all caught up</div>`;
+}
+
 function _renderTankCard(t){
   const st = _tankStatus(t);
   const animals = totalFish(t);
@@ -476,6 +495,7 @@ function _renderTankCard(t){
         </span>
       </div>
       <div class="tc-meta">${t.gallons} gal &middot; ${escapeHTML(t.type||"Freshwater")} &middot; ${animals} ${animals === 1 ? "animal" : "animals"}${species ? ` &middot; ${species} ${species === 1 ? "species" : "species"}` : ""}</div>
+      ${_renderEqHint(t)}
     </button>
   `;
 }
@@ -774,6 +794,7 @@ function renderTank(){
       <button class="tab ${view.tab==='fish'?'active':''}" data-tab="fish">Fish</button>
       <button class="tab ${view.tab==='water-care'?'active':''}" data-tab="water-care">Water Care</button>
       <button class="tab ${view.tab==='history'?'active':''}" data-tab="history">History</button>
+      <button class="tab ${view.tab==='equipment'?'active':''}" data-tab="equipment">Equipment</button>
     </div>
     <div id="tab-body"></div>
   `;
@@ -782,15 +803,17 @@ function renderTank(){
   }));
 
   const body = $("#tab-body");
-  if(view.tab === "details") body.innerHTML = renderDetails(t);
-  if(view.tab === "fish")    body.innerHTML = renderFish(t);
+  if(view.tab === "details")   body.innerHTML = renderDetails(t);
+  if(view.tab === "fish")       body.innerHTML = renderFish(t);
   if(view.tab === "water-care") body.innerHTML = renderWaterCare(t);
-  if(view.tab === "history") body.innerHTML = renderHistory(t);
+  if(view.tab === "history")    body.innerHTML = renderHistory(t);
+  if(view.tab === "equipment")  body.innerHTML = renderEquipment(t);
 
-  if(view.tab === "details") bindDetails(t);
-  if(view.tab === "fish")    bindFish(t);
+  if(view.tab === "details")   bindDetails(t);
+  if(view.tab === "fish")       bindFish(t);
   if(view.tab === "water-care") bindWaterCare(t);
-  if(view.tab === "history") bindHistory(t);
+  if(view.tab === "history")    bindHistory(t);
+  if(view.tab === "equipment")  bindEquipment(t);
 
   // Wire up advisor dismiss button
   const dismiss = $("#adv-dismiss");
@@ -3132,6 +3155,454 @@ function bindHistory(t){
     m.addEventListener("keydown", (ev) => {
       if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); toggle(m.dataset.expand); }
     });
+  });
+}
+
+/* ============================================================
+   EQUIPMENT & MAINTENANCE DASHBOARD
+   ============================================================ */
+
+let eqFilter = "month"; // week | month | upcoming | all
+
+function renderEquipment(t) {
+  if (typeof EQ === "undefined") {
+    return `<div class="section"><p class="muted center">Equipment module not loaded.</p></div>`;
+  }
+
+  const summary = EQ.tankSummary(t.id);
+  const items   = EQ.dueList(t.id, eqFilter);
+  // For "all" show everything active; for other windows dueList already filters
+  const allActive = EQ.getItems(t.id);
+  const archived  = EQ.getAllItems().filter(i => i.tankId === t.id && !i.isActive);
+
+  // Display list: if filter is "all" use allActive; else use dueList result
+  const displayItems = eqFilter === "all" ? allActive : items;
+
+  /* ── Summary chips ── */
+  const chips = [];
+  if (summary.overdue)      chips.push(`<span class="eq-chip eq-chip-bad">${summary.overdue} overdue</span>`);
+  if (summary.dueThisWeek)  chips.push(`<span class="eq-chip eq-chip-warn">${summary.dueThisWeek} due this week</span>`);
+  if (summary.dueThisMonth) chips.push(`<span class="eq-chip eq-chip-soon">${summary.dueThisMonth} due this month</span>`);
+  if (summary.expiringSoon) chips.push(`<span class="eq-chip eq-chip-expiry">${summary.expiringSoon} expiring soon</span>`);
+  if (!chips.length && summary.total > 0) chips.push(`<span class="eq-chip eq-chip-ok">All caught up</span>`);
+
+  const summaryBar = chips.length
+    ? `<div class="eq-summary-bar">${chips.join("")}</div>`
+    : "";
+
+  /* ── Filter strip ── */
+  const filters = [
+    { id: "week",     label: "This week" },
+    { id: "month",    label: "This month" },
+    { id: "upcoming", label: "Upcoming" },
+    { id: "all",      label: "All" },
+  ];
+  const filterStrip = `
+    <div class="eq-filters" role="tablist" aria-label="Equipment filter">
+      ${filters.map(f => `
+        <button class="eq-filter-btn${eqFilter === f.id ? " active" : ""}" data-eq-filter="${f.id}" role="tab" aria-selected="${eqFilter === f.id}">${f.label}</button>
+      `).join("")}
+    </div>`;
+
+  /* ── Equipment cards ── */
+  function _renderCard(item) {
+    const st   = EQ.itemStatus(item);
+    const type = EQ.TYPES.find(ty => ty.id === item.type) || { label: "Other", icon: "📦" };
+    const subtypeLabel = item.subtype
+      ? (type.subtypes || []).find(s => s.id === item.subtype)?.label || ""
+      : "";
+    const typeChip = subtypeLabel
+      ? `${type.icon} ${escapeHTML(subtypeLabel)}`
+      : `${type.icon} ${escapeHTML(type.label)}`;
+
+    // Status chip class
+    const chipClass = {
+      ok:           "eq-status-ok",
+      due_week:     "eq-status-warn",
+      due_month:    "eq-status-soon",
+      overdue:      "eq-status-bad",
+      expiring_soon:"eq-status-expiry",
+      expired:      "eq-status-bad",
+      no_schedule:  "eq-status-neutral",
+      archived:     "eq-status-neutral",
+    }[st.code] || "eq-status-neutral";
+
+    // Human-readable due line
+    let dueLine = "";
+    if (st.code === "overdue" || st.code === "expired") {
+      const n = Math.abs(st.daysUntil);
+      dueLine = `${n === 0 ? "Due today" : `${n} day${n === 1 ? "" : "s"} overdue`}`;
+    } else if (st.code === "due_week") {
+      const n = st.daysUntil;
+      dueLine = n === 0 ? "Due today" : `Due in ${n} day${n === 1 ? "" : "s"}`;
+    } else if (st.code === "due_month" || st.code === "expiring_soon") {
+      dueLine = `In ${st.daysUntil} days`;
+    } else if (st.code === "ok" && st.daysUntil !== null) {
+      dueLine = `In ${st.daysUntil} days`;
+    } else if (st.code === "no_schedule") {
+      dueLine = "No schedule set";
+    }
+
+    // Action label
+    const actionLabel = (st.kind === "replace") ? escapeHTML(item.replacementLabel || "Replace")
+                      : (st.kind === "expiry")  ? "Check / swap"
+                      :                            escapeHTML(item.serviceLabel || "Mark done");
+    const actionFn    = (st.kind === "replace") ? "markReplaced" : "markServiced";
+
+    const brandModel = [item.brand, item.model].filter(Boolean).join(" ");
+
+    return `
+      <div class="eq-card eq-card-${st.code}" data-eq-id="${item.id}">
+        <div class="eq-card-top">
+          <div class="eq-card-left">
+            <span class="eq-type-chip">${typeChip}</span>
+            <div class="eq-card-name">${escapeHTML(item.name)}</div>
+            ${brandModel ? `<div class="eq-card-brand muted small">${escapeHTML(brandModel)}</div>` : ""}
+          </div>
+          <span class="eq-status-chip ${chipClass}">${escapeHTML(st.label)}</span>
+        </div>
+        ${dueLine ? `<div class="eq-due-line">${escapeHTML(dueLine)}</div>` : ""}
+        <div class="eq-card-actions">
+          ${st.code !== "no_schedule" && st.code !== "archived"
+            ? `<button class="btn small eq-mark-btn" data-eq-mark="${item.id}" data-eq-action="${actionFn}">${actionLabel}</button>`
+            : ""}
+          <button class="btn small secondary eq-edit-btn" data-eq-edit="${item.id}">Edit</button>
+          <button class="btn small ghost eq-more-btn" data-eq-more="${item.id}" aria-label="More options" title="More">···</button>
+        </div>
+      </div>`;
+  }
+
+  /* ── Empty state ── */
+  const emptyState = `
+    <div class="eq-empty">
+      <div class="eq-empty-icon">🔧</div>
+      <p class="eq-empty-title">No equipment tracked yet</p>
+      <p class="muted small">Add your filter, heater, or any piece of gear and Tank Care Buddy will remind you when it needs attention.</p>
+    </div>`;
+
+  /* ── Items or empty ── */
+  const listHTML = displayItems.length
+    ? displayItems.map(_renderCard).join("")
+    : (allActive.length > 0
+      ? `<p class="muted center" style="padding:24px 0">Nothing due in this window. Tap <b>All</b> to see every item.</p>`
+      : emptyState);
+
+  /* ── Archived section ── */
+  const archivedHTML = archived.length
+    ? `<div class="eq-archived-toggle">
+        <button class="btn small ghost" id="eq-show-archived">Show ${archived.length} archived item${archived.length === 1 ? "" : "s"}</button>
+       </div>
+       <div id="eq-archived-list" hidden>
+         ${archived.map(_renderCard).join("")}
+       </div>`
+    : "";
+
+  return `
+    <div class="section eq-section">
+      ${summaryBar}
+      ${filterStrip}
+      <div class="eq-list" id="eq-list">${listHTML}</div>
+      ${archivedHTML}
+      <div class="eq-add-row">
+        <button class="btn eq-add-btn" id="eq-add-btn">+ Add Equipment</button>
+      </div>
+    </div>`;
+}
+
+function bindEquipment(t) {
+  if (typeof EQ === "undefined") return;
+
+  /* ── Filter strip ── */
+  $$("[data-eq-filter]").forEach(b => b.addEventListener("click", () => {
+    eqFilter = b.dataset.eqFilter;
+    render();
+  }));
+
+  /* ── Mark serviced / replaced ── */
+  $$("[data-eq-mark]").forEach(btn => btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const id  = btn.dataset.eqMark;
+    const fn  = btn.dataset.eqAction;
+    if (fn === "markReplaced") EQ.markReplaced(id);
+    else                        EQ.markServiced(id);
+    const item = EQ.getItem(id);
+    if (item) {
+      const label = fn === "markReplaced" ? (item.replacementLabel || "Replace") : (item.serviceLabel || "Service");
+      toast(`${escapeHTML(item.name)} — ${label} logged`);
+    }
+    render();
+  }));
+
+  /* ── Edit ── */
+  $$("[data-eq-edit]").forEach(btn => btn.addEventListener("click", () => {
+    const item = EQ.getItem(btn.dataset.eqEdit);
+    if (!item) return;
+    _openEqEditModal(t, item);
+  }));
+
+  /* ── More (archive / delete / note) ── */
+  $$("[data-eq-more]").forEach(btn => btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const id   = btn.dataset.eqMore;
+    const item = EQ.getItem(id);
+    if (!item) return;
+    _openEqMoreModal(t, item);
+  }));
+
+  /* ── Add button ── */
+  const addBtn = $("#eq-add-btn");
+  if (addBtn) addBtn.addEventListener("click", () => _openEqAddModal(t));
+
+  /* ── Archived toggle ── */
+  const archBtn = $("#eq-show-archived");
+  if (archBtn) archBtn.addEventListener("click", () => {
+    const list = $("#eq-archived-list");
+    if (!list) return;
+    const hidden = list.hasAttribute("hidden");
+    if (hidden) {
+      list.removeAttribute("hidden");
+      archBtn.textContent = "Hide archived";
+    } else {
+      list.setAttribute("hidden", "");
+      const n = EQ.getAllItems().filter(i => i.tankId === t.id && !i.isActive).length;
+      archBtn.textContent = `Show ${n} archived item${n === 1 ? "" : "s"}`;
+    }
+  });
+}
+
+/* ── Add Equipment modal (type → subtype → form) ──────────────── */
+function _openEqAddModal(t) {
+  // Step 1: type picker
+  const typeHTML = EQ.TYPES.map(ty => `
+    <button class="eq-type-pick-btn" data-eq-type="${ty.id}">
+      <span class="eq-type-pick-icon">${ty.icon}</span>
+      <span class="eq-type-pick-label">${escapeHTML(ty.label)}</span>
+    </button>`).join("");
+
+  openModal(`
+    <h2 class="modal-title">Add Equipment</h2>
+    <p class="muted small" style="margin:0 0 16px">What type of equipment is this?</p>
+    <div class="eq-type-grid">${typeHTML}</div>
+    <div class="modal-footer">
+      <button class="btn secondary" id="eq-add-cancel">Cancel</button>
+    </div>`, (el) => {
+      el.querySelectorAll("[data-eq-type]").forEach(b => b.addEventListener("click", () => {
+        const typeId = b.dataset.eqType;
+        const typeObj = EQ.TYPES.find(ty => ty.id === typeId);
+        if (!typeObj) return;
+        if (typeObj.subtypes && typeObj.subtypes.length > 0) {
+          _openEqSubtypeModal(t, typeObj);
+        } else {
+          _openEqFormModal(t, typeObj, null);
+        }
+      }));
+      const cancelBtn = el.querySelector("#eq-add-cancel");
+      if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
+    });
+}
+
+function _openEqSubtypeModal(t, typeObj) {
+  const subtypeHTML = typeObj.subtypes.map(s => `
+    <button class="eq-type-pick-btn" data-eq-sub="${s.id}">
+      <span class="eq-type-pick-label">${escapeHTML(s.label)}</span>
+    </button>`).join("");
+
+  openModal(`
+    <h2 class="modal-title">${typeObj.icon} ${escapeHTML(typeObj.label)}</h2>
+    <p class="muted small" style="margin:0 0 16px">Pick the subtype that matches yours.</p>
+    <div class="eq-type-grid">${subtypeHTML}</div>
+    <div class="modal-footer">
+      <button class="btn secondary" id="eq-sub-back">← Back</button>
+    </div>`, (el) => {
+      el.querySelectorAll("[data-eq-sub]").forEach(b => b.addEventListener("click", () => {
+        const sub = typeObj.subtypes.find(s => s.id === b.dataset.eqSub);
+        if (sub) _openEqFormModal(t, typeObj, sub.id);
+      }));
+      const backBtn = el.querySelector("#eq-sub-back");
+      if (backBtn) backBtn.addEventListener("click", () => _openEqAddModal(t));
+    });
+}
+
+function _openEqFormModal(t, typeObj, subtypeId, existingItem) {
+  const isEdit = !!existingItem;
+  const defs   = typeObj.defaults ? typeObj.defaults(subtypeId) : {};
+  const item   = existingItem || {};
+  const subtypeLabel = subtypeId
+    ? (typeObj.subtypes || []).find(s => s.id === subtypeId)?.label || ""
+    : "";
+
+  const today = new Date().toISOString().slice(0, 10);
+  const guidance = defs.guidance || item.guidance || "";
+
+  // Pre-fill values
+  const name       = item.name   || (subtypeLabel ? `${subtypeLabel} ${typeObj.label}` : typeObj.label);
+  const brand      = item.brand  || "";
+  const installDt  = item.installDate || today;
+  const servInt    = item.serviceIntervalDays     != null ? item.serviceIntervalDays     : (defs.serviceIntervalDays     || "");
+  const replInt    = item.replacementIntervalDays != null ? item.replacementIntervalDays : (defs.replacementIntervalDays || "");
+  const expiryDt   = item.expiryDate || "";
+  const notes      = item.notes || "";
+  const isExpiry   = defs.expiryBased || item.expiryBased;
+
+  // Only show expiry field if the type uses expiry (test_kit) or if editing an item that has one
+  const showExpiry = isExpiry || !!item.expiryDate;
+  // Show replacement interval only if type has one in defaults or existing item has one
+  const showReplace = !!(replInt || defs.replacementIntervalDays);
+
+  openModal(`
+    <h2 class="modal-title">${isEdit ? "Edit" : "Add"} ${typeObj.icon} ${escapeHTML(subtypeLabel || typeObj.label)}</h2>
+    ${guidance ? `<div class="eq-form-guidance">${escapeHTML(guidance)}</div>` : ""}
+    <div class="eq-form">
+      <label class="field-label">Name <span class="muted small">(what you call it)</span></label>
+      <input id="eq-f-name" class="field" type="text" value="${escapeHTML(name)}" placeholder="e.g. Main sponge filter" maxlength="60" />
+
+      <label class="field-label">Brand / model <span class="muted small">(optional)</span></label>
+      <input id="eq-f-brand" class="field" type="text" value="${escapeHTML(brand)}" placeholder="e.g. Aquarium Co-Op, Fluval" maxlength="60" />
+
+      <label class="field-label">Install / purchase date</label>
+      <input id="eq-f-install" class="field" type="date" value="${escapeHTML(installDt)}" />
+
+      ${!isExpiry && servInt !== "" ? `
+      <label class="field-label">${escapeHTML(defs.serviceLabel || item.serviceLabel || "Service")} every <span class="muted small">(days)</span></label>
+      <input id="eq-f-serv" class="field" type="number" min="1" max="9999" value="${servInt}" placeholder="e.g. 30" />
+      ` : ""}
+
+      ${showReplace ? `
+      <label class="field-label">${escapeHTML(defs.replacementLabel || item.replacementLabel || "Replace")} every <span class="muted small">(days)</span></label>
+      <input id="eq-f-repl" class="field" type="number" min="1" max="9999" value="${replInt}" placeholder="e.g. 90" />
+      ` : ""}
+
+      ${showExpiry ? `
+      <label class="field-label">Expiry / best-by date</label>
+      <input id="eq-f-expiry" class="field" type="date" value="${escapeHTML(expiryDt)}" />
+      ` : ""}
+
+      <label class="field-label">Notes <span class="muted small">(optional)</span></label>
+      <textarea id="eq-f-notes" class="field" rows="2" placeholder="Any notes..." maxlength="300">${escapeHTML(notes)}</textarea>
+    </div>
+    <div class="modal-footer">
+      ${!isEdit ? `<button class="btn secondary" id="eq-form-back">← Back</button>` : `<button class="btn secondary" id="eq-form-cancel">Cancel</button>`}
+      <button class="btn" id="eq-form-save">${isEdit ? "Save changes" : "Add equipment"}</button>
+    </div>`, (el) => {
+
+    const saveBtn = el.querySelector("#eq-form-save");
+    if (saveBtn) saveBtn.addEventListener("click", () => {
+      const nameVal    = (el.querySelector("#eq-f-name")?.value || "").trim();
+      if (!nameVal) { toast("Please enter a name."); return; }
+      const brandVal   = (el.querySelector("#eq-f-brand")?.value  || "").trim();
+      const installVal = (el.querySelector("#eq-f-install")?.value || today);
+      const servVal    = el.querySelector("#eq-f-serv")   ? Number(el.querySelector("#eq-f-serv").value)   || null : (existingItem?.serviceIntervalDays     ?? (isExpiry ? null : (defs.serviceIntervalDays || null)));
+      const replVal    = el.querySelector("#eq-f-repl")   ? Number(el.querySelector("#eq-f-repl").value)   || null : (existingItem?.replacementIntervalDays ?? (defs.replacementIntervalDays || null));
+      const expiryVal  = el.querySelector("#eq-f-expiry") ? (el.querySelector("#eq-f-expiry").value || null) : (existingItem?.expiryDate || null);
+      const notesVal   = (el.querySelector("#eq-f-notes")?.value || "").trim();
+
+      if (isEdit) {
+        EQ.updateItem(existingItem.id, {
+          name:                    nameVal,
+          brand:                   brandVal,
+          installDate:             installVal,
+          serviceIntervalDays:     servVal,
+          replacementIntervalDays: replVal,
+          expiryDate:              expiryVal,
+          notes:                   notesVal,
+        });
+        toast(`${nameVal} updated`);
+      } else {
+        EQ.addItem({
+          tankId:                  t.id,
+          type:                    typeObj.id,
+          subtype:                 subtypeId,
+          name:                    nameVal,
+          brand:                   brandVal,
+          installDate:             installVal,
+          serviceIntervalDays:     servVal,
+          replacementIntervalDays: replVal,
+          expiryDate:              expiryVal,
+          notes:                   notesVal,
+        });
+        toast(`${nameVal} added`);
+      }
+      closeModal();
+      render();
+    });
+
+    const backBtn = el.querySelector("#eq-form-back");
+    if (backBtn) backBtn.addEventListener("click", () => {
+      if (subtypeId && typeObj.subtypes?.length) {
+        _openEqSubtypeModal(t, typeObj);
+      } else {
+        _openEqAddModal(t);
+      }
+    });
+    const cancelBtn = el.querySelector("#eq-form-cancel");
+    if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
+  });
+}
+
+function _openEqEditModal(t, item) {
+  const typeObj = EQ.TYPES.find(ty => ty.id === item.type) || EQ.TYPES[EQ.TYPES.length - 1];
+  _openEqFormModal(t, typeObj, item.subtype, item);
+}
+
+function _openEqMoreModal(t, item) {
+  openModal(`
+    <h2 class="modal-title">${escapeHTML(item.name)}</h2>
+    <div class="eq-more-list">
+      <button class="eq-more-row" id="eq-more-note">📝 Add a note</button>
+      <button class="eq-more-row" id="eq-more-archive">${item.isActive ? "📦 Archive" : "♻️ Restore"}</button>
+      <button class="eq-more-row eq-more-delete" id="eq-more-delete">🗑️ Delete</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn secondary" id="eq-more-cancel">Cancel</button>
+    </div>`, (el) => {
+
+    const noteBtn = el.querySelector("#eq-more-note");
+    if (noteBtn) noteBtn.addEventListener("click", () => {
+      closeModal();
+      openModal(`
+        <h2 class="modal-title">Add a note</h2>
+        <textarea id="eq-note-text" class="field" rows="4" placeholder="What happened or what you noticed..." maxlength="400"></textarea>
+        <div class="modal-footer">
+          <button class="btn secondary" id="eq-note-cancel">Cancel</button>
+          <button class="btn" id="eq-note-save">Save note</button>
+        </div>`, (nel) => {
+          const saveNote = nel.querySelector("#eq-note-save");
+          if (saveNote) saveNote.addEventListener("click", () => {
+            const txt = (nel.querySelector("#eq-note-text")?.value || "").trim();
+            if (!txt) { toast("Note is empty."); return; }
+            EQ.addNote(item.id, txt);
+            toast("Note saved");
+            closeModal();
+          });
+          const nc = nel.querySelector("#eq-note-cancel");
+          if (nc) nc.addEventListener("click", closeModal);
+      });
+    });
+
+    const archBtn = el.querySelector("#eq-more-archive");
+    if (archBtn) archBtn.addEventListener("click", () => {
+      if (item.isActive) {
+        EQ.archiveItem(item.id);
+        toast(`${item.name} archived`);
+      } else {
+        EQ.updateItem(item.id, { isActive: true });
+        toast(`${item.name} restored`);
+      }
+      closeModal();
+      render();
+    });
+
+    const delBtn = el.querySelector("#eq-more-delete");
+    if (delBtn) delBtn.addEventListener("click", () => {
+      if (!confirm(`Delete "${item.name}" and all its history? This cannot be undone.`)) return;
+      EQ.deleteItem(item.id);
+      toast(`${item.name} deleted`);
+      closeModal();
+      render();
+    });
+
+    const cancelBtn = el.querySelector("#eq-more-cancel");
+    if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
   });
 }
 
