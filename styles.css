@@ -3308,6 +3308,23 @@ html[data-skin="dark"] .topbar-logo-mark {
   display: none;
 }
 
+/* Fish-only nav icon (browse-species button) */
+.fish-btn-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: block;
+  object-fit: contain;
+  /* Light themes: invert white mark to dark */
+  filter: invert(1);
+  opacity: 0.85;
+}
+html[data-skin="dark"] .fish-btn-icon {
+  /* Dark theme: keep white */
+  filter: none;
+  opacity: 0.9;
+}
+
 /* ============================================================
    QUICK LOG — Water Care tab
    ============================================================ */
