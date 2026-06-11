@@ -807,7 +807,7 @@ function renderTank(){
   if(view.tab === "fish")       body.innerHTML = renderFish(t);
   if(view.tab === "water-care") body.innerHTML = renderWaterCare(t);
   if(view.tab === "history")    body.innerHTML = renderHistory(t);
-  if(view.tab === "equipment")  body.innerHTML = renderEquipment(t);
+  if(view.tab === "equipment") { body.innerHTML = renderEquipment(t); }
 
   if(view.tab === "details")   bindDetails(t);
   if(view.tab === "fish")       bindFish(t);
@@ -3162,12 +3162,15 @@ function bindHistory(t){
    EQUIPMENT & MAINTENANCE DASHBOARD
    ============================================================ */
 
-let eqFilter = "month"; // week | month | upcoming | all
+let eqFilter    = "month"; // week | month | upcoming | all
+let eqPrevTankId = null;  // reset filter when switching tanks
 
 function renderEquipment(t) {
   if (typeof EQ === "undefined") {
     return `<div class="section"><p class="muted center">Equipment module not loaded.</p></div>`;
   }
+  // Reset filter when switching to a different tank
+  if (t.id !== eqPrevTankId) { eqFilter = "month"; eqPrevTankId = t.id; }
 
   const summary = EQ.tankSummary(t.id);
   const items   = EQ.dueList(t.id, eqFilter);
@@ -3737,6 +3740,8 @@ function openAddTank(opts){
    MODAL + TOAST
    ============================================================ */
 function openModal(html, onMount){
+  // Always close any existing modal before opening a new one — prevents backdrop stacking
+  closeModal();
   const wrap = document.createElement("div");
   wrap.className = "modal-backdrop";
   wrap.innerHTML = `<div class="modal">${html}</div>`;
@@ -3745,8 +3750,8 @@ function openModal(html, onMount){
   if(typeof onMount === "function") onMount();
 }
 function closeModal(){
-  const m = $(".modal-backdrop");
-  if(m) m.remove();
+  // Remove ALL backdrops in case any leaked through (defensive)
+  $$("."+"modal-backdrop").forEach(m => m.remove());
 }
 function toast(msg){
   const el = document.createElement("div");
