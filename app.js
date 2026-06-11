@@ -449,7 +449,11 @@ function openTankActions(tankId){
 function _tankStatus(t){
   // Returns { tone: "ok"|"fyi"|"soon"|"urgent", label, hint }
   try {
-    const adv = window.ADVISOR && window.ADVISOR.computeAdvice ? window.ADVISOR.computeAdvice(t) : null;
+    // Use list API when available so we always reflect the true top severity
+    const list = window.ADVISOR && window.ADVISOR.computeAdviceList
+      ? window.ADVISOR.computeAdviceList(t)
+      : (window.ADVISOR && window.ADVISOR.computeAdvice ? [window.ADVISOR.computeAdvice(t)].filter(Boolean) : []);
+    const adv = list[0] || null;
     if (adv && adv.sev){
       if (adv.sev === "urgent") return { tone:"urgent", label:"Needs attention", hint: adv.title || "" };
       if (adv.sev === "soon")   return { tone:"soon",   label:"Check soon",      hint: adv.title || "" };
@@ -706,24 +710,30 @@ function renderHome(){
 }
 
 function renderAdvisorBanner(t){
-  // Get top recommendation and log if new (history persistence)
   if (!window.ADVISOR) return "";
+  let advList = [];
   let adv = null;
   try {
-    adv = window.ADVISOR.computeAdvice(t);
+    // Use list API when available (upgraded advisor), fall back to single
+    advList = window.ADVISOR.computeAdviceList
+      ? window.ADVISOR.computeAdviceList(t)
+      : (window.ADVISOR.computeAdvice(t) ? [window.ADVISOR.computeAdvice(t)] : []);
+    adv = advList[0] || null;
     if (adv) {
-      window.ADVISOR.logAdviceIfNew(t, adv);
-      // Fire OS notification for urgent issues (if user opted in)
+      // Log all active items to history (with per-rule dedup / cooldown inside advisor)
+      advList.forEach(item => { try { window.ADVISOR.logAdviceIfNew(t, item); } catch(e){} });
+      // Fire OS notification for urgent issues (if user opted in) — top item only
       if (window.REMINDERS) {
         try { window.REMINDERS.fireUrgentAdvisorNotif(t, adv); } catch(e){}
       }
     }
   } catch (err) { console.warn("advisor error", err); return ""; }
   if (!adv) return "";
-  // Suppress if user dismissed this exact signature this session
-  const sig = (adv.title + " | " + adv.rule);
+  // Signature uses ruleId when available (new advisor), falls back to title+rule
+  const sig = adv.ruleId ? (adv.ruleId + " | " + adv.rule) : (adv.title + " | " + adv.rule);
   if (window._advisorDismissed && window._advisorDismissed[t.id] === sig) return "";
-  // Where this reminder can be acted on \u2014 makes the banner tappable
+  // Tag label (Risk / Insight / Reminder / Tip) — only shown when present
+  const tagLabel = adv.tag ? `<span class="adv-tag adv-tag-${adv.sev}">${escapeHTML(adv.tag)}</span>` : "";
   const target = (window.ADVISOR.adviceTarget && window.ADVISOR.adviceTarget(adv)) || null;
   const clickable = !!target;
   const targetAttrs = clickable
@@ -732,13 +742,19 @@ function renderAdvisorBanner(t){
   const hint = clickable
     ? `<div class="adv-hint">Tap to fix <span class="adv-chev">\u203a</span></div>`
     : "";
+  // Secondary items indicator (when more than 1 item, show a quiet count)
+  const moreCount = advList.length - 1;
+  const moreHint = (moreCount > 0)
+    ? `<div class="adv-more">${moreCount} more insight${moreCount > 1 ? 's' : ''} this tank</div>`
+    : "";
   return `
     <div class="advisor-banner ${adv.sev}${clickable ? " adv-clickable" : ""}" data-sig="${escapeHTML(sig)}"${targetAttrs}>
       <div class="adv-icon">${adv.sev === "urgent" ? "\u26a0\ufe0f" : adv.sev === "soon" ? "\ud83d\udd14" : "\ud83c\udf38"}</div>
       <div class="adv-body">
-        <div class="adv-title">${escapeHTML(adv.title)}</div>
+        <div class="adv-title-row">${tagLabel}<span class="adv-title">${escapeHTML(adv.title)}</span></div>
         <div class="adv-text">${escapeHTML(adv.body)}</div>
         ${hint}
+        ${moreHint}
       </div>
       <button class="adv-dismiss" id="adv-dismiss" aria-label="Dismiss">\u2715</button>
     </div>

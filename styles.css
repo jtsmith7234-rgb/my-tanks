@@ -1100,16 +1100,40 @@ button:focus-visible, .tab:focus-visible, .chip:focus-visible{
   padding-top:1px;
 }
 .adv-body{ flex:1; min-width:0 }
+/* Title row: tag chip + title side by side */
+.adv-title-row{ display:flex; align-items:center; gap:6px; margin-bottom:4px; flex-wrap:wrap }
 .adv-title{
   font-weight:700;
   font-size:14.5px;
   color:var(--ink);
-  margin-bottom:4px;
   letter-spacing:.1px;
+  line-height:1.3;
 }
 .advisor-banner.urgent .adv-title{ color:var(--bad) }
 .advisor-banner.soon .adv-title{ color:var(--warn) }
 .advisor-banner.fyi .adv-title{ color:var(--sakura) }
+/* Tag chip (Risk / Insight / Reminder / Tip) */
+.adv-tag{
+  display:inline-block;
+  font-size:9.5px;
+  font-weight:700;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+  padding:2px 6px;
+  border-radius:4px;
+  opacity:.85;
+  flex-shrink:0;
+}
+.adv-tag-urgent{ background:rgba(255,122,138,.18); color:var(--bad) }
+.adv-tag-soon  { background:rgba(245,181,107,.18); color:var(--warn) }
+.adv-tag-fyi   { background:rgba(255,155,190,.18); color:var(--sakura) }
+/* Secondary insights count */
+.adv-more{
+  font-size:11.5px;
+  color:var(--ink-dim);
+  opacity:.65;
+  margin-top:5px;
+}
 .adv-text{
   font-size:13px;
   color:var(--ink-dim);
@@ -3001,6 +3025,9 @@ html[data-theme="clean"] .advisor-banner.fyi    { border-color: rgba(0,120,120,.
 html[data-theme="clean"] .advisor-banner::before { background: var(--clean-primary) }
 html[data-theme="clean"] .advisor-banner.urgent::before { background: var(--clean-bad) }
 html[data-theme="clean"] .advisor-banner.soon::before   { background: var(--clean-warn) }
+html[data-theme="clean"] .adv-tag-urgent{ background:rgba(192,57,43,.12); color:var(--clean-bad) }
+html[data-theme="clean"] .adv-tag-soon  { background:rgba(160,94,0,.12);  color:var(--clean-warn) }
+html[data-theme="clean"] .adv-tag-fyi   { background:rgba(0,120,120,.12); color:var(--clean-primary) }
 
 /* ── UP NEXT ROWS ────────────────────────────────────────── */
 html[data-theme="clean"] .upn-row {
