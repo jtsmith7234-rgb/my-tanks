@@ -3283,27 +3283,24 @@ html[data-theme="clean"] .event-icon.tank_edit    { color: var(--clean-warn); }
   background: none;
   text-shadow: none;
 }
-/* Topbar logo image — full teal PNG, no wrapper needed.
-   border-radius clips it to match the iOS icon shape.
-   Each theme gets a slight shadow tweak to feel natural. */
+/* Topbar logo mark — transparent PNG, no background badge, no border-radius.
+   Swaps between a teal mark (light themes) and a white mark (dark theme)
+   so it always matches the contrast level of the header text beside it. */
 .topbar-logo-img {
-  width: 30px;
-  height: 30px;
-  border-radius: 7px;
+  width: 26px;
+  height: 26px;
   flex-shrink: 0;
   display: block;
-  object-fit: cover;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.22);
+  object-fit: contain;
+  border-radius: 0;
+  box-shadow: none;
+  /* Default src is logo-mark-dark.png (teal mark) set in index.html —
+     overridden to white mark on dark skin via content-swap below. */
 }
 
-/* Clean & light themes — very subtle shadow, icon stands on its own */
-html[data-skin="light"] .topbar-logo-img {
-  box-shadow: 0 1px 5px rgba(0,60,60,0.25);
-}
-
-/* Midnight Reef (dark) — soft teal glow ring to lift it off the dark bar */
-html[data-theme="midnight-reef"] .topbar-logo-img {
-  box-shadow: 0 0 0 1.5px rgba(0,200,200,0.20), 0 2px 8px rgba(0,0,0,0.35);
+/* Dark theme (The Deep / midnight-reef): swap to the white logo mark */
+html[data-skin="dark"] .topbar-logo-img {
+  content: url('logo-mark-light.png');
 }
 /* Hide logo when on inner screens (title changes via JS) */
 #title:not(.topbar-brand) .topbar-logo-img,
