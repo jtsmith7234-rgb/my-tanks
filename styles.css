@@ -3283,28 +3283,21 @@ html[data-theme="clean"] .event-icon.tank_edit    { color: var(--clean-warn); }
   background: none;
   text-shadow: none;
 }
-/* Topbar logo mark — transparent PNG, no background badge, no border-radius.
-   Swaps between a teal mark (light themes) and a white mark (dark theme)
-   so it always matches the contrast level of the header text beside it. */
-.topbar-logo-img {
-  width: 26px;
-  height: 26px;
+/* Topbar logo mark — inline SVG fish icon, inherits currentColor from the h1.
+   Sized to match the cap-height of the 18px brand title (Plus Jakarta Sans 800).
+   No background, no border, no PNG swap needed — color is automatic via currentColor. */
+.topbar-logo-mark {
+  width: 17px;
+  height: 17px;
   flex-shrink: 0;
   display: block;
-  object-fit: contain;
-  border-radius: 0;
-  box-shadow: none;
-  /* Default src is logo-mark-dark.png (teal mark) set in index.html —
-     overridden to white mark on dark skin via content-swap below. */
-}
-
-/* Dark theme (The Deep / midnight-reef): swap to the white logo mark */
-html[data-skin="dark"] .topbar-logo-img {
-  content: url('logo-mark-light.png');
+  color: inherit;
+  stroke: currentColor;
+  overflow: visible;
 }
 /* Hide logo when on inner screens (title changes via JS) */
-#title:not(.topbar-brand) .topbar-logo-img,
-.topbar-inner-title .topbar-logo-img {
+#title:not(.topbar-brand) .topbar-logo-mark,
+.topbar-inner-title .topbar-logo-mark {
   display: none;
 }
 
