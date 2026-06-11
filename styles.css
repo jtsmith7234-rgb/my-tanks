@@ -3283,17 +3283,24 @@ html[data-theme="clean"] .event-icon.tank_edit    { color: var(--clean-warn); }
   background: none;
   text-shadow: none;
 }
-/* Topbar logo mark — tank+fish brand mark SVG, inherits currentColor.
-   ViewBox 56x44, rendered at 28x22px so height visually matches
-   the cap-height of the 18-19px Plus Jakarta Sans 800 title.
-   No background, no border, no PNG swap — color automatic via currentColor. */
+/* Topbar logo mark — extracted from the app icon master, transparent background.
+   PNG is a white mark (116x96px native). Rendered at 27x22px so the height matches
+   the cap-height of the 19px Plus Jakarta Sans 800 title text.
+   Theme contrast via CSS filter:
+     light skin (Tropical Pop / Planted / Clean) → invert(1) = dark mark on light bg
+     dark  skin (The Deep / midnight-reef)        → no filter  = white mark on dark bg */
 .topbar-logo-mark {
-  width: 28px;
+  width: 27px;
   height: 22px;
   flex-shrink: 0;
   display: block;
-  color: inherit;
-  overflow: visible;
+  object-fit: contain;
+  /* Light themes: invert the white mark to dark */
+  filter: invert(1);
+}
+html[data-skin="dark"] .topbar-logo-mark {
+  /* Dark theme: keep the mark white */
+  filter: none;
 }
 /* Hide logo when on inner screens (title changes via JS) */
 #title:not(.topbar-brand) .topbar-logo-mark,
