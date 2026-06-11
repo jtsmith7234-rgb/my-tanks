@@ -358,7 +358,7 @@ function render(){
   // Helper: swap between brand lockup (home) and plain title (inner screens)
   function setTitleText(text, showLogo) {
     if (showLogo) {
-      titleEl.innerHTML = `<svg class="topbar-logo-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6.5 12c0-3.5 3-6.5 8-6.5 2 0 3.5.5 4.5 1L22 12l-3 5.5c-1 .5-2.5 1-4.5 1-5 0-8-3-8-6.5z"/><path d="M6.5 12C4 10.5 2 9.5 2 9.5c0 0 .5 1.5.5 2.5S2 14.5 2 14.5c0 0 2-1 4.5-2.5z"/><circle cx="16" cy="10.5" r="1" fill="currentColor" stroke="none"/></svg>${escapeHTML(text)}`;
+      titleEl.innerHTML = `<svg class="topbar-logo-mark" viewBox="0 0 56 44" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="1.5" y="1.5" width="53" height="41" rx="4" ry="4" stroke-width="3"/><path d="M1.5 10 Q10 7.5 18 10 Q26 12.5 34 10 Q42 7.5 54.5 10" stroke-width="2"/><ellipse cx="30" cy="28" rx="12" ry="7" stroke-width="2.2"/><path d="M18 28 L11 21 M18 28 L11 35" stroke-width="2.2"/><circle cx="40" cy="25.5" r="1.8" fill="currentColor" stroke="none"/></svg>${escapeHTML(text)}`;
       titleEl.classList.add("topbar-brand");
     } else {
       titleEl.textContent = text;

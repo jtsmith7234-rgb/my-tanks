@@ -3283,16 +3283,16 @@ html[data-theme="clean"] .event-icon.tank_edit    { color: var(--clean-warn); }
   background: none;
   text-shadow: none;
 }
-/* Topbar logo mark — inline SVG fish icon, inherits currentColor from the h1.
-   Sized to match the cap-height of the 18px brand title (Plus Jakarta Sans 800).
-   No background, no border, no PNG swap needed — color is automatic via currentColor. */
+/* Topbar logo mark — tank+fish brand mark SVG, inherits currentColor.
+   ViewBox 56x44, rendered at 28x22px so height visually matches
+   the cap-height of the 18-19px Plus Jakarta Sans 800 title.
+   No background, no border, no PNG swap — color automatic via currentColor. */
 .topbar-logo-mark {
-  width: 17px;
-  height: 17px;
+  width: 28px;
+  height: 22px;
   flex-shrink: 0;
   display: block;
   color: inherit;
-  stroke: currentColor;
   overflow: visible;
 }
 /* Hide logo when on inner screens (title changes via JS) */
