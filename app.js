@@ -791,10 +791,10 @@ function renderTank(){
     ${renderAdvisorBanner(t)}
     <div class="tabs" role="tablist">
       <button class="tab ${view.tab==='details'?'active':''}" data-tab="details">Details</button>
-      <button class="tab ${view.tab==='fish'?'active':''}" data-tab="fish">Fish</button>
+      <button class="tab ${view.tab==='fish'?'active':''}" data-tab="fish">Livestock</button>
       <button class="tab ${view.tab==='water-care'?'active':''}" data-tab="water-care">Water Care</button>
-      <button class="tab ${view.tab==='history'?'active':''}" data-tab="history">History</button>
       <button class="tab ${view.tab==='equipment'?'active':''}" data-tab="equipment">Equipment</button>
+      <button class="tab ${view.tab==='history'?'active':''}" data-tab="history">History</button>
     </div>
     <div id="tab-body"></div>
   `;
@@ -3383,11 +3383,15 @@ function _openEqAddModal(t) {
     </button>`).join("");
 
   openModal(`
+    <div class="modal-inner">
     <h2 class="modal-title">Add Equipment</h2>
+    <div class="modal-scroll-body">
     <p class="muted small" style="margin:0 0 16px">What type of equipment is this?</p>
     <div class="eq-type-grid">${typeHTML}</div>
+    </div>
     <div class="modal-footer">
       <button class="btn secondary" id="eq-add-cancel">Cancel</button>
+    </div>
     </div>`, () => {
       $$("[data-eq-type]").forEach(b => b.addEventListener("click", () => {
         const typeId = b.dataset.eqType;
@@ -3411,11 +3415,15 @@ function _openEqSubtypeModal(t, typeObj) {
     </button>`).join("");
 
   openModal(`
+    <div class="modal-inner">
     <h2 class="modal-title">${typeObj.icon} ${escapeHTML(typeObj.label)}</h2>
+    <div class="modal-scroll-body">
     <p class="muted small" style="margin:0 0 16px">Pick the subtype that matches yours.</p>
     <div class="eq-type-grid">${subtypeHTML}</div>
+    </div>
     <div class="modal-footer">
       <button class="btn secondary" id="eq-sub-back">← Back</button>
+    </div>
     </div>`, () => {
       $$("[data-eq-sub]").forEach(b => b.addEventListener("click", () => {
         const sub = typeObj.subtypes.find(s => s.id === b.dataset.eqSub);
@@ -3453,7 +3461,9 @@ function _openEqFormModal(t, typeObj, subtypeId, existingItem) {
   const showReplace = !!(replInt || defs.replacementIntervalDays);
 
   openModal(`
+    <div class="modal-inner">
     <h2 class="modal-title">${isEdit ? "Edit" : "Add"} ${typeObj.icon} ${escapeHTML(subtypeLabel || typeObj.label)}</h2>
+    <div class="modal-scroll-body">
     ${guidance ? `<div class="eq-form-guidance">${escapeHTML(guidance)}</div>` : ""}
     <div class="eq-form">
       <label class="field-label">Name <span class="muted small">(what you call it)</span></label>
@@ -3483,10 +3493,13 @@ function _openEqFormModal(t, typeObj, subtypeId, existingItem) {
       <label class="field-label">Notes <span class="muted small">(optional)</span></label>
       <textarea id="eq-f-notes" class="field" rows="2" placeholder="Any notes..." maxlength="300">${escapeHTML(notes)}</textarea>
     </div>
+    </div><!-- /eq-form -->
+    </div><!-- /modal-scroll-body -->
     <div class="modal-footer">
       ${!isEdit ? `<button class="btn secondary" id="eq-form-back">← Back</button>` : `<button class="btn secondary" id="eq-form-cancel">Cancel</button>`}
       <button class="btn" id="eq-form-save">${isEdit ? "Save changes" : "Add equipment"}</button>
-    </div>`, () => {
+    </div>
+    </div><!-- /modal-inner -->`, () => {
 
     const saveBtn = $("#eq-form-save");
     if (saveBtn) saveBtn.addEventListener("click", () => {
@@ -3549,25 +3562,33 @@ function _openEqEditModal(t, item) {
 
 function _openEqMoreModal(t, item) {
   openModal(`
+    <div class="modal-inner">
     <h2 class="modal-title">${escapeHTML(item.name)}</h2>
+    <div class="modal-scroll-body">
     <div class="eq-more-list">
       <button class="eq-more-row" id="eq-more-note">📝 Add a note</button>
       <button class="eq-more-row" id="eq-more-archive">${item.isActive ? "📦 Archive" : "♻️ Restore"}</button>
       <button class="eq-more-row eq-more-delete" id="eq-more-delete">🗑️ Delete</button>
     </div>
+    </div>
     <div class="modal-footer">
       <button class="btn secondary" id="eq-more-cancel">Cancel</button>
+    </div>
     </div>`, () => {
 
     const noteBtn = $("#eq-more-note");
     if (noteBtn) noteBtn.addEventListener("click", () => {
       closeModal();
       openModal(`
+        <div class="modal-inner">
         <h2 class="modal-title">Add a note</h2>
+        <div class="modal-scroll-body">
         <textarea id="eq-note-text" class="field" rows="4" placeholder="What happened or what you noticed..." maxlength="400"></textarea>
+        </div>
         <div class="modal-footer">
           <button class="btn secondary" id="eq-note-cancel">Cancel</button>
           <button class="btn" id="eq-note-save">Save note</button>
+        </div>
         </div>`, () => {
           const saveNote = $("#eq-note-save");
           if (saveNote) saveNote.addEventListener("click", () => {

@@ -517,15 +517,17 @@ html[data-skin="dark"] .topbar h1{
 }
 .tabs::-webkit-scrollbar{display:none}
 .tab{
-  flex:0 0 auto;             /* never get squished; never force-stretch beyond width */
+  flex:1 1 0;                /* flex-grow so all 5 share the row equally */
+  min-width:0;               /* allow shrink below content width */
   appearance:none;background:transparent;border:0;color:var(--ink-dim);
-  padding:9px 13px;font-weight:600;border-radius:12px;cursor:pointer;font-size:13.5px;
+  padding:8px 6px;font-weight:600;border-radius:12px;cursor:pointer;font-size:12px;
   transition:.2s cubic-bezier(.2,.8,.2,1);
   white-space:nowrap;
   font-family:inherit;
+  text-align:center;
   scroll-snap-align:start;
 }
-.tab:last-child{ margin-right:6px; }   /* visible end padding so the last chip is never partially clipped at rest */
+/* last-child margin removed — tabs use flex:1 1 0 to fill the row */
 .tab.active{
   background:linear-gradient(180deg, rgba(255,155,190,.28), rgba(255,122,74,.14));
   color:#fff5f7;
@@ -761,12 +763,17 @@ html[data-skin="light"] .dose-card .big .unit{color:var(--ink-dim);-webkit-text-
   -webkit-backdrop-filter:blur(40px) saturate(180%);
           backdrop-filter:blur(40px) saturate(180%);
   border-radius:28px 28px 0 0;
-  width:100%;max-width:560px;max-height:90vh;overflow:auto;
-  padding:24px 18px env(safe-area-inset-bottom);
+  width:100%;max-width:560px;
+  /* Allow modal to be as tall as needed up to 88vh; content scrolls inside */
+  max-height:88vh;
+  display:flex;flex-direction:column;
   box-shadow:0 -20px 60px rgba(0,0,0,.65), 0 1px 0 rgba(255,255,255,.10) inset;
   position:relative;
   animation: sheet-up .3s cubic-bezier(.2,.9,.25,1);
   color:var(--ink);
+  overflow:hidden; /* clip at border-radius; inner areas scroll */
+  /* Default padding for modals that don't use modal-inner */
+  padding:24px 18px env(safe-area-inset-bottom, 16px);
 }
 html[data-skin="light"] .modal{
   background:linear-gradient(180deg, rgba(255,255,255,.78) 0%, rgba(225,240,247,.78) 100%);
@@ -787,6 +794,89 @@ html[data-skin="light"] .modal-backdrop{
   background:rgba(255,200,215,.25);
 }
 .modal h3{margin:6px 0 14px;font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:-.2px}
+
+/* Modal layout: title sticks, content scrolls, footer sticks */
+.modal-title {
+  font-family:var(--font-display);
+  font-size:20px;
+  font-weight:800;
+  letter-spacing:-.2px;
+  color:var(--ink);
+  margin:6px 0 14px;
+  padding-top:8px;  /* breathe below drag handle */
+  flex-shrink:0;
+}
+/* Scrollable content area — used by eq form modal */
+.modal-scroll-body {
+  flex:1;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:0 18px;
+  margin:0 -18px;
+}
+/* Sticky footer with safe-area padding */
+.modal-footer {
+  display:flex;
+  gap:10px;
+  align-items:center;
+  justify-content:flex-end;
+  padding-top:14px;
+  padding-bottom:env(safe-area-inset-bottom, 12px);
+  flex-shrink:0;
+  border-top:1px solid var(--glass-stroke);
+  margin-top:6px;
+}
+.modal-footer .btn { flex:1; }
+/* Full modal padding wrapper — used by all eq modals */
+.modal-inner {
+  display:flex;
+  flex-direction:column;
+  padding:20px 18px 0;
+  max-height:88vh;
+  overflow:hidden;
+}
+
+/* .field — reusable class for form inputs inside modals */
+.field {
+  width:100%;
+  background:rgba(255,255,255,.08);
+  border:1px solid var(--glass-stroke);
+  color:var(--ink);
+  padding:11px 13px;
+  border-radius:12px;
+  font-size:15px;
+  font-family:inherit;
+  outline:none;
+  transition:.18s ease;
+  -webkit-backdrop-filter:blur(8px);
+          backdrop-filter:blur(8px);
+  box-sizing:border-box;
+}
+.field:focus {
+  border-color:var(--jade);
+  background:rgba(67,122,34,.08);
+  box-shadow:0 0 0 3px rgba(67,122,34,.18);
+}
+.field::placeholder { color:var(--ink-soft); }
+html[data-skin="light"] .field {
+  background:rgba(255,255,255,.85);
+  border:1px solid var(--glass-stroke);
+  color:var(--ink);
+}
+html[data-skin="light"] .field:focus {
+  border-color:var(--jade);
+  background:#fff;
+  box-shadow:0 0 0 3px rgba(67,122,34,.15);
+}
+/* field-label — labels above .field inputs */
+.field-label {
+  display:block;
+  font-size:13px;
+  font-weight:600;
+  color:var(--ink-dim);
+  margin-bottom:5px;
+}
+.field-label .muted { font-weight:400; }
 
 /* ============================================================
    SETTINGS SHEET
@@ -3431,13 +3521,18 @@ html[data-skin="dark"] .fish-btn-icon {
 .eq-filters {
   display: flex;
   gap: 6px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;       /* keep all 4 pills on one line */
+  overflow-x: auto;
+  scrollbar-width: none;
   margin: 0 0 16px;
+  -webkit-overflow-scrolling: touch;
 }
+.eq-filters::-webkit-scrollbar { display: none; }
 .eq-filter-btn {
-  font-size: 13px;
-  font-weight: 500;
-  padding: 6px 14px;
+  flex: 1 1 0;             /* equal-width pills filling the row */
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 4px;
   border-radius: 999px;
   border: 1.5px solid var(--glass-stroke);
   background: var(--glass-fill);
@@ -3445,6 +3540,7 @@ html[data-skin="dark"] .fish-btn-icon {
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
   white-space: nowrap;
+  text-align: center;
   -webkit-tap-highlight-color: transparent;
 }
 .eq-filter-btn.active,
