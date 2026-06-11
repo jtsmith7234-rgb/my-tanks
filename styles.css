@@ -295,8 +295,8 @@ html[data-theme="planted"] .fx-plants .blade::after{
    TOP BAR — washi paper bar
    ============================================================ */
 .topbar{
-  display:flex;align-items:center;gap:6px;
-  padding:10px 12px;
+  display:flex;align-items:center;gap:4px;
+  padding:10px 10px;
   margin:0 10px 12px;
   position:relative;
   z-index:30;
@@ -324,8 +324,8 @@ html[data-theme="planted"] .fx-plants .blade::after{
 .topbar-right{justify-content:flex-end;}
 .topbar h1{
   font-family: var(--font-display);
-  font-weight:800;letter-spacing:-.2px;
-  font-size:19px;margin:0;
+  font-weight:800;letter-spacing:-.4px;
+  font-size:20px;margin:0;
   flex:0 1 auto;text-align:center;
   min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   color: var(--ink);
@@ -339,24 +339,24 @@ html[data-skin="dark"] .topbar h1{
 }
 .ghost-btn{
   appearance:none;
-  border:1px solid var(--glass-stroke);
-  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.04);
   -webkit-backdrop-filter:blur(20px) saturate(180%);
           backdrop-filter:blur(20px) saturate(180%);
   color:var(--ink);
-  width:40px;height:40px;border-radius:14px;
-  font-size:18px;font-weight:600;
-  cursor:pointer;transition: transform .15s cubic-bezier(.2,.8,.2,1), background .2s ease, border-color .2s ease;
-  box-shadow:var(--glass-shadow-sm);
+  width:38px;height:38px;border-radius:13px;
+  font-size:17px;font-weight:600;
+  cursor:pointer;transition: transform .15s cubic-bezier(.2,.8,.2,1), background .18s ease, border-color .18s ease;
+  box-shadow:none;
   display:flex;align-items:center;justify-content:center;
 }
-.ghost-btn:hover{background:var(--glass-fill-strong);border-color:var(--sakura)}
+.ghost-btn:hover{background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.28)}
 .ghost-btn:active{transform:scale(.92)}
 .ghost-btn[hidden]{display:none}
-/* Friendlier, slightly larger primary header actions (settings / add). */
+/* Primary header actions — same footprint as base ghost-btn, no upsizing. */
 .ghost-btn-lg{
-  width:46px;height:46px;border-radius:16px;
-  font-size:22px;line-height:1;
+  width:38px;height:38px;border-radius:13px;
+  font-size:18px;line-height:1;
 }
 
 /* ============================================================
@@ -2750,8 +2750,8 @@ html[data-theme="clean"] .topbar::before { display: none; }
 html[data-theme="clean"] .topbar h1 {
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 18px;
-  letter-spacing: -0.02em;
+  font-size: 20px;
+  letter-spacing: -0.03em;
   color: var(--clean-ink);
   background: none;
   -webkit-background-clip: unset;
@@ -2763,12 +2763,14 @@ html[data-theme="clean"] .topbar h1 {
 /* ── GHOST BUTTONS (back / settings / add) ───────────────── */
 html[data-theme="clean"] .ghost-btn {
   background: transparent;
-  border: 1.5px solid var(--clean-border);
+  border: 1px solid var(--clean-border);
   color: var(--clean-ink-muted);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   box-shadow: none;
-  border-radius: 12px;
+  border-radius: 13px;
+  width: 38px;
+  height: 38px;
 }
 html[data-theme="clean"] .ghost-btn:hover {
   background: var(--clean-primary-lt);
@@ -3190,11 +3192,12 @@ html[data-theme="clean"] .hr { background: linear-gradient(90deg, transparent, v
 
 /* Topbar ghost buttons */
 .btn-icon {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   display: block;
   flex-shrink: 0;
   pointer-events: none;
+  opacity: 0.75;
 }
 
 /* Action sheet rows */
@@ -3266,11 +3269,11 @@ html[data-theme="clean"] .event-icon.tank_edit    { color: var(--clean-warn); }
 .topbar-brand {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-family: var(--font-display);
   font-weight: 800;
-  font-size: 18px;
-  letter-spacing: -0.02em;
+  font-size: 20px;
+  letter-spacing: -0.03em;
   color: var(--ink);
   flex: 0 1 auto;
   text-align: center;
@@ -3290,8 +3293,8 @@ html[data-theme="clean"] .event-icon.tank_edit    { color: var(--clean-warn); }
      light skin (Tropical Pop / Planted / Clean) → invert(1) = dark mark on light bg
      dark  skin (The Deep / midnight-reef)        → no filter  = white mark on dark bg */
 .topbar-logo-mark {
-  width: 27px;
-  height: 22px;
+  width: 30px;
+  height: 25px;
   flex-shrink: 0;
   display: block;
   object-fit: contain;
@@ -3310,19 +3313,19 @@ html[data-skin="dark"] .topbar-logo-mark {
 
 /* Fish-only nav icon (browse-species button) */
 .fish-btn-icon {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
   display: block;
   object-fit: contain;
   /* Light themes: invert white mark to dark */
   filter: invert(1);
-  opacity: 0.85;
+  opacity: 0.7;
 }
 html[data-skin="dark"] .fish-btn-icon {
   /* Dark theme: keep white */
   filter: none;
-  opacity: 0.9;
+  opacity: 0.75;
 }
 
 /* ============================================================
