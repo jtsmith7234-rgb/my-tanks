@@ -3385,8 +3385,8 @@ function _openEqAddModal(t) {
     <div class="eq-type-grid">${typeHTML}</div>
     <div class="modal-footer">
       <button class="btn secondary" id="eq-add-cancel">Cancel</button>
-    </div>`, (el) => {
-      el.querySelectorAll("[data-eq-type]").forEach(b => b.addEventListener("click", () => {
+    </div>`, () => {
+      $$("[data-eq-type]").forEach(b => b.addEventListener("click", () => {
         const typeId = b.dataset.eqType;
         const typeObj = EQ.TYPES.find(ty => ty.id === typeId);
         if (!typeObj) return;
@@ -3396,7 +3396,7 @@ function _openEqAddModal(t) {
           _openEqFormModal(t, typeObj, null);
         }
       }));
-      const cancelBtn = el.querySelector("#eq-add-cancel");
+      const cancelBtn = $("#eq-add-cancel");
       if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
     });
 }
@@ -3413,12 +3413,12 @@ function _openEqSubtypeModal(t, typeObj) {
     <div class="eq-type-grid">${subtypeHTML}</div>
     <div class="modal-footer">
       <button class="btn secondary" id="eq-sub-back">← Back</button>
-    </div>`, (el) => {
-      el.querySelectorAll("[data-eq-sub]").forEach(b => b.addEventListener("click", () => {
+    </div>`, () => {
+      $$("[data-eq-sub]").forEach(b => b.addEventListener("click", () => {
         const sub = typeObj.subtypes.find(s => s.id === b.dataset.eqSub);
         if (sub) _openEqFormModal(t, typeObj, sub.id);
       }));
-      const backBtn = el.querySelector("#eq-sub-back");
+      const backBtn = $("#eq-sub-back");
       if (backBtn) backBtn.addEventListener("click", () => _openEqAddModal(t));
     });
 }
@@ -3483,18 +3483,18 @@ function _openEqFormModal(t, typeObj, subtypeId, existingItem) {
     <div class="modal-footer">
       ${!isEdit ? `<button class="btn secondary" id="eq-form-back">← Back</button>` : `<button class="btn secondary" id="eq-form-cancel">Cancel</button>`}
       <button class="btn" id="eq-form-save">${isEdit ? "Save changes" : "Add equipment"}</button>
-    </div>`, (el) => {
+    </div>`, () => {
 
-    const saveBtn = el.querySelector("#eq-form-save");
+    const saveBtn = $("#eq-form-save");
     if (saveBtn) saveBtn.addEventListener("click", () => {
-      const nameVal    = (el.querySelector("#eq-f-name")?.value || "").trim();
+      const nameVal    = ($("#eq-f-name")?.value || "").trim();
       if (!nameVal) { toast("Please enter a name."); return; }
-      const brandVal   = (el.querySelector("#eq-f-brand")?.value  || "").trim();
-      const installVal = (el.querySelector("#eq-f-install")?.value || today);
-      const servVal    = el.querySelector("#eq-f-serv")   ? Number(el.querySelector("#eq-f-serv").value)   || null : (existingItem?.serviceIntervalDays     ?? (isExpiry ? null : (defs.serviceIntervalDays || null)));
-      const replVal    = el.querySelector("#eq-f-repl")   ? Number(el.querySelector("#eq-f-repl").value)   || null : (existingItem?.replacementIntervalDays ?? (defs.replacementIntervalDays || null));
-      const expiryVal  = el.querySelector("#eq-f-expiry") ? (el.querySelector("#eq-f-expiry").value || null) : (existingItem?.expiryDate || null);
-      const notesVal   = (el.querySelector("#eq-f-notes")?.value || "").trim();
+      const brandVal   = ($("#eq-f-brand")?.value  || "").trim();
+      const installVal = ($("#eq-f-install")?.value || today);
+      const servVal    = $("#eq-f-serv")   ? Number($("#eq-f-serv").value)   || null : (existingItem?.serviceIntervalDays     ?? (isExpiry ? null : (defs.serviceIntervalDays || null)));
+      const replVal    = $("#eq-f-repl")   ? Number($("#eq-f-repl").value)   || null : (existingItem?.replacementIntervalDays ?? (defs.replacementIntervalDays || null));
+      const expiryVal  = $("#eq-f-expiry") ? ($("#eq-f-expiry").value || null) : (existingItem?.expiryDate || null);
+      const notesVal   = ($("#eq-f-notes")?.value || "").trim();
 
       if (isEdit) {
         EQ.updateItem(existingItem.id, {
@@ -3526,7 +3526,7 @@ function _openEqFormModal(t, typeObj, subtypeId, existingItem) {
       render();
     });
 
-    const backBtn = el.querySelector("#eq-form-back");
+    const backBtn = $("#eq-form-back");
     if (backBtn) backBtn.addEventListener("click", () => {
       if (subtypeId && typeObj.subtypes?.length) {
         _openEqSubtypeModal(t, typeObj);
@@ -3534,7 +3534,7 @@ function _openEqFormModal(t, typeObj, subtypeId, existingItem) {
         _openEqAddModal(t);
       }
     });
-    const cancelBtn = el.querySelector("#eq-form-cancel");
+    const cancelBtn = $("#eq-form-cancel");
     if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
   });
 }
@@ -3554,9 +3554,9 @@ function _openEqMoreModal(t, item) {
     </div>
     <div class="modal-footer">
       <button class="btn secondary" id="eq-more-cancel">Cancel</button>
-    </div>`, (el) => {
+    </div>`, () => {
 
-    const noteBtn = el.querySelector("#eq-more-note");
+    const noteBtn = $("#eq-more-note");
     if (noteBtn) noteBtn.addEventListener("click", () => {
       closeModal();
       openModal(`
@@ -3565,21 +3565,21 @@ function _openEqMoreModal(t, item) {
         <div class="modal-footer">
           <button class="btn secondary" id="eq-note-cancel">Cancel</button>
           <button class="btn" id="eq-note-save">Save note</button>
-        </div>`, (nel) => {
-          const saveNote = nel.querySelector("#eq-note-save");
+        </div>`, () => {
+          const saveNote = $("#eq-note-save");
           if (saveNote) saveNote.addEventListener("click", () => {
-            const txt = (nel.querySelector("#eq-note-text")?.value || "").trim();
+            const txt = ($("#eq-note-text")?.value || "").trim();
             if (!txt) { toast("Note is empty."); return; }
             EQ.addNote(item.id, txt);
             toast("Note saved");
             closeModal();
           });
-          const nc = nel.querySelector("#eq-note-cancel");
+          const nc = $("#eq-note-cancel");
           if (nc) nc.addEventListener("click", closeModal);
       });
     });
 
-    const archBtn = el.querySelector("#eq-more-archive");
+    const archBtn = $("#eq-more-archive");
     if (archBtn) archBtn.addEventListener("click", () => {
       if (item.isActive) {
         EQ.archiveItem(item.id);
@@ -3592,7 +3592,7 @@ function _openEqMoreModal(t, item) {
       render();
     });
 
-    const delBtn = el.querySelector("#eq-more-delete");
+    const delBtn = $("#eq-more-delete");
     if (delBtn) delBtn.addEventListener("click", () => {
       if (!confirm(`Delete "${item.name}" and all its history? This cannot be undone.`)) return;
       EQ.deleteItem(item.id);
@@ -3601,7 +3601,7 @@ function _openEqMoreModal(t, item) {
       render();
     });
 
-    const cancelBtn = el.querySelector("#eq-more-cancel");
+    const cancelBtn = $("#eq-more-cancel");
     if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
   });
 }
