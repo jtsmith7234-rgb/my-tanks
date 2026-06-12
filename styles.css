@@ -1429,7 +1429,7 @@ html[data-skin="light"] .upn-snoozed{ background:linear-gradient(160deg, rgba(25
 .input.tiny{
   width:70px;
   padding:6px 8px;
-  font-size:13px;
+  font-size:16px; /* iOS: must be >=16px to prevent auto-zoom on focus */
   text-align:center;
 }
 input[type=time].input{ font-family:inherit }

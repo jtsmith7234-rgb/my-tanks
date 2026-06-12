@@ -2,3 +2,13 @@ make_icon.py
 .DS_Store
 *.pyc
 __pycache__/
+
+# Capacitor / Node
+node_modules/
+www/
+ios/App/App/public/
+
+# Capacitor generated
+ios/App/Pods/
+ios/App/App/build/
+*.xcworkspace/xcuserdata/

@@ -1,0 +1,16 @@
+{
+  "name": "tank-care-buddy",
+  "version": "1.0.0",
+  "description": "Freshwater aquarium tracker — water changes, dosing, and tests",
+  "private": true,
+  "scripts": {
+    "cap": "npx cap"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.1"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.2.1",
+    "@capacitor/ios": "^6.2.1"
+  }
+}
