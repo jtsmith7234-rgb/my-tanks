@@ -102,7 +102,7 @@ function downloadBackup(){
   const url = URL.createObjectURL(blob);
   const ts = new Date().toISOString().slice(0,16).replace(/[T:]/g,"-");
   const a = document.createElement("a");
-  a.href = url; a.download = `my-tanks-backup-${ts}.json`;
+  a.href = url; a.download = `tank-care-buddy-backup-${ts}.json`;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1500);
 }
@@ -428,7 +428,14 @@ function openTankActions(tankId){
       window.scrollTo({top:0});
     };
     $("#act-open").addEventListener("click",  () => go("details"));
-    $("#act-edit").addEventListener("click",  () => go("details"));
+    $("#act-edit").addEventListener("click",  () => {
+      go("details");
+      // Scroll to the edit form after render settles
+      requestAnimationFrame(() => {
+        const editEl = document.getElementById("details-edit-section") || document.getElementById("details-name");
+        if (editEl) editEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
     $("#act-clean").addEventListener("click", () => go("water-care"));
     $("#act-test").addEventListener("click",  () => go("water-care"));
     $("#act-cancel").addEventListener("click",() => closeModal());
@@ -1378,7 +1385,7 @@ function renderDetails(t){
 
     ${renderRemindersSection(t)}
 
-    <div class="section">
+    <div class="section" id="details-edit-section">
       <h2>Edit tank info</h2>
       <label class="field"><span>Name</span><input class="input" id="d-name" value="${escapeHTML(t.name)}" /></label>
       <div class="row">
@@ -2900,9 +2907,12 @@ const HISTORY_FILTERS = [
   { id: "daily_checkin", label: "Daily check-ins" }
 ];
 let historyFilter = "all";
+let historyPrevTankId = null; // reset filter when switching tanks
 let expandedEventId = null;
 
 function renderHistory(t){
+  // Reset filter state when user navigates to a different tank
+  if (t.id !== historyPrevTankId) { historyFilter = "all"; historyPrevTankId = t.id; }
   const all = tankEvents(t.id);
   if(!all.length){
     return `
@@ -3945,7 +3955,7 @@ function handleImportFile(ev){
 }
 
 function openShareModal(){
-  const url = "https://jtsmith7234-rgb.github.io/my-tanks/";
+  const url = "https://jtsmith7234-rgb.github.io/tank-care-buddy/";
   const msg = `Hey — check out the aquarium app I'm beta testing. Track your tanks, water tests, dosing, and a guided cycle walkthrough for new tanks. Open in Safari then Share → Add to Home Screen.\n\n${url}`;
 
   const html = `

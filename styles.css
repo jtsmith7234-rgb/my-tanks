@@ -835,6 +835,10 @@ html[data-skin="light"] .modal-backdrop{
   max-height:88vh;
   overflow:hidden;
 }
+/* When modal-inner handles its own padding, cancel the .modal default padding */
+.modal:has(.modal-inner) {
+  padding:0;
+}
 
 /* .field — reusable class for form inputs inside modals */
 .field {
@@ -3513,7 +3517,7 @@ html[data-skin="dark"] .fish-btn-icon {
 }
 .eq-chip-bad     { background: color-mix(in srgb, var(--bad)    30%, transparent); color: var(--bad); }
 .eq-chip-warn    { background: color-mix(in srgb, var(--warn)   30%, transparent); color: var(--warn); }
-.eq-chip-soon    { background: color-mix(in srgb, var(--gold)   28%, transparent); color: color-mix(in srgb, var(--gold) 70%, var(--ink)); }
+.eq-chip-soon    { background: color-mix(in srgb, var(--gold)   28%, transparent); color: var(--gold); }
 .eq-chip-expiry  { background: color-mix(in srgb, var(--koi)    28%, transparent); color: var(--koi); }
 .eq-chip-ok      { background: color-mix(in srgb, var(--jade)   25%, transparent); color: var(--jade); }
 
@@ -3614,7 +3618,7 @@ html[data-skin="dark"] .fish-btn-icon {
 }
 .eq-status-ok      { background: color-mix(in srgb, var(--jade) 22%, transparent); color: var(--jade); }
 .eq-status-warn    { background: color-mix(in srgb, var(--warn) 25%, transparent); color: var(--warn); }
-.eq-status-soon    { background: color-mix(in srgb, var(--gold) 25%, transparent); color: color-mix(in srgb, var(--gold) 80%, var(--ink)); }
+.eq-status-soon    { background: color-mix(in srgb, var(--gold) 25%, transparent); color: var(--gold); }
 .eq-status-bad     { background: color-mix(in srgb, var(--bad)  25%, transparent); color: var(--bad); }
 .eq-status-expiry  { background: color-mix(in srgb, var(--koi)  22%, transparent); color: var(--koi); }
 .eq-status-neutral { background: var(--glass-stroke); color: var(--ink-soft); }
@@ -3778,5 +3782,5 @@ html[data-skin="dark"] .fish-btn-icon {
 }
 .tc-eq-hint-bad   { color: var(--bad); }
 .tc-eq-hint-warn  { color: var(--warn); }
-.tc-eq-hint-soon  { color: color-mix(in srgb, var(--gold) 80%, var(--ink)); }
+.tc-eq-hint-soon  { color: var(--gold); }
 .tc-eq-hint-ok    { color: var(--jade); }
