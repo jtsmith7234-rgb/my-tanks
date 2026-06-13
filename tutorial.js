@@ -128,6 +128,17 @@
     `);
   }
 
+  function snapEquipment() {
+    return deviceFrame(`
+      <div class="tut-ui-head"><span class="tut-ui-back">‹</span><span class="tut-ui-title">Equipment</span><span></span></div>
+      <div class="tut-eq-list">
+        <div class="tut-eq-row"><span class="tut-log-ico">🔬</span><span><b>HOB Filter</b><br><span style="font-size:9px;color:#7a7974">Service in 12 days</span></span><span class="tut-pill tut-pill-ok">● OK</span></div>
+        <div class="tut-eq-row"><span class="tut-log-ico">🌡️</span><span><b>Heater</b><br><span style="font-size:9px;color:#7a7974">Inspect in 45 days</span></span><span class="tut-pill tut-pill-ok">● OK</span></div>
+        <div class="tut-eq-row"><span class="tut-log-ico">💡</span><span><b>LED Light</b><br><span style="font-size:9px;color:#7a7974">Check in 60 days</span></span><span class="tut-pill tut-pill-ok">● OK</span></div>
+      </div>
+    `);
+  }
+
   /* ---------- Tutorial card content (4–6 cards max) ---------- */
   const CARDS = [
     {
@@ -137,10 +148,10 @@
       body: "Your simple home base for keeping every aquarium healthy — all in one place."
     },
     {
-      label: "New here?",
+      label: "Getting started",
       snap: snapBeginner,
-      title: "First tank? We can help",
-      body: "Tank Care Buddy guides you through the basics, step by step, as you set up your first tank."
+      title: "New tank or experienced keeper \u2014 we\u2019ve got you",
+      body: "If this is your first tank, turn on the guided setup for step-by-step help. If you\u2019re already set up, just add your tanks and log your care."
     },
     {
       label: "Step 1",
@@ -167,11 +178,17 @@
       body: "Reminders and trends help you spot what's due and how your water is trending."
     },
     {
+      label: "Equipment",
+      snap: snapEquipment,
+      title: "Track your gear",
+      body: "Add your filter, heater, and other equipment. Tank Care Buddy calculates when each item is due for service \u2014 so nothing gets missed."
+    },
+    {
       label: "You're ready",
       snap: snapReady,
       title: "You're all set",
-      body: "That's the tour. Add your first tank and your fish will thank you.",
-      cta: "Create my first tank"
+      body: "That's the overview. Add your first tank to get started.",
+      cta: "Add my first tank"
     }
   ];
 

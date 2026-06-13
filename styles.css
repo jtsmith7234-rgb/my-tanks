@@ -582,6 +582,30 @@ html[data-skin="light"] .tab.active{
 .kv b{color:var(--ink-dim);font-weight:500}
 
 /* ============================================================
+   CROSS-TAB CONTEXT HINTS
+   ============================================================ */
+.tank-context-hint {
+  font-size: 12.5px;
+  color: var(--ink-dim);
+  padding: 7px 10px;
+  background: var(--glass-fill);
+  border-radius: 9px;
+  border: 1px solid var(--glass-stroke-soft);
+  margin: 8px 0 2px;
+  line-height: 1.5;
+}
+.tank-context-hint-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 10px;
+}
+.tank-context-hint-action {
+  color: var(--teal);
+  font-weight: 500;
+}
+
+/* ============================================================
    FISH LIST — ink rows
    ============================================================ */
 .fish-list{display:flex;flex-direction:column;gap:8px}
@@ -2551,6 +2575,14 @@ input[type=time].input{ font-family:inherit }
   background:var(--glass-fill);
 }
 .tut-tab.active{ background:var(--glass-fill-strong); color:var(--ink); }
+.tut-eq-list{ display:flex; flex-direction:column; gap:6px; padding:4px 0; }
+.tut-eq-row{
+  display:flex; align-items:center; gap:7px; font-size:10.5px;
+  padding:7px 8px; border-radius:10px;
+  background:var(--glass-fill); border:1px solid var(--glass-stroke-soft);
+}
+.tut-eq-row span:nth-child(2){ flex:1; }
+
 .tut-log,.tut-remind{ display:flex; flex-direction:column; gap:6px; }
 .tut-log-row,.tut-remind-row{
   display:flex; align-items:center; gap:7px; font-size:10.5px;
@@ -3755,6 +3787,50 @@ html[data-skin="dark"] .fish-btn-icon {
   margin: 0 0 6px;
 }
 .eq-empty p { max-width: 280px; margin: 0 auto; }
+
+/* ── Equipment guidance card ── */
+.eq-guidance-card {
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-stroke-soft);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 14px auto 0;
+  max-width: 320px;
+  text-align: left;
+}
+.eq-guidance-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--teal);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: 8px;
+}
+.eq-guidance-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: 4px;
+}
+.eq-guidance-item {
+  font-size: 12.5px;
+  color: var(--ink);
+  padding: 2px 0;
+  line-height: 1.4;
+}
+.eq-guidance-item.muted { color: var(--ink-dim); }
+.eq-guidance-required { margin-bottom: 8px; }
+.eq-guidance-optional { margin-top: 4px; }
+.eq-guidance-compact {
+  padding: 6px 10px;
+  background: var(--glass-fill);
+  border-radius: 8px;
+  border: 1px solid var(--glass-stroke-soft);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
 
 /* ── Archived toggle ── */
 .eq-archived-toggle {

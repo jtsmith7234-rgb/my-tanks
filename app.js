@@ -379,6 +379,19 @@ const uid = () => Math.random().toString(36).slice(2,9);
 function getTank(id){ return tanks.find(t => t.id === id); }
 function totalFish(tank){ return (tank.fish||[]).reduce((s,f) => s + (Number(f.count)||0), 0); }
 
+function _getTankContext(tank) {
+  const eqItems = window.EQ ? window.EQ.getItems(tank.id) : [];
+  const fishList = tank.fish || [];
+  const hasHeater = eqItems.some(e => e.type === "heater");
+  const hasFilter = eqItems.some(e => e.type === "filter");
+  const hasLight  = eqItems.some(e => e.type === "light");
+  const isCycled  = !!(tank.firstTank && tank.firstTank.completed && tank.firstTank.completed["cycle_finish"]);
+  const isBeginner = !!(tank.firstTank && tank.firstTank.enabled && !tank.firstTank.allDone);
+  const substrate = (tank.substrate || "").toLowerCase();
+  const kind = tank.kind || "other";
+  return { eqItems, fishList, hasHeater, hasFilter, hasLight, isCycled, isBeginner, substrate, kind };
+}
+
 /* ============================================================
    ROUTING / RENDER
    ============================================================ */
@@ -1420,6 +1433,17 @@ function bindUpNext(t){
 }
 
 function renderDetails(t){
+  const _dctx = _getTankContext(t);
+  // Build cross-check hints
+  const _hints = [];
+  if (!_dctx.hasFilter) _hints.push({ msg: "No filter recorded", action: "Add one in Equipment", tab: "equipment" });
+  if (_dctx.isCycled && _dctx.fishList.length === 0) _hints.push({ msg: "Tank is cycled", action: "You're ready for fish", tab: "fish" });
+  if (_dctx.kind === "betta" && totalFish(t) > 1) _hints.push({ msg: "Multiple fish in betta tank", action: "Check compatibility", tab: "fish" });
+  const _hintsHTML = _hints.length ? `
+    <div class="tank-context-hint-group">${_hints.map(h =>
+      `<div class="tank-context-hint" data-nav-tab="${h.tab}" style="cursor:pointer">${escapeHTML(h.msg)} — <span class="tank-context-hint-action">${escapeHTML(h.action)} →</span></div>`
+    ).join("")}</div>` : "";
+
   return `
     ${renderUpNextSection(t)}
 
@@ -1433,6 +1457,7 @@ function renderDetails(t){
         <b>Inhabitants</b><span>${totalFish(t)} (${(t.fish||[]).length} species)</span>
       </div>
       ${t.notes ? `<div class="hr"></div><p class="muted" style="margin:0">${escapeHTML(t.notes)}</p>` : ""}
+      ${_hintsHTML}
     </div>
 
     ${window.FIRSTTANK ? window.FIRSTTANK.render(t) : ""}
@@ -1447,7 +1472,11 @@ function renderDetails(t){
         <label class="field"><span>Type</span><input class="input" id="d-type" value="${escapeHTML(t.type||"")}" /></label>
       </div>
       <div class="row">
-        <label class="field"><span>Substrate</span><input class="input" id="d-substrate" value="${escapeHTML(t.substrate||"")}" /></label>
+        <label class="field"><span>Substrate</span>
+          <select class="input" id="d-substrate">
+            ${[{v:"",l:"Not sure yet"},{v:"gravel",l:"Gravel"},{v:"sand",l:"Sand"},{v:"aqua soil",l:"Aqua soil (planted tanks)"},{v:"bare bottom",l:"Bare bottom"},{v:"mixed",l:"Mixed (gravel + sand)"}].map(o => `<option value="${o.v}"${(t.substrate||"") === o.v ? " selected" : ""}>${escapeHTML(o.l)}</option>`).join("")}
+          </select>
+        </label>
         <label class="field"><span>Decor</span><input class="input" id="d-decor" value="${escapeHTML(t.decor||"")}" /></label>
       </div>
       <label class="field"><span>Notes</span><textarea class="input" id="d-notes" rows="3">${escapeHTML(t.notes||"")}</textarea></label>
@@ -1552,6 +1581,13 @@ function bindReminders(t){
 function bindDetails(t){
   bindUpNext(t);
   bindReminders(t);
+  // Cross-check hint navigation
+  $$("[data-nav-tab]").forEach(el => {
+    el.addEventListener("click", () => {
+      const tab = el.dataset.navTab;
+      if (tab) { view.tab = tab; render(); }
+    });
+  });
   if (window.FIRSTTANK){
     window.FIRSTTANK.bind(t, (msg) => {
       saveTanks(tanks);
@@ -1605,9 +1641,14 @@ function bindDetails(t){
    FISH TAB
    ============================================================ */
 function renderFish(t){
+  const _ctx = _getTankContext(t);
+  const _fishCycleWarning = (!_ctx.isCycled && _ctx.fishList.length > 0)
+    ? `<div class="tank-context-hint">Heads up: adding fish before cycling is complete can stress them. Check your First Tank guide.</div>`
+    : "";
   return `
     <div class="section">
       <h2>Inhabitants</h2>
+      ${_fishCycleWarning}
       <div class="fish-list" id="fish-list">
         ${(t.fish||[]).map(f => `
           <div class="fish-row" data-id="${f.id}">
@@ -2013,6 +2054,11 @@ function _lastTestPrefill(tankId){
    preserved and still render correctly in history.
    ============================================================ */
 function renderWaterCare(t){
+  const _wctx = _getTankContext(t);
+  const _heaterTip = (!_wctx.hasHeater && (_wctx.kind === 'betta' || _wctx.kind === 'community'))
+    ? `<div class="tank-context-hint">Tip: Your setup may need a heater — temperature affects water chemistry readings.</div>`
+    : "";
+
   // BUG 3 FIX: t.gallons may be stored as a string. Coerce to Number before math.
   const gals = Number(t.gallons) || 10;
   const suggested = Math.round(gals * 0.5);
@@ -2034,6 +2080,7 @@ function renderWaterCare(t){
     : `<button class="btn small ql-btn" disabled title="No combined care session found yet">Repeat last care</button>`;
 
   return `
+    ${_heaterTip}
     <!-- QUICK LOG SECTION -->
     <div class="section ql-section" id="ql-section">
       <h2>Quick log</h2>
@@ -3324,6 +3371,44 @@ function bindHistory(t){
 let eqFilter    = "month"; // week | month | upcoming | all
 let eqPrevTankId = null;  // reset filter when switching tanks
 
+const EQ_GUIDANCE_BY_KIND = {
+  betta: {
+    required: ["Heater (76\u201382\u00b0F)", "Filter with low flow"],
+    recommended: ["Thermometer", "LED light"],
+    optional: ["CO2 system", "UV sterilizer"]
+  },
+  community: {
+    required: ["Filter", "Heater (if tropical fish)", "Thermometer"],
+    recommended: ["LED light", "Air pump (optional backup)"],
+    optional: ["UV sterilizer", "CO2 system"]
+  },
+  shrimp: {
+    required: ["Sponge filter", "Heater", "Thermometer"],
+    recommended: ["Aqua soil substrate", "Plants / moss"],
+    optional: ["CO2 system", "UV sterilizer"]
+  },
+  planted: {
+    required: ["Filter", "Plant-friendly light", "Fertilizer"],
+    recommended: ["CO2 system", "Heater", "Thermometer"],
+    optional: ["UV sterilizer"]
+  },
+  species: {
+    required: ["Filter", "Heater matched to species", "Thermometer"],
+    recommended: ["Species-appropriate light"],
+    optional: ["UV sterilizer", "CO2 system"]
+  },
+  quarantine: {
+    required: ["Sponge filter", "Heater", "Thermometer"],
+    recommended: ["Basic light"],
+    optional: ["UV sterilizer"]
+  },
+  other: {
+    required: ["Filter", "Heater (if tropical)", "Thermometer"],
+    recommended: [],
+    optional: []
+  }
+};
+
 function renderEquipment(t) {
   if (typeof EQ === "undefined") {
     return `<div class="section"><p class="muted center">Equipment module not loaded.</p></div>`;
@@ -3434,12 +3519,30 @@ function renderEquipment(t) {
       </div>`;
   }
 
+  /* ── Equipment guidance card ── */
+  const _kindGuidance = EQ_GUIDANCE_BY_KIND[t.kind] || EQ_GUIDANCE_BY_KIND.other;
+  const _essentials = [..._kindGuidance.required, ..._kindGuidance.recommended];
+  const _optional = _kindGuidance.optional;
+  const guidanceCard = `
+    <div class="eq-guidance-card">
+      <div class="eq-guidance-title">Recommended for your setup</div>
+      <div class="eq-guidance-required">
+        <div class="eq-guidance-label">Essential</div>
+        ${_kindGuidance.required.map(e => `<div class="eq-guidance-item">✓ ${escapeHTML(e)}</div>`).join('')}
+        ${_kindGuidance.recommended.map(e => `<div class="eq-guidance-item muted">▸ ${escapeHTML(e)}</div>`).join('')}
+      </div>
+      ${_optional.length ? `<div class="eq-guidance-optional"><div class="eq-guidance-label muted">Optional</div>${_optional.map(e => `<div class="eq-guidance-item muted">◦ ${escapeHTML(e)}</div>`).join('')}</div>` : ''}
+    </div>`;
+  const compactGuidanceNote = allActive.length > 0 ? `
+    <div class="eq-guidance-compact muted small">ℹ️ Your setup: ${_kindGuidance.required.length} essential, ${_kindGuidance.recommended.length} recommended, ${_optional.length} optional — <span style="color:var(--teal)">${_kindGuidance.required.join(', ')}</span></div>` : '';
+
   /* ── Empty state ── */
   const emptyState = `
     <div class="eq-empty">
       <div class="eq-empty-icon">🔧</div>
       <p class="eq-empty-title">No equipment tracked yet</p>
       <p class="muted small">Add your filter, heater, light, and other gear here. Tank Care Buddy will track when each item needs service or replacement.</p>
+      ${guidanceCard}
     </div>`;
 
   /* ── Items or empty ── */
@@ -3463,6 +3566,7 @@ function renderEquipment(t) {
     <div class="section eq-section">
       ${summaryBar}
       ${filterStrip}
+      ${compactGuidanceNote}
       <div class="eq-list" id="eq-list">${listHTML}</div>
       ${archivedHTML}
       <div class="eq-add-row">
@@ -3909,7 +4013,7 @@ function openFirstTankHelpModal(){
 function openAddTank(opts){
   const guided = !!(opts && opts.guided);
   const optedOut = !!(opts && opts.optedOut);
-  const kindOpts = TANK_KINDS.map(k =>
+  const kindOpts = `<option value="" disabled selected>Choose your tank type…</option>` + TANK_KINDS.map(k =>
     `<option value="${k.id}">${escapeHTML(k.label)}</option>`
   ).join("");
   openModal(`
@@ -3929,7 +4033,17 @@ function openAddTank(opts){
         <details style="margin-top:8px">
           <summary style="cursor:pointer;font-size:13.5px;color:var(--ink-dim);user-select:none;list-style:none;display:flex;align-items:center;gap:6px"><span style="font-size:11px">&#9654;</span> More details (optional)</summary>
           <div style="margin-top:10px;display:flex;flex-direction:column;gap:10px">
-            <label class="field"><span>Substrate</span><input class="input" id="n-substrate" placeholder="e.g. gravel, sand, bare bottom" /></label>
+            <label class="field">
+              <span>Substrate</span>
+              <select class="input" id="n-substrate">
+                <option value="">Not sure yet</option>
+                <option value="gravel">Gravel</option>
+                <option value="sand">Sand</option>
+                <option value="aqua soil">Aqua soil (planted tanks)</option>
+                <option value="bare bottom">Bare bottom</option>
+                <option value="mixed">Mixed (gravel + sand)</option>
+              </select>
+            </label>
             <label class="field"><span>D&#233;cor</span><input class="input" id="n-decor" placeholder="e.g. driftwood, rocks, fake plants" /></label>
             <label class="field"><span>Notes</span><textarea class="input" id="n-notes" rows="2" placeholder="Anything to remember about this tank..." style="resize:vertical"></textarea></label>
           </div>
@@ -3944,8 +4058,9 @@ function openAddTank(opts){
     const kindSel = $("#n-kind");
     const desc = $("#n-kind-desc");
     const syncDesc = () => {
+      if (!kindSel.value) { desc.textContent = ""; return; }
       const k = tankKindById(kindSel.value);
-      desc.textContent = k.desc;
+      desc.textContent = k ? k.desc : "";
     };
     syncDesc();
     kindSel.addEventListener("change", syncDesc);
@@ -3953,6 +4068,7 @@ function openAddTank(opts){
     $("#n-save").addEventListener("click", () => {
       const name = $("#n-name").value.trim();
       if(!name){ alert("Name required"); return; }
+      if(!kindSel.value){ alert("Please choose a tank type."); return; }
       const k = tankKindById(kindSel.value);
       const mainFish = $("#n-mainfish").value.trim();
       const tank = {

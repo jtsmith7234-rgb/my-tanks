@@ -18,7 +18,7 @@ const FIRST_TANK_STAGES = [
     summary: "Get everything together before water goes in. Bigger tanks are actually easier than small ones.",
     need: [
       "A tank (10 gallons or bigger), a filter, a heater, and a thermometer",
-      "Gravel or sand for the bottom",
+      "Gravel, sand, or bare bottom",
       "Water conditioner (Seachem Prime is a safe pick)",
       "Starter bacteria (Fritz Turbo Start, Seachem Stability, or API Quick Start)",
       "A liquid test kit (API Master Kit works well — skip the paper strips)",
@@ -46,7 +46,7 @@ const FIRST_TANK_STAGES = [
     ],
     do: [
       { id:"rinse",   label:"Rinse the gravel and add it to the tank", detail:"Rinse it in plain water (no soap, ever) until the water runs clear. Then add rocks, wood, or plants while everything is still dry — it's way easier than fishing them in later." },
-      { id:"fill",    label:"Add tap water and conditioner together", detail:"Pour water conditioner in as you fill. Tap water has chlorine, and chlorine kills the good bacteria you're about to grow. The conditioner takes care of that instantly." },
+      { id:"fill",    label:"Add tap water and conditioner together", detail:"Pour water conditioner in as you fill. Tap water has chlorine, and chlorine kills the good bacteria you're about to grow. The conditioner takes care of that instantly. Start with Seachem Prime or any dechlorinator. After you fill, you can log it in the Chemicals section so you have a record of the first dose." },
       { id:"plug",    label:"Plug in the filter and heater", detail:"Set the heater to 78°F as a safe starting point. Let it run for 2–3 hours before checking with a thermometer — heaters often take longer than expected to stabilize." },
       { id:"basetest",label:"Do a first water test and save it", detail:"Use your liquid test kit and check ammonia, nitrite, nitrate, and pH. Everything should be near zero. Save the numbers in the Tests tab so you have a starting point." }
     ],
@@ -316,7 +316,29 @@ function _mergeStage(base, extras){
 function stagesForTank(tank){
   const kind = (tank.firstTank && tank.firstTank.kind) || tank.kind || "other";
   const extras = TANK_KIND_EXTRAS[kind] || {};
-  return FIRST_TANK_STAGES.map(st => _mergeStage(st, extras[st.key]));
+  const stages = FIRST_TANK_STAGES.map(st => _mergeStage(st, extras[st.key]));
+
+  // Substrate-aware language substitution
+  const substrate = ((tank.substrate || "").toLowerCase());
+  const isSand = substrate.includes("sand");
+  const isBare = substrate.includes("bare");
+  stages.forEach(st => {
+    if (st.key === "fill") {
+      st.do = st.do.map(item => {
+        if (item.id === "rinse") {
+          if (isBare) {
+            return { ...item, label: "Skip the substrate — bare bottom tank", detail: "No gravel or sand to rinse. Just make sure the glass is clean before filling." };
+          } else if (isSand) {
+            return { ...item, label: "Rinse the sand and add it to the tank", detail: "Sand needs a thorough rinse — run water through it until it runs mostly clear. Expect some initial cloudiness; it settles within a day." };
+          }
+          // Default: gravel (no change)
+        }
+        return item;
+      });
+    }
+  });
+
+  return stages;
 }
 
 function getStartedDate(tank){
@@ -485,6 +507,7 @@ function renderFirstTankSection(tank){
    ============================================================ */
 const FT_NAV_PROMPTS = {
   "fill:basetest":      { msg: "Ready to log your first water test?",          label: "Go \u2192", tab: "water-care" },
+  "fill:fill":          { msg: "Time to add your conditioner. Tap to log it in your chemicals.", label: "Add chemical \u2192", tab: "water-care" },
   "cycle_start:dose":   { msg: "Good time to add your chemicals to the app.",   label: "Go \u2192", tab: "water-care" },
   "first_fish:pick":    { msg: "Browse fish in the Livestock tab to find yours.", label: "Go \u2192", tab: "fish" },
   "first_fish:accl":    { msg: "Add your fish to the tank in the Livestock tab.", label: "Go \u2192", tab: "fish" },
