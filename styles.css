@@ -2215,6 +2215,23 @@ input[type=time].input{ font-family:inherit }
   .ft-check, .ft-check-bubble { transition: none; }
 }
 
+/* CHANGE 4: Stage flash animation when auto-completing */
+.ft-stage-flash-done {
+  animation: ftStageDone .6s ease forwards;
+}
+@keyframes ftStageDone {
+  0%   { background: rgba(80,200,120,.15); border-color: rgba(80,200,120,.5); }
+  100% { background: rgba(80,200,120,.05); border-color: rgba(80,200,120,.18); }
+}
+
+/* CHANGE 5: Compact completion banner */
+.ft-done-banner { padding: 12px 14px; }
+.ft-done-row { display:flex; align-items:center; gap:10px; }
+.ft-done-icon { font-size:22px; flex-shrink:0; }
+.ft-done-title { font-weight:600; font-size:14px; }
+.ft-done-sub { margin-top:1px; }
+.ft-done-history { margin-left:auto; flex-shrink:0; }
+
 /* ============================================================
    ACTION SHEET (long-press on tank card)
    ============================================================ */

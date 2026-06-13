@@ -392,6 +392,23 @@ function renderFirstTankSection(tank){
   if (tank.firstTank && tank.firstTank.optedOut){
     return "";
   }
+
+  // CHANGE 5: When allDone, show compact completion banner instead of full checklist
+  if (tank.firstTank && tank.firstTank.allDone) {
+    return `
+      <div class="section ft-done-banner">
+        <div class="ft-done-row">
+          <span class="ft-done-icon">🌱</span>
+          <div>
+            <div class="ft-done-title">First tank complete</div>
+            <div class="ft-done-sub muted small">Completed · Tap to view history</div>
+          </div>
+          <button class="btn small secondary ft-done-history" id="ft-done-history">History</button>
+        </div>
+      </div>
+    `;
+  }
+
   if (!tank.firstTank || !tank.firstTank.enabled){
     return `
       <div class="section first-tank-cta">
@@ -432,9 +449,9 @@ function renderFirstTankSection(tank){
         const active = st.key === activeKey;
         const expanded = active; // only the next-up stage is open by default
         return `
-          <div class="ft-stage ${done ? "done" : ""} ${active ? "active" : ""}">
+          <div class="ft-stage ${done ? "done" : ""} ${active ? "active" : ""}" data-stage-key="${st.key}">
             <div class="ft-stage-head" data-stage="${st.key}">
-              <span class="ft-stage-icon">${done ? "✓" : active ? "▶" : "○"}</span>
+              <span class="ft-stage-icon">${done ? "\u2713" : active ? "\u25b6" : "\u25cb"}</span>
               <span class="ft-stage-title">${st.title}</span>
             </div>
             <div class="ft-stage-body" ${expanded ? "" : "hidden"}>
@@ -454,6 +471,54 @@ function renderFirstTankSection(tank){
   `;
 }
 
+/* ============================================================
+   NAVIGATION PROMPTS — shown as actionToasts when key items checked
+   ============================================================ */
+const FT_NAV_PROMPTS = {
+  "fill:basetest":      { msg: "Ready to log your first water test?",          label: "Go \u2192", tab: "water-care" },
+  "cycle_start:dose":   { msg: "Good time to add your chemicals to the app.",   label: "Go \u2192", tab: "water-care" },
+  "first_fish:pick":    { msg: "Browse fish in the Livestock tab to find yours.", label: "Go \u2192", tab: "fish" },
+  "first_fish:accl":    { msg: "Add your fish to the tank in the Livestock tab.", label: "Go \u2192", tab: "fish" },
+  "fill:plug":          { msg: "Add your equipment in the Equipment tab.",        label: "Go \u2192", tab: "equipment" }
+};
+
+/* Stage-completion messages — shown when a full stage auto-completes */
+const FT_STAGE_COMPLETE_MSGS = {
+  setup:         { msg: "Gear is ready \u2014 time to fill it up.",             label: null, tab: null },
+  fill:          { msg: "Tank is filled! Cycling starts now.",                 label: null, tab: null },
+  cycle_start:   { msg: "Cycling underway. Check back in a few days.",          label: null, tab: null },
+  cycle_middle:  { msg: "Almost there \u2014 test daily this week.",            label: null, tab: null },
+  cycle_finish:  { msg: "Cycle confirmed \u2014 you're ready for fish!",         label: "Add fish \u2192", tab: "fish" },
+  first_fish:    null // handled by full completion flow
+};
+
+/* CHANGE 3: Full completion flow */
+function _ftShowCompletion(tank, onChange) {
+  tank.firstTank.completedAt = Date.now();
+  tank.firstTank.allDone = true;
+
+  // Log the completion event before the re-render
+  window.logEvent && window.logEvent(tank.id, "first_tank_complete", {
+    kind: tank.firstTank.kind || tank.kind || "freshwater"
+  });
+
+  // Save and re-render via the special sentinel that skips duplicate logging
+  onChange("__first_tank_complete__");
+
+  // Show the completion modal
+  window.openModal && window.openModal(`
+    <div style="padding:4px 0">
+      <h3 style="margin:0 0 12px;font-size:18px;font-weight:700">Your first tank is ready.</h3>
+      <p style="margin:0 0 10px;font-size:14px;line-height:1.55;color:var(--ink-dim)">You've cycled the water, added your first fish, and worked through every step. From here it's regular care \u2014 water changes, tests, and watching things grow.</p>
+      <p style="margin:0 0 18px;font-size:13px;line-height:1.5;color:var(--ink-dim)">Your setup is saved in History anytime you want to look back.</p>
+      <button class="btn block" id="ft-completion-ok">Got it</button>
+    </div>
+  `, () => {
+    const ok = document.getElementById("ft-completion-ok");
+    if (ok) ok.addEventListener("click", () => window.closeModal && window.closeModal());
+  });
+}
+
 function bindFirstTank(tank, onChange){
   const enable = document.getElementById("enable-first-tank");
   if (enable){
@@ -467,10 +532,18 @@ function bindFirstTank(tank, onChange){
     });
   }
 
+  // CHANGE 5: Bind the History button on the done-banner
+  const doneHistoryBtn = document.getElementById("ft-done-history");
+  if (doneHistoryBtn) {
+    doneHistoryBtn.addEventListener("click", () => {
+      window._ftNavigateToTab && window._ftNavigateToTab("history");
+    });
+  }
+
   const disable = document.getElementById("ft-disable");
   if (disable){
     disable.addEventListener("click", () => {
-      if (!confirm("Hide First Tank Mode? Your progress is saved — you can turn it back on anytime.")) return;
+      if (!confirm("Hide First Tank Mode? Your progress is saved \u2014 you can turn it back on anytime.")) return;
       tank.firstTank.enabled = false;
       onChange("Hidden First Tank Mode");
     });
@@ -514,7 +587,7 @@ function bindFirstTank(tank, onChange){
     const checkItem = b.closest(".ft-check-item");
     if (checkItem) checkItem.classList.toggle("on", willBeOn);
     const bubble = b.querySelector(".ft-check-bubble");
-    if (bubble) bubble.textContent = willBeOn ? "✓" : "";
+    if (bubble) bubble.textContent = willBeOn ? "\u2713" : "";
     b.setAttribute("aria-pressed", String(willBeOn));
     b.setAttribute("aria-label", (willBeOn ? "Uncheck" : "Check") + ": " + (b.querySelector(".ft-check-label")?.textContent || ""));
 
@@ -523,6 +596,20 @@ function bindFirstTank(tank, onChange){
       delete tank.firstTank.checked[stageKey][itemId];
     } else {
       tank.firstTank.checked[stageKey][itemId] = true;
+    }
+
+    // CHANGE 1: Navigation prompts for key item checks (only when checking ON)
+    if (willBeOn) {
+      const promptKey = stageKey + ":" + itemId;
+      const prompt = FT_NAV_PROMPTS[promptKey];
+      if (prompt) {
+        const tab = prompt.tab;
+        window.actionToast && window.actionToast(
+          prompt.msg,
+          prompt.label,
+          tab ? () => { window._ftNavigateToTab && window._ftNavigateToTab(tab); } : null
+        );
+      }
     }
 
     // Auto-mark the whole stage done when every "do" item is checked.
@@ -545,9 +632,38 @@ function bindFirstTank(tank, onChange){
       }
     }
 
-    // Only do a full re-render if the stage auto-completed (progress bar + card state changes)
     if (stageAutoCompleted) {
-      onChange("Stage completed: " + stageKey);
+      // CHANGE 3: Check if ALL stages are now complete
+      const allStages = stagesForTank(tank);
+      const everyStageDone = allStages.every(s => !!(tank.firstTank.completed && tank.firstTank.completed[s.key]));
+
+      if (everyStageDone) {
+        // Full completion — save first, then show modal
+        _ftShowCompletion(tank, onChange);
+      } else if (stageKey === "first_fish") {
+        // first_fish stage completed but not all — shouldn't normally happen, but handle gracefully
+        onChange("Stage completed: " + stageKey);
+      } else {
+        // CHANGE 2: Stage-completion contextual message
+        const completion = FT_STAGE_COMPLETE_MSGS[stageKey];
+        if (completion) {
+          const tab = completion.tab;
+          window.actionToast && window.actionToast(
+            completion.msg,
+            completion.label || null,
+            (completion.label && tab) ? () => { window._ftNavigateToTab && window._ftNavigateToTab(tab); } : null
+          );
+        }
+
+        // CHANGE 4: Flash the stage card before re-rendering
+        const stageEl = document.querySelector(`.ft-stage[data-stage-key="${stageKey}"]`);
+        if (stageEl) {
+          stageEl.classList.add("ft-stage-flash-done");
+          setTimeout(() => onChange("Stage completed: " + stageKey), 600);
+        } else {
+          onChange("Stage completed: " + stageKey);
+        }
+      }
     } else {
       // Just save without re-render (optimistic update already applied above)
       onChange(null); // null = save state only, skip full re-render if onChange supports it

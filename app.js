@@ -1520,10 +1520,12 @@ function bindDetails(t){
   if (window.FIRSTTANK){
     window.FIRSTTANK.bind(t, (msg) => {
       saveTanks(tanks);
-      // BUG 6 FIX: when msg is null it means only save state (optimistic update
-      // already applied to DOM). Skip the full re-render to avoid the jump/bounce.
+      // msg===null means optimistic update only — save state, skip re-render
       if (msg !== null) {
-        logEvent(t.id, "first_tank", { msg });
+        // Don't log a generic first_tank event for completion — firsttank.js handles that
+        if (msg !== "__first_tank_complete__") {
+          logEvent(t.id, "first_tank", { msg });
+        }
         render();
       }
     });
@@ -2949,6 +2951,7 @@ function renderHistory(t){
   const filtered = all.filter(e => {
     if (historyFilter === "all") return true;
     if (historyFilter === "fish") return e.type.startsWith("fish_");
+    if (historyFilter === "first_tank") return e.type === "first_tank" || e.type === "first_tank_complete";
     return e.type === historyFilter;
   });
   return `
@@ -3087,7 +3090,8 @@ const EVT_ICONS = {
   advisor:        `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
   reminder_fired: `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`,
   chem_add:       `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6m-5 0v6l-4 9a1 1 0 0 0 .9 1.45h10.2A1 1 0 0 0 18 18L14 9V3"/><line x1="7" y1="13" x2="17" y2="13"/></svg>`,
-  first_tank:     `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12m0 0C12 7 7 5 7 5s2 4 5 7zm0 0c0-5 5-7 5-7s-2 4-5 7z"/></svg>`,
+  first_tank:          `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12m0 0C12 7 7 5 7 5s2 4 5 7zm0 0c0-5 5-7 5-7s-2 4-5 7z"/></svg>`,
+  first_tank_complete: `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12m0 0C12 7 7 5 7 5s2 4 5 7zm0 0c0-5 5-7 5-7s-2 4-5 7z"/></svg>`,
   daily_checkin:  `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>`,
 };
 function eventIcon(type){
@@ -3106,6 +3110,7 @@ function eventTitle(e){
   if (e.type === "reminder_fired") return escapeHTML(d.title || "Reminder");
   if (e.type === "chem_add")     return `Added chemical: ${escapeHTML(d.name || "")}${d.custom ? " (custom)" : ""}`;
   if (e.type === "first_tank")   return `First Tank: ${escapeHTML(d.msg || "updated")}`;
+  if (e.type === "first_tank_complete") return `🌱 First tank complete`;
   if (e.type === "daily_checkin") return `Daily check-in`;
   return e.type;
 }
@@ -3150,6 +3155,9 @@ function eventDetail(e){
   }
   if (e.type === "reminder_fired") {
     return escapeHTML(d.body || "");
+  }
+  if (e.type === "first_tank_complete") {
+    return `Tank fully set up — ${escapeHTML(d.kind || "freshwater")} setup complete.`;
   }
   return "";
 }
@@ -3899,6 +3907,52 @@ function toast(msg){
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 1400);
 }
+
+/* Action toast — shows a message with a tap/action button. Auto-dismisses after 5s. */
+function actionToast(msg, actionLabel, onAction){
+  // Remove any existing action toast
+  const existing = document.getElementById("ft-action-toast");
+  if (existing) existing.remove();
+
+  const el = document.createElement("div");
+  el.id = "ft-action-toast";
+  el.style.cssText = "position:fixed;left:50%;bottom:72px;transform:translateX(-50%);background:#0b1e2a;border:1px solid #234a66;color:#e9f5ff;padding:10px 12px 10px 16px;border-radius:14px;z-index:101;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.45);display:flex;align-items:center;gap:12px;max-width:min(340px,90vw);";
+
+  const msgSpan = document.createElement("span");
+  msgSpan.style.cssText = "flex:1;line-height:1.4;";
+  msgSpan.textContent = msg;
+  el.appendChild(msgSpan);
+
+  if (actionLabel && typeof onAction === "function") {
+    const btn = document.createElement("button");
+    btn.textContent = actionLabel;
+    btn.style.cssText = "flex-shrink:0;background:rgba(110,168,255,.18);border:1px solid rgba(110,168,255,.35);color:#6ea8ff;font:600 12px/1 inherit;padding:6px 10px;border-radius:8px;cursor:pointer;white-space:nowrap;";
+    btn.addEventListener("click", () => {
+      el.remove();
+      onAction();
+    });
+    el.appendChild(btn);
+  }
+
+  document.body.appendChild(el);
+  const timer = setTimeout(() => el.remove(), 5000);
+  // Also dismiss on click of the toast itself (not just the button)
+  el.addEventListener("click", (e) => {
+    if (e.target === el || e.target === msgSpan) {
+      clearTimeout(timer);
+      el.remove();
+    }
+  });
+}
+window.actionToast = actionToast;
+
+/* Navigate to a tab within the current tank screen from firsttank.js */
+window._ftNavigateToTab = function(tab) {
+  if (window.view && window.view.screen === "tank") {
+    window.view.tab = tab;
+    window.render && window.render();
+  }
+};
 
 /* ============================================================
    BOOT
