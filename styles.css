@@ -4051,6 +4051,23 @@ html[data-skin="dark"] .fish-btn-icon {
   transition: opacity 0.15s;
 }
 .action-toast-btn:active { opacity: 0.8; }
+.action-toast-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.action-toast-dismiss {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  font-size: 14px;
+  padding: 4px;
+  cursor: pointer;
+  line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+}
+.action-toast-dismiss:active { opacity: 0.6; }
 html[data-skin="dark"] .action-toast {
   background: #1a2a38;
   border-color: rgba(255,255,255,0.12);
@@ -4169,3 +4186,97 @@ html[data-skin="dark"] .action-toast-btn {
   font-weight: 600;
   margin: 0 0 6px;
 }
+
+/* ── Phase 10: Input handling fixes ── */
+input[type="number"],
+input[type="text"],
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 44px;
+}
+input[type="date"] {
+  line-height: 44px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+}
+@supports (-webkit-touch-callout: none) {
+  input[type="date"] {
+    -webkit-appearance: none;
+    height: 44px;
+    padding: 10px 12px;
+  }
+}
+
+/* ── Phase 10: Home welcome tagline (moved out of h1) ── */
+.home-welcome-tagline {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+  padding: 6px 16px 2px;
+  opacity: 0.75;
+}
+/* Hide old inline tagline span that used to live inside h1 */
+.home-tagline {
+  display: none;
+}
+
+/* ── Phase 10: Topbar brand — prevent overflow clipping ── */
+.topbar-brand {
+  overflow: visible;
+  text-overflow: unset;
+  white-space: normal;
+  max-width: none;
+}
+.topbar-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.topbar-brand-name {
+  white-space: nowrap;
+}
+
+/* ── Phase 10: Chemical modal secondary button contrast ── */
+.btn.secondary {
+  background: rgba(255,255,255,.06);
+  border: 1.5px solid var(--glass-stroke);
+  color: var(--ink);
+}
+html[data-skin="light"] .btn.secondary {
+  background: rgba(0,0,0,.04);
+  border: 1.5px solid rgba(0,0,0,.15);
+  color: var(--ink);
+}
+
+/* ── Phase 9: Guided mode return banner (equipment tab) ── */
+.guided-return-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--teal, #01696F);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+.guided-return-text {
+  font-weight: 500;
+  opacity: 0.9;
+}
+.guided-return-btn {
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.guided-return-btn:active { opacity: 0.7; }

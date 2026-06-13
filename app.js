@@ -396,6 +396,15 @@ function _getTankContext(tank) {
    ROUTING / RENDER
    ============================================================ */
 function render(){
+  // Save scroll position before re-render so the view doesn't jump
+  const scrollContainer = document.querySelector('.tank-content')
+    || document.querySelector('.screen-scroll')
+    || document.querySelector('#main')
+    || document.documentElement;
+  const savedScrollY = scrollContainer ? scrollContainer.scrollTop : window.scrollY;
+  const savedScreen  = view.screen;
+  const savedTab     = view.tab;
+
   const titleEl = $("#title");
   const backBtn = $("#back-btn");
   const addBtn  = $("#add-tank-btn");
@@ -404,7 +413,12 @@ function render(){
   // Helper: swap between brand lockup (home) and plain title (inner screens)
   function setTitleText(text, showLogo) {
     if (showLogo) {
-      titleEl.innerHTML = `<img src="logo-mark.png" class="topbar-logo-mark" alt="" aria-hidden="true" draggable="false">${escapeHTML(text)}<span class="home-tagline">Care that shows.</span>`;
+      titleEl.innerHTML = `
+        <span class="topbar-brand-row">
+          <img src="logo-mark.png" class="topbar-logo-mark" alt="" aria-hidden="true" draggable="false">
+          <span class="topbar-brand-name">${escapeHTML(text)}</span>
+        </span>
+      `;
       titleEl.classList.add("topbar-brand");
     } else {
       titleEl.textContent = text;
@@ -431,6 +445,18 @@ function render(){
     addBtn.hidden = true;
     if (browseBtn) browseBtn.hidden = true;
     renderSpeciesBrowser();
+  }
+
+  // Restore scroll position if the screen + tab haven't changed (i.e. same view re-rendered)
+  if (savedScrollY > 0 && view.screen === savedScreen && view.tab === savedTab) {
+    requestAnimationFrame(() => {
+      const sc = document.querySelector('.tank-content')
+        || document.querySelector('.screen-scroll')
+        || document.querySelector('#main')
+        || document.documentElement;
+      if (sc) sc.scrollTop = savedScrollY;
+      else window.scrollTo(0, savedScrollY);
+    });
   }
 }
 
@@ -583,6 +609,7 @@ function renderHome(){
     return;
   }
   main.innerHTML = `
+    <div class="home-welcome-tagline">Take care, taken care of.</div>
     <div class="grid">
       ${tanks.map(t => `
         <div class="swipe-row" data-row="${t.id}">
@@ -1209,7 +1236,7 @@ function _consumeReminderHighlight(){
         try {
           f.focus({ preventScroll: false });
           if (typeof f.select === "function" && (f.type === "number" || f.type === "text")) {
-            try { f.select(); } catch(_){}
+            requestAnimationFrame(() => { try { f.select(); } catch(_){} });
           }
         } catch(_){}
       }
@@ -2362,7 +2389,7 @@ function bindWaterCare(t){
       <p class="muted small" style="margin:0 0 10px">Check this against your bottle label before confirming.</p>
       <div class="verify-prompt-rule">${escapeHTML(spec.rule || "")} ${srcLink}</div>
       <button class="btn block" id="vp-confirm" style="margin-top:14px">Confirm \u2014 matches my bottle</button>
-      <button class="btn block link-btn" id="vp-manual" style="margin-top:8px">Not the correct dosage</button>
+      <button class="btn block secondary" id="vp-manual" style="margin-top:8px">Not the correct dosage</button>
     `, () => {
       $("#vp-confirm").addEventListener("click", () => {
         entry.verified = true;
@@ -2725,7 +2752,7 @@ function bindClean(t){
       <p class="muted small" style="margin:0 0 10px">Check this against your bottle label before confirming. Manufacturers sometimes change instructions between batches.</p>
       <div class="verify-prompt-rule">${escapeHTML(spec.rule || "")} ${srcLink}</div>
       <button class="btn block" id="vp-confirm" style="margin-top:14px">Confirm — matches my bottle</button>
-      <button class="btn block link-btn" id="vp-manual" style="margin-top:8px">Not the correct dosage</button>
+      <button class="btn block secondary" id="vp-manual" style="margin-top:8px">Not the correct dosage</button>
     `, () => {
       $("#vp-confirm").addEventListener("click", () => {
         entry.verified = true;
@@ -3562,8 +3589,17 @@ function renderEquipment(t) {
        </div>`
     : "";
 
+  // Guided mode sticky banner — shown when first-tank setup is in progress
+  const guidedBanner = (t.firstTank && t.firstTank.enabled && !t.firstTank.allDone)
+    ? `<div class="guided-return-banner">
+         <span class="guided-return-text">Setup guide in progress</span>
+         <button class="guided-return-btn" id="eq-back-to-guide" type="button">Back to guide ›</button>
+       </div>`
+    : '';
+
   return `
     <div class="section eq-section">
+      ${guidedBanner}
       ${summaryBar}
       ${filterStrip}
       ${compactGuidanceNote}
@@ -3578,25 +3614,28 @@ function renderEquipment(t) {
 function bindEquipment(t) {
   if (typeof EQ === "undefined") return;
 
+  /* ── Guided mode: back-to-guide banner button ── */
+  const backToGuideBtn = document.getElementById("eq-back-to-guide");
+  if (backToGuideBtn) {
+    backToGuideBtn.addEventListener("click", () => {
+      window._ftNavigateToTab && window._ftNavigateToTab("details");
+    });
+  }
+
   /* ── Filter strip ── */
   $$("[data-eq-filter]").forEach(b => b.addEventListener("click", () => {
     eqFilter = b.dataset.eqFilter;
     render();
   }));
 
-  /* ── Mark serviced / replaced ── */
+  /* ── Mark serviced / replaced ──
+     Phase 9: route through _openEqMoreModal so the user sees guidance before logging. */
   $$("[data-eq-mark]").forEach(btn => btn.addEventListener("click", (e) => {
     e.stopPropagation();
-    const id  = btn.dataset.eqMark;
-    const fn  = btn.dataset.eqAction;
-    if (fn === "markReplaced") EQ.markReplaced(id);
-    else                        EQ.markServiced(id);
+    const id   = btn.dataset.eqMark;
     const item = EQ.getItem(id);
-    if (item) {
-      const label = fn === "markReplaced" ? (item.replacementLabel || "Replace") : (item.serviceLabel || "Service");
-      toast(`${escapeHTML(item.name)} — ${label} logged`);
-    }
-    render();
+    if (!item) return;
+    _openEqMoreModal(t, item);
   }));
 
   /* ── Edit ── */
@@ -3838,63 +3877,76 @@ function _openEqEditModal(t, item) {
   _openEqFormModal(t, typeObj, item.subtype, item);
 }
 
+/* Returns plain-text service guidance for an equipment item by type. Phase 9. */
+function _getEqServiceGuide(item) {
+  const guides = {
+    filter:    "Rinse filter media in tank water (not tap water). Check impeller and intake. Replace media if it's falling apart or running slow after a rinse. Do not use soap.",
+    heater:    "Check the temperature on a separate thermometer and compare to the heater's setting. Look for cracks or mineral buildup on the glass. Confirm the indicator light cycles on and off normally.",
+    light:     "Wipe the lens. Check the timer or controller settings. Note any dimming — LED lights degrade gradually over time.",
+    pump:      "Check for debris on the intake. Rinse the impeller housing. Verify flow rate looks normal.",
+    co2:       "Check bubble count against your target. Inspect the diffuser for buildup — soak in hydrogen peroxide if clogged. Verify solenoid is clicking on/off with your lights.",
+    uv:        "Inspect the quartz sleeve for buildup. Replace the UV bulb annually even if it still lights up — output degrades before the light goes out.",
+    other:     "Check the item visually, verify it is functioning correctly, and clean or adjust as needed."
+  };
+  return guides[item.type] || guides[item.typeId] || guides.other;
+}
+
 function _openEqMoreModal(t, item) {
-  // BUG 5 FIX: Add Inspect button that shows guidance and logs an inspection.
-  const typeObj = EQ.TYPES.find(ty => ty.id === item.type) || EQ.TYPES[EQ.TYPES.length - 1];
-  const defs = typeObj.defaults ? typeObj.defaults(item.subtype) : {};
-  const guidanceText = defs.guidance || item.guidance || "";
-  const serviceLabel = defs.serviceLabel || item.serviceLabel || "Inspect";
-
-  openModal(`
+  const serviceLabel = item.nextServiceType === "replace" ? "Replace" : "Inspect / service";
+  const html = `
     <div class="modal-inner">
-    <h2 class="modal-title">${escapeHTML(item.name)}</h2>
-    <div class="modal-scroll-body">
-    <div class="eq-more-list">
-      <button class="eq-more-row" id="eq-more-inspect">🔍 ${escapeHTML(serviceLabel)}</button>
-      <button class="eq-more-row" id="eq-more-note">📝 Add a note</button>
-      <button class="eq-more-row" id="eq-more-archive">${item.isActive ? "📦 Archive" : "♻️ Restore"}</button>
-      <button class="eq-more-row eq-more-delete" id="eq-more-delete">🗑️ Delete</button>
-    </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn secondary" id="eq-more-cancel">Cancel</button>
-    </div>
-    </div>`, () => {
+      <h2 class="modal-title">${escapeHTML(item.name)}</h2>
+      <div class="modal-scroll-body">
+        <p class="muted small" style="margin:0 0 12px">What would you like to do with this item?</p>
+        <button class="btn block" id="eq-more-inspect" type="button">${escapeHTML(serviceLabel)}</button>
+        <button class="btn block secondary" id="eq-more-note" type="button" style="margin-top:8px">📝 Add a note</button>
+        <button class="btn block secondary" id="eq-more-archive" type="button" style="margin-top:8px">${item.isActive ? "📦 Archive" : "♻️ Restore"}</button>
+        <button class="btn block" id="eq-more-delete" type="button" style="margin-top:8px;background:var(--koi,#e74c3c);color:#fff">🗑️ Delete</button>
+      </div>
+      <div class="modal-footer">
+        <button class="btn secondary" id="eq-more-close" type="button">Close</button>
+      </div>
+    </div>`;
 
-    // BUG 5 FIX: Inspect button handler — shows guidance and Mark inspected button
-    const inspBtn = $("#eq-more-inspect");
-    if (inspBtn) inspBtn.addEventListener("click", () => {
-      closeModal();
-      const checkList = guidanceText
-        ? `<div class="eq-form-guidance" style="margin-bottom:14px">${escapeHTML(guidanceText)}</div>`
-        : `<p class="muted" style="margin-bottom:14px">No specific guidance for this item. Check it over visually and note anything unusual.</p>`;
-      openModal(`
-        <div class="modal-inner">
-        <h2 class="modal-title">🔍 ${escapeHTML(serviceLabel)}: ${escapeHTML(item.name)}</h2>
-        <div class="modal-scroll-body">
-        ${checkList}
-        <p class="muted small" style="margin:0 0 10px">Once you've completed the inspection, tap the button below to log it and reset the service timer.</p>
-        </div>
-        <div class="modal-footer">
-          <button class="btn secondary" id="eq-inspect-cancel">Cancel</button>
-          <button class="btn" id="eq-inspect-done">Mark inspected</button>
-        </div>
-        </div>`, () => {
-          const doneBtn = $("#eq-inspect-done");
-          if (doneBtn) doneBtn.addEventListener("click", () => {
-            EQ.markServiced(item.id);
-            toast("Inspection logged");
-            closeModal();
-            render();
-          });
-          const cancelBtn = $("#eq-inspect-cancel");
-          if (cancelBtn) cancelBtn.addEventListener("click", () => {
-            closeModal();
-          });
+  openModal(html, () => {
+    const closeBtn = document.getElementById("eq-more-close");
+    if (closeBtn) closeBtn.addEventListener("click", closeModal);
+
+    const inspBtn = document.getElementById("eq-more-inspect");
+    if (inspBtn) {
+      inspBtn.addEventListener("click", () => {
+        closeModal();
+        const guideText = _getEqServiceGuide(item);
+        const guideHtml = `
+          <div class="modal-inner">
+            <h2 class="modal-title">${escapeHTML(item.name)} — ${escapeHTML(serviceLabel)}</h2>
+            <div class="modal-scroll-body">
+              <p style="margin:0 0 12px;font-size:14px;line-height:1.55">${escapeHTML(guideText)}</p>
+              <p class="muted small" style="margin:0 0 16px">Once you're done, tap below to log this service and reset the timer.</p>
+            </div>
+            <div class="modal-footer">
+              <button class="btn" id="eq-inspect-done" type="button">Mark as serviced</button>
+              <button class="btn secondary" id="eq-inspect-cancel" type="button" style="margin-top:8px">Cancel</button>
+            </div>
+          </div>`;
+        openModal(guideHtml, () => {
+          const doneBtn = document.getElementById("eq-inspect-done");
+          const cancelBtn = document.getElementById("eq-inspect-cancel");
+          if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
+          if (doneBtn) {
+            doneBtn.addEventListener("click", () => {
+              EQ.markServiced(item.id);
+              closeModal();
+              view.tab = "equipment";
+              render();
+              toast("Serviced — timer reset.");
+            });
+          }
+        });
       });
-    });
+    }
 
-    const noteBtn = $("#eq-more-note");
+    const noteBtn = document.getElementById("eq-more-note");
     if (noteBtn) noteBtn.addEventListener("click", () => {
       closeModal();
       openModal(`
@@ -3921,7 +3973,7 @@ function _openEqMoreModal(t, item) {
       });
     });
 
-    const archBtn = $("#eq-more-archive");
+    const archBtn = document.getElementById("eq-more-archive");
     if (archBtn) archBtn.addEventListener("click", () => {
       if (item.isActive) {
         EQ.archiveItem(item.id);
@@ -3934,7 +3986,7 @@ function _openEqMoreModal(t, item) {
       render();
     });
 
-    const delBtn = $("#eq-more-delete");
+    const delBtn = document.getElementById("eq-more-delete");
     if (delBtn) delBtn.addEventListener("click", () => {
       if (!confirm(`Delete "${item.name}" and all its history? This cannot be undone.`)) return;
       EQ.deleteItem(item.id);
@@ -3942,9 +3994,6 @@ function _openEqMoreModal(t, item) {
       closeModal();
       render();
     });
-
-    const cancelBtn = $("#eq-more-cancel");
-    if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
   });
 }
 
@@ -4190,9 +4239,10 @@ function toast(msg){
   setTimeout(() => el.remove(), 1400);
 }
 
-/* Action toast — shows a message with a tap/action button. Auto-dismisses after 5s. */
+/* Action toast — shows a message with a tap/action button. Auto-dismisses after 8s.
+   Phase 9: onAction fires BEFORE removal to avoid race with render(); added dismiss X. */
 function actionToast(msg, actionLabel, onAction, duration) {
-  duration = duration || 5000;
+  duration = duration || 8000;
   // Remove any existing action toast (both old id and new id)
   const existing = document.getElementById('action-toast');
   if (existing) existing.remove();
@@ -4202,37 +4252,57 @@ function actionToast(msg, actionLabel, onAction, duration) {
   const el = document.createElement('div');
   el.id = 'action-toast';
   el.className = 'action-toast';
-  el.innerHTML = `<span class="action-toast-msg">${escapeHTML(msg)}</span>${actionLabel ? `<button class="action-toast-btn" type="button">${escapeHTML(actionLabel)}</button>` : ''}`;
+  el.innerHTML = `
+    <span class="action-toast-msg">${escapeHTML(msg)}</span>
+    <div class="action-toast-controls">
+      ${actionLabel ? `<button class="action-toast-btn" type="button">${escapeHTML(actionLabel)}</button>` : ''}
+      <button class="action-toast-dismiss" type="button" aria-label="Dismiss">✕</button>
+    </div>`;
   document.body.appendChild(el);
 
   // Animate in
   requestAnimationFrame(() => el.classList.add('action-toast-show'));
 
+  function dismissToast() {
+    clearTimeout(tid);
+    el.classList.remove('action-toast-show');
+    setTimeout(() => el.remove(), 300);
+  }
+
   if (actionLabel && typeof onAction === 'function') {
-    el.querySelector('.action-toast-btn').addEventListener('click', (e) => {
+    const actionBtn = el.querySelector('.action-toast-btn');
+    if (actionBtn) actionBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      clearTimeout(tid);
-      el.classList.remove('action-toast-show');
-      setTimeout(() => el.remove(), 300);
+      // Fire callback FIRST before removing, so render() triggered by callback doesn't race
       try { onAction(); } catch(err) { console.warn('actionToast callback error', err); }
+      setTimeout(() => dismissToast(), 50);
     });
   }
 
-  const tid = setTimeout(() => {
-    el.classList.remove('action-toast-show');
-    setTimeout(() => el.remove(), 300);
-  }, duration);
+  const dismissBtn = el.querySelector('.action-toast-dismiss');
+  if (dismissBtn) dismissBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dismissToast();
+  });
+
+  const tid = setTimeout(() => dismissToast(), duration);
   el.dataset.tid = String(tid);
 }
 window.actionToast = actionToast;
 
-/* Navigate to a tab within the current tank screen from firsttank.js */
-window._ftNavigateToTab = function(tab) {
-  // Guard: only navigate if we are actually inside a tank screen
-  if (!window.view || window.view.screen !== "tank") return;
-  window.view.tab = tab;
-  window.render && window.render();
-};
+/* Navigate to a tab within the current tank screen from firsttank.js.
+   Phase 9: re-reads view at call time (not creation time) to avoid stale closure;
+   scrolls tab content to top after render. */
+function _ftNavigateToTab(tab) {
+  // Always re-check view at call time
+  if (!view || view.screen !== 'tank') return;
+  view = { screen: 'tank', tankId: view.tankId, tab: tab };
+  render();
+  // After render, scroll to top of tank content
+  const content = document.querySelector('.tank-content') || document.querySelector('#tank-body') || document.querySelector('.screen');
+  if (content) content.scrollTop = 0;
+}
+window._ftNavigateToTab = _ftNavigateToTab;
 
 /* ============================================================
    BOOT
@@ -4809,10 +4879,57 @@ function openSettingsSheet(){
       if (window.TUTORIAL) window.TUTORIAL.openTutorial({ markSeen: false, onFinish: handleAddTankTap });
     });
 
-    const bugMsg = "Bug reports help a ton. Email us at tankcarebuddy@outlook.com — include your device and iOS version and we\'ll look into it.";
-    const featureMsg = "Feature ideas are always welcome. Email us at tankcarebuddy@outlook.com and we\'d love to hear what you\'d like to see.";
-    const bugBtn = $("#settings-bug"); if (bugBtn) bugBtn.addEventListener("click", () => toast(bugMsg));
-    const featBtn = $("#settings-feature"); if (featBtn) featBtn.addEventListener("click", () => toast(featureMsg));
+    const bugBtn = $("#settings-bug");
+    if (bugBtn) bugBtn.addEventListener("click", () => {
+      closeModal();
+      openModal(`
+        <div class="modal-inner">
+          <h2 class="modal-title">Report a bug</h2>
+          <div class="modal-scroll-body">
+            <p style="font-size:14.5px;line-height:1.6;margin:0 0 14px">Found something broken? We want to know about it.</p>
+            <p style="font-size:14px;line-height:1.55;margin:0 0 8px;color:var(--ink-dim)">Email us with:</p>
+            <ul style="font-size:13.5px;line-height:1.8;margin:0 0 16px;padding-left:18px;color:var(--ink-dim)">
+              <li>What you were doing</li>
+              <li>What happened (vs. what you expected)</li>
+              <li>Your device and iOS version</li>
+            </ul>
+            <a href="mailto:tankcarebuddy@outlook.com?subject=Bug Report" class="btn block" style="text-decoration:none;text-align:center;display:block">Open email app</a>
+          </div>
+          <div class="modal-footer">
+            <button class="btn secondary" id="bug-modal-close" type="button">Close</button>
+          </div>
+        </div>
+      `, () => {
+        const c = document.getElementById("bug-modal-close");
+        if (c) c.addEventListener("click", closeModal);
+      });
+    });
+
+    const featBtn = $("#settings-feature");
+    if (featBtn) featBtn.addEventListener("click", () => {
+      closeModal();
+      openModal(`
+        <div class="modal-inner">
+          <h2 class="modal-title">Suggest a feature</h2>
+          <div class="modal-scroll-body">
+            <p style="font-size:14.5px;line-height:1.6;margin:0 0 14px">Have an idea? We’d love to hear it.</p>
+            <p style="font-size:14px;line-height:1.55;margin:0 0 8px;color:var(--ink-dim)">Tell us:</p>
+            <ul style="font-size:13.5px;line-height:1.8;margin:0 0 16px;padding-left:18px;color:var(--ink-dim)">
+              <li>What feature you’d want</li>
+              <li>Why it would help your routine</li>
+              <li>Anything similar you’ve seen in other apps</li>
+            </ul>
+            <a href="mailto:tankcarebuddy@outlook.com?subject=Feature Suggestion" class="btn block" style="text-decoration:none;text-align:center;display:block">Open email app</a>
+          </div>
+          <div class="modal-footer">
+            <button class="btn secondary" id="feat-modal-close" type="button">Close</button>
+          </div>
+        </div>
+      `, () => {
+        const c = document.getElementById("feat-modal-close");
+        if (c) c.addEventListener("click", closeModal);
+      });
+    });
 
     $("#settings-clear").addEventListener("click", () => {
       if (!confirm("Clear all tanks, fish, water changes, and tests on this device? This can't be undone. Export a backup first if you want to keep anything.")) return;

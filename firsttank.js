@@ -613,6 +613,10 @@ function bindFirstTank(tank, onChange){
     const isOn = !!tank.firstTank.checked[stageKey][itemId];
     const willBeOn = !isOn;
 
+    // Disable immediately to prevent double-tap jitter
+    b.disabled = true;
+    setTimeout(() => { try { b.disabled = false; } catch(_){} }, 350);
+
     // --- Optimistic DOM update (instant, no layout jump) ---
     const checkItem = b.closest(".ft-check-item");
     if (checkItem) checkItem.classList.toggle("on", willBeOn);
@@ -621,7 +625,8 @@ function bindFirstTank(tank, onChange){
     b.setAttribute("aria-pressed", String(willBeOn));
     b.setAttribute("aria-label", (willBeOn ? "Uncheck" : "Check") + ": " + (b.querySelector(".ft-check-label")?.textContent || ""));
 
-    // --- Persist state ---
+    // --- Persist state (deferred 120ms so optimistic render settles first) ---
+    setTimeout(() => {
     if (isOn) {
       delete tank.firstTank.checked[stageKey][itemId];
     } else {
@@ -698,6 +703,7 @@ function bindFirstTank(tank, onChange){
       // Just save without re-render (optimistic update already applied above)
       onChange(null); // null = save state only, skip full re-render if onChange supports it
     }
+    }, 120); // end deferred persist
   }));
 }
 
