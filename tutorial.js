@@ -203,7 +203,7 @@
         <section class="tut-card-slide tut-card-hero" role="group" aria-roledescription="slide" aria-label="1 of ${total}">
           <div class="tut-hero-brand">
             <div class="tut-hero-wordmark">Tank Care Buddy</div>
-            <div class="tut-hero-tagline">Care that shows.</div>
+            <div class="tut-hero-tagline">Take care, taken care of.</div>
           </div>
           <div class="tut-hero-visual">${card.snap()}</div>
           <div class="tut-hero-body">

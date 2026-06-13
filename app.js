@@ -583,9 +583,11 @@ function renderHome(){
   const main = $("#main");
   if(!tanks.length){
     main.innerHTML = `
-      <div class="section center">
-        <h2>Let's add your first tank</h2>
-        <p class="muted">Tap the + button up top to get started. It takes about a minute.</p>
+      <div class="home-empty-state">
+        <div class="home-empty-icon">🐠</div>
+        <h2 class="home-empty-title">Welcome to Tank Care Buddy</h2>
+        <p class="home-empty-sub">Add your first tank to get started. Everything tracks from there — water, fish, and care schedule.</p>
+        <button class="btn" id="home-empty-add" type="button">Add my first tank</button>
       </div>
       <div class="section first-tank-cta">
         <h2>🌱 New to keeping fish?</h2>
@@ -595,6 +597,8 @@ function renderHome(){
         <button class="btn small secondary" id="load-sample-data">Just looking? Load sample tanks</button>
         <p class="muted" style="font-size:11px;margin:8px 0 0">Demo data only — safe to wipe later from Backup &amp; Settings.</p>
       </div>`;
+    const emptyAddBtn = $("#home-empty-add");
+    if (emptyAddBtn) emptyAddBtn.addEventListener("click", () => openAddTank());
     const sampleBtn = $("#load-sample-data");
     if (sampleBtn) sampleBtn.addEventListener("click", () => {
       if (!confirm("Load sample tanks for a tour? You can clear them anytime from Backup & Settings.")) return;
@@ -871,7 +875,7 @@ function renderTank(){
     ${renderAdvisorBanner(t)}
     <div class="tabs" role="tablist">
       <button class="tab ${view.tab==='details'?'active':''}" data-tab="details">Details</button>
-      <button class="tab ${view.tab==='fish'?'active':''}" data-tab="fish">Livestock</button>
+      <button class="tab ${view.tab==='fish'?'active':''}" data-tab="fish">Fish</button>
       <button class="tab ${view.tab==='water-care'?'active':''}" data-tab="water-care">Water Care</button>
       <button class="tab ${view.tab==='equipment'?'active':''}" data-tab="equipment">Equipment</button>
       <button class="tab ${view.tab==='history'?'active':''}" data-tab="history">History</button>
@@ -4845,13 +4849,13 @@ function openSettingsSheet(){
         </div>
         <div class="settings-row">
           <span class="settings-label">Owned by</span>
-          <span class="settings-value">The Pop Umbrella</span>
+          <span class="settings-value">Tank Care Buddy</span>
         </div>
         <p class="settings-note">Tank Care Buddy — your simple aquarium companion.</p>
       </section>
       <div class="settings-brand-footer">
         <span class="settings-brand-name">Tank Care Buddy</span>
-        <span class="settings-brand-tag">Care that shows.</span>
+        <span class="settings-brand-tag">Take care, taken care of.</span>
       </div>
     </div>
   `, () => {
