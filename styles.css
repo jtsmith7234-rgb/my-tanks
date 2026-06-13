@@ -538,12 +538,14 @@ html[data-skin="dark"] .topbar h1{
   color:#fff5f7;
   border:1px solid rgba(255,155,190,.45);
   box-shadow:0 1px 0 rgba(255,255,255,.15) inset, 0 4px 14px rgba(255,155,190,.25);
+  border-radius:20px;
 }
 html[data-skin="light"] .tab.active{
   background:linear-gradient(180deg, rgba(25,162,194,.20), rgba(25,162,194,.08));
   color:#0d2a3a;
   border:1px solid rgba(25,162,194,.45);
   box-shadow:0 1px 0 rgba(255,255,255,.55) inset, 0 4px 14px rgba(25,162,194,.18);
+  border-radius:20px;
 }
 .tab:active{transform:scale(.96)}
 
@@ -1076,6 +1078,30 @@ html[data-skin="light"] .chip:hover{border-color:rgba(25,162,194,.55);color:#0d2
 .event-actions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; align-items:center; }
 .event-actions .btn{ flex:1 1 auto; min-width:100px; }
 .event-del-btn{ flex:0 0 auto; min-width:unset; }
+.event-group-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,.12);
+  color: var(--ink-dim);
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 10px;
+  padding: 1px 7px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+.event-group-member {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  font-size: 13px;
+}
+.event-group-member:last-child { border-bottom: 0; }
+.event-group-member-title { flex: 1; color: var(--ink); }
 @media (prefers-reduced-motion: reduce){
   .event-expand{transition:none}
   .event-chevron{transition:none}

@@ -437,7 +437,7 @@ function renderFirstTankSection(tank){
     <div class="section first-tank-active">
       <div class="ft-head">
         <h2>🌱 First Tank — Day ${daysIn}${kindLabel && kindLabel !== "other" ? ` · <span class="muted" style="font-weight:500;font-size:14px">${kindLabel.charAt(0).toUpperCase() + kindLabel.slice(1)}</span>` : ""}</h2>
-        <button class="btn small secondary" id="ft-disable">Hide</button>
+        <button class="btn small secondary" id="ft-disable">Hide guide</button>
       </div>
       <div class="ft-progress">
         <div class="ft-progress-bar"><div class="ft-progress-fill" style="width:${(completedCount/totalStages*100)}%"></div></div>
@@ -470,7 +470,7 @@ function renderFirstTankSection(tank){
               ${_renderList("What to expect", st.expect, "ft-expect")}
               <div class="ft-tip"><b>Tip:</b> ${st.tip}</div>
               ${done
-                ? `<button class="btn small secondary ft-uncomplete" data-stage="${st.key}">Mark as not done</button>`
+                ? `<button class="btn small secondary ft-uncomplete" data-stage="${st.key}">Undo step</button>`
                 : `<button class="btn small ft-complete" data-stage="${st.key}">Mark this step done</button>`}
             </div>
           </div>

@@ -1285,22 +1285,23 @@ function renderUpNextSection(t){
   const rows = items.map(it => {
     const nav = UPN_NAV[it.type];
     const sub = it.status === "due-now"
-      ? `<span class="upn-sub bad">Due now</span>`
+      ? `<span class="upn-sub bad">Due now — tap to go to ${nav ? nav.label : "the"} tab</span>`
       : it.status === "snoozed"
-        ? `<span class="upn-sub warn">Snoozed — next ${_friendlyRelative(it.nextDueTs)}</span>`
-        : `<span class="upn-sub">Next ${_friendlyRelative(it.nextDueTs)} · ${_friendlyShortDate(it.nextDueTs)}</span>`;
+        ? `<span class="upn-sub warn">Snoozed — resumes ${_friendlyRelative(it.nextDueTs)}</span>`
+        : `<span class="upn-sub">Due ${_friendlyRelative(it.nextDueTs)} · ${_friendlyShortDate(it.nextDueTs)}</span>`;
     const lastTxt = it.lastDoneTs
       ? `Last done ${_friendlyRelative(it.lastDoneTs)}`
       : `Never done yet`;
     const showActions = it.status === "due-now" || it.status === "snoozed";
     const navLabel = nav ? nav.label : "";
-    // Daily check-in doesn't have a logging form to land on, so its CTA is "Open history"
-    const goLabel = it.type === "daily" ? "Open history" : "Go do it";
+    // Daily check-in doesn't have a logging form to land on, so its CTA is "Open"
+    const goLabel = it.type === "daily" ? "Open" : "Go do it";
+    const subLabel = it.type === "daily" ? `<div class="upn-go-hint muted small" style="margin-top:3px">Tap to log today's check-in in History</div>` : "";
     // For due/snoozed: show CTA button. For upcoming: gentle hint on the row.
     const goHint = nav
       ? (it.status === "upcoming"
           ? `<div class="upn-go-hint muted small">Tap to go to ${navLabel} tab ›</div>`
-          : `<button class="upn-go-btn" data-go="${it.type}" type="button">${goLabel} <span class="upn-go-chev">›</span></button>`)
+          : `<button class="upn-go-btn" data-go="${it.type}" type="button">${goLabel} <span class="upn-go-chev">›</span></button>${subLabel}`)
       : "";
     // Skip-once doesn't apply to daily (it's already daily — use snooze instead)
     const showSkip = it.type !== "daily";
@@ -2231,7 +2232,7 @@ function bindWaterCare(t){
       const data = _lastChangePrefill(t.id);
       // Prefill gallons from last change; clear test fields so it reads as change-only
       prefillForm({
-        gallons: data ? data.gallons : Math.round(t.gallons * 0.5),
+        gallons: data ? data.gallons : Math.round(Number(t.gallons) * 0.5),
         ph: "", ammonia: "", nitrite: "", nitrate: "", temp_f: ""
       });
       toast("Water change prefilled — test fields cleared");
@@ -2488,7 +2489,7 @@ function calcDoses(gallons){
 }
 
 function renderClean(t){
-  const suggested = Math.round(t.gallons * 0.5);
+  const suggested = Math.round(Number(t.gallons) * 0.5);
   if (!t.chemicals) t.chemicals = [];
   return `
     <div class="section" id="wc-section">
@@ -2981,8 +2982,8 @@ function renderHistory(t){
   if(!all.length){
     return `
       <div class="section center">
-        <h2>No history yet</h2>
-        <p class="muted">Every water change, water test, fish change, and tank edit gets timestamped and saved here.</p>
+        <h2>Nothing here yet</h2>
+        <p class="muted">Your water changes, tests, fish additions, and tank updates will all appear here.</p>
       </div>`;
   }
   const filtered = all.filter(e => {
@@ -2991,6 +2992,43 @@ function renderHistory(t){
     if (historyFilter === "first_tank") return e.type === "first_tank" || e.type === "first_tank_complete";
     return e.type === historyFilter;
   });
+
+  // Group same-day events of the same type where grouping makes sense
+  function _groupEvents(events) {
+    const GROUPABLE = ["first_tank", "daily_checkin", "reminder_fired"];
+    const result = [];
+    const dayGroups = {}; // key: "type::YYYY-MM-DD"
+
+    events.forEach(e => {
+      if (!GROUPABLE.includes(e.type)) {
+        result.push(e);
+        return;
+      }
+      const day = new Date(e.ts).toISOString().slice(0, 10);
+      const key = e.type + "::" + day;
+      if (!dayGroups[key]) {
+        // First event of this type on this day — create a group placeholder
+        const group = {
+          ...e,
+          _isGroup: true,
+          _groupCount: 1,
+          _groupDay: day,
+          _groupType: e.type,
+          _members: [e]
+        };
+        dayGroups[key] = group;
+        result.push(group);
+      } else {
+        dayGroups[key]._groupCount++;
+        dayGroups[key]._members.push(e);
+      }
+    });
+
+    return result;
+  }
+
+  const grouped = _groupEvents(filtered);
+
   return `
     <div class="section">
       <h2>Activity timeline</h2>
@@ -3000,13 +3038,46 @@ function renderHistory(t){
         `).join("")}
       </div>
       <div class="fish-list" style="margin-top:10px">
-        ${filtered.length ? filtered.map(e => renderEventRow(e)).join("") : `<p class="muted center">No entries match this filter.</p>`}
+        ${grouped.length ? grouped.map(e => renderEventRow(e)).join("") : `<p class="muted center">No entries match this filter.</p>`}
       </div>
     </div>
   `;
 }
 
 function renderEventRow(e){
+  // Grouped event rendering
+  if (e._isGroup && e._groupCount > 1) {
+    const isOpen = expandedEventId === e.id;
+    const label = e._groupType === "first_tank" ? "First Tank updates"
+      : e._groupType === "daily_checkin" ? "Daily check-ins"
+      : "Reminders";
+    const dayStr = new Date(e._groupDay + "T12:00:00").toLocaleDateString(undefined, { month:"short", day:"numeric" });
+    // Always pre-render member rows — CSS grid animation reveals them on .open class toggle
+    // so no JS re-render is needed on expand/collapse.
+    const memberRows = e._members.map(m => {
+      const t2 = eventTitle(m);
+      const t2when = new Date(m.ts).toLocaleTimeString(undefined, { hour:"numeric", minute:"2-digit" });
+      return `<div class="event-group-member"><span class="event-group-member-title">${t2}</span><span class="muted small">${t2when}</span></div>`;
+    }).join("");
+    return `
+      <div class="event-row event-row-group${isOpen ? " open" : ""}" data-id="${e.id}">
+        <div class="event-main" data-expand="${e.id}" role="button" tabindex="0" aria-expanded="${isOpen}">
+          <div class="event-icon ${e._groupType}">${eventIcon(e._groupType)}</div>
+          <div class="event-body">
+            <div class="event-title">${label} <span class="event-group-badge">${e._groupCount}</span></div>
+            <div class="event-when">${dayStr}</div>
+          </div>
+          <svg class="event-chevron" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 10l4 4 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="event-expand">
+          <div class="event-expand-inner">
+            ${memberRows}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   const when = formatTS(e.ts);
   const icon = eventIcon(e.type);
   const title = eventTitle(e);
@@ -3360,7 +3431,7 @@ function renderEquipment(t) {
     <div class="eq-empty">
       <div class="eq-empty-icon">🔧</div>
       <p class="eq-empty-title">No equipment tracked yet</p>
-      <p class="muted small">Add your filter, heater, or any piece of gear and Tank Care Buddy will remind you when it needs attention.</p>
+      <p class="muted small">Add your filter, heater, light, and other gear here. Tank Care Buddy will track when each item needs service or replacement.</p>
     </div>`;
 
   /* ── Items or empty ── */
