@@ -1219,8 +1219,27 @@ const UPN_NAV = {
   daily:        { tab: "history", sel: null,          focus: null,         label: "History" }
 };
 
+function _tankHasConfiguredReminders(t){
+  // A tank has "configured" reminders when the user has explicitly saved reminder
+  // settings for it (i.e. called setTankReminders). Brand-new tanks only have
+  // default-merged values from getTankReminders() and have no entry in the store.
+  try {
+    const stored = JSON.parse(store.get("tm.reminders.v1") || "{}");
+    return !!(stored[t.id]);
+  } catch(e) { return false; }
+}
+
 function renderUpNextSection(t){
   if (!window.REMINDERS || !window.REMINDERS.computeDueList) return "";
+  // Suppress Up Next for guided first-tank users who haven't configured reminders yet
+  if (t.firstTank && t.firstTank.enabled && !_tankHasConfiguredReminders(t)){
+    return `
+      <div class="section">
+        <h2>Up next</h2>
+        <p class="muted" style="margin:0">Your reminders will appear here once you've completed a few steps in the setup checklist.</p>
+      </div>
+    `;
+  }
   const items = window.REMINDERS.computeDueList(t);
   if (!items.length){
     return `
@@ -3728,11 +3747,11 @@ function handleAddTankTap(){
 
 function openFirstTankHelpModal(){
   openModal(`
-    <h3 style="margin:0 0 6px">Need help setting up this tank?</h3>
-    <p class="muted" style="margin:0 0 14px;font-size:13.5px;line-height:1.5">Choose guided setup if you want a beginner-friendly checklist based on the kind of tank you're making.</p>
+    <h3 style="margin:0 0 6px">Setting up a new tank?</h3>
+    <p class="muted" style="margin:0 0 14px;font-size:13.5px;line-height:1.5">Guided setup gives you a step-by-step checklist based on your tank type — what to buy, what to do, and what to expect. Takes about 4–6 weeks from empty tank to fish-ready.</p>
     <div class="col" style="display:flex;flex-direction:column;gap:8px">
-      <button class="btn block" id="ftp-yes">Yes</button>
-      <button class="btn block secondary" id="ftp-no">No</button>
+      <button class="btn block" id="ftp-yes">Yes, guide me through it</button>
+      <button class="btn block secondary" id="ftp-no">No, I know what I'm doing</button>
       <button class="btn block ghost" id="ftp-cancel" style="background:transparent;border:0;color:var(--ink-dim);font-weight:500">Cancel</button>
     </div>
   `, () => {
@@ -3757,20 +3776,32 @@ function openAddTank(opts){
     `<option value="${k.id}">${escapeHTML(k.label)}</option>`
   ).join("");
   openModal(`
-    <h3>Add a tank${guided ? ` <span class="pill" style="vertical-align:middle;font-size:11px;margin-left:6px">Guided</span>` : ""}</h3>
-    <label class="field">
-      <span>What kind of tank?</span>
-      <select class="input" id="n-kind">${kindOpts}</select>
-    </label>
-    <p class="muted small" id="n-kind-desc" style="margin:-4px 0 8px 2px;font-size:12px"></p>
-    <label class="field"><span>Name</span><input class="input" id="n-name" placeholder="e.g. Living-room 20g" /></label>
-    <div class="row">
-      <label class="field"><span>Gallons</span><input class="input" id="n-gallons" type="number" min="1" step="0.5" value="10" /></label>
-      <label class="field"><span>Main fish or plant <span class="muted small">(optional)</span></span><input class="input" id="n-mainfish" placeholder="e.g. Crowntail betta" /></label>
-    </div>
-    <div class="row">
-      <button class="btn" id="n-save">Create</button>
-      <button class="btn secondary" id="n-cancel">Cancel</button>
+    <div class="modal-inner">
+      <h3 class="modal-title">Add a tank${guided ? ` <span class="pill" style="vertical-align:middle;font-size:11px;margin-left:6px">Guided</span>` : ""}</h3>
+      <div class="modal-scroll-body">
+        <label class="field">
+          <span>What kind of tank?</span>
+          <select class="input" id="n-kind">${kindOpts}</select>
+        </label>
+        <p class="muted small" id="n-kind-desc" style="margin:-4px 0 8px 2px;font-size:12px"></p>
+        <label class="field"><span>Name</span><input class="input" id="n-name" placeholder="e.g. Living-room 20g" /></label>
+        <div class="row">
+          <label class="field"><span>Gallons</span><input class="input" id="n-gallons" type="number" min="1" step="0.5" value="10" /></label>
+          <label class="field"><span>Main fish or plant <span class="muted small">(optional)</span></span><input class="input" id="n-mainfish" placeholder="e.g. Crowntail betta" /></label>
+        </div>
+        <details style="margin-top:8px">
+          <summary style="cursor:pointer;font-size:13.5px;color:var(--ink-dim);user-select:none;list-style:none;display:flex;align-items:center;gap:6px"><span style="font-size:11px">&#9654;</span> More details (optional)</summary>
+          <div style="margin-top:10px;display:flex;flex-direction:column;gap:10px">
+            <label class="field"><span>Substrate</span><input class="input" id="n-substrate" placeholder="e.g. gravel, sand, bare bottom" /></label>
+            <label class="field"><span>D&#233;cor</span><input class="input" id="n-decor" placeholder="e.g. driftwood, rocks, fake plants" /></label>
+            <label class="field"><span>Notes</span><textarea class="input" id="n-notes" rows="2" placeholder="Anything to remember about this tank..." style="resize:vertical"></textarea></label>
+          </div>
+        </details>
+      </div>
+      <div class="modal-footer">
+        <button class="btn secondary" id="n-cancel">Cancel</button>
+        <button class="btn" id="n-save">Create tank</button>
+      </div>
     </div>
   `, () => {
     const kindSel = $("#n-kind");
@@ -3795,7 +3826,10 @@ function openAddTank(opts){
         kind: k.id,
         mainFish: mainFish || "",
         createdAt: Date.now(),
-        substrate: "", decor: "", notes: "", fish: []
+        substrate: ($("#n-substrate")?.value || "").trim(),
+        decor: ($("#n-decor")?.value || "").trim(),
+        notes: ($("#n-notes")?.value || "").trim(),
+        fish: []
       };
       if (guided){
         tank.firstTank = {
@@ -3808,10 +3842,36 @@ function openAddTank(opts){
         tank.firstTank = { enabled: false, optedOut: true };
       }
       tanks.push(tank); saveTanks(tanks); closeModal();
+      if (guided){
+        openEquipmentPromptModal(tank);
+      } else {
+        view = { screen:"tank", tankId: tank.id, tab:"details" };
+        render();
+      }
+    });
+    $("#n-cancel").addEventListener("click", closeModal);
+  });
+}
+
+function openEquipmentPromptModal(tank){
+  openModal(`
+    <h3 style="margin:0 0 8px">Want to add your equipment?</h3>
+    <p class="muted" style="margin:0 0 16px;font-size:13.5px;line-height:1.5">Adding your filter, heater, and any other gear now lets Tank Care Buddy track when things are due for service — and personalizes your setup checklist.</p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn block" id="eq-yes">Add equipment</button>
+      <button class="btn block secondary" id="eq-later">Add later</button>
+    </div>
+  `, () => {
+    $("#eq-yes").addEventListener("click", () => {
+      closeModal();
+      view = { screen:"tank", tankId: tank.id, tab:"equipment" };
+      render();
+    });
+    $("#eq-later").addEventListener("click", () => {
+      closeModal();
       view = { screen:"tank", tankId: tank.id, tab:"details" };
       render();
     });
-    $("#n-cancel").addEventListener("click", closeModal);
   });
 }
 
