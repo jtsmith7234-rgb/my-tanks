@@ -316,14 +316,47 @@ function lastEventOfType(tankId, type){
    ============================================================ */
 const SAFE = {
   ph:       { good: [6.5, 7.8], warn: [6.0, 8.4] },
-  ammonia:  { good: [0,   0.0], warn: [0,   0.25] },  // anything > 0 starts to worry; > 0.25 = danger
-  nitrite:  { good: [0,   0.0], warn: [0,   0.25] },
-  nitrate:  { good: [0,   20 ], warn: [0,   40  ] }
+  ammonia:  { good: [0, 0.0], warn: [0, 0.25] },  // anything > 0 starts to worry; > 0.25 = danger
+  nitrite:  { good: [0, 0.0], warn: [0, 0.25] },
+  nitrate:  { good: [0, 20],  warn: [0, 40]   }
 };
-function rateReading(metric, value){
+
+// Tank-kind-aware safe ranges
+const SAFE_BY_KIND = {
+  betta: {
+    ph:      { good: [6.5, 7.5], warn: [6.0, 8.0] },
+    nitrate: { good: [0, 10],    warn: [0, 20]     }  // bettas more sensitive
+  },
+  shrimp: {
+    ph:      { good: [6.5, 7.5], warn: [6.2, 7.8] },
+    ammonia: { good: [0, 0.0],   warn: [0, 0.0]   },  // shrimp: zero tolerance
+    nitrate: { good: [0, 10],    warn: [0, 20]     }   // very sensitive
+  },
+  planted: {
+    nitrate: { good: [5, 30],    warn: [0, 50]     }   // plants consume nitrate; low is normal
+  },
+  quarantine: {
+    ammonia: { good: [0, 0.0],   warn: [0, 0.0]   },   // must be zero
+    nitrate: { good: [0, 10],    warn: [0, 20]     }
+  }
+};
+
+function getSafeRanges(tank) {
+  const kind = (tank && tank.kind) || "other";
+  const kindOverrides = SAFE_BY_KIND[kind] || {};
+  // Merge: start from SAFE defaults, apply kind-specific overrides per metric
+  const result = {};
+  ["ph","ammonia","nitrite","nitrate"].forEach(m => {
+    result[m] = kindOverrides[m] || SAFE[m];
+  });
+  return result;
+}
+
+function rateReading(metric, value, safe) {
   if (value === "" || value == null || isNaN(value)) return "unknown";
   const v = Number(value);
-  const s = SAFE[metric];
+  const ranges = safe || SAFE;
+  const s = ranges[metric];
   if (!s) return "unknown";
   if (v >= s.good[0] && v <= s.good[1]) return "good";
   if (v >= s.warn[0] && v <= s.warn[1]) return "warn";
@@ -1585,10 +1618,10 @@ function renderFish(t){
     </div>
 
     <div class="section">
-      <h2>Add fish or invertebrate</h2>
+      <h2>Add to tank</h2>
       <div class="row">
         <label class="field species-field"><span>Species</span>
-          <input class="input" id="add-species" placeholder="Start typing (e.g. neon, betta, cory)" autocomplete="off" />
+          <input class="input" id="add-species" placeholder="Type a fish name to see its profile, then add it" autocomplete="off" />
           <div id="species-suggest" class="species-suggest" hidden></div>
         </label>
         <label class="field"><span>Count</span><input class="input" id="add-count" type="number" min="1" value="1" /></label>
@@ -1643,7 +1676,7 @@ function bindFish(t){
     if (t.gallons && f.minGal > t.gallons){
       warn = `<div class="species-warn"><b>Heads up:</b> This species needs at least ${f.minGal} gal. Your tank is ${t.gallons} gal.</div>`;
     }
-    spInfo.innerHTML = warn + window.FISHDB_API.card(f);
+    spInfo.innerHTML = warn + window.FISHDB_API.profileCard(f);
   }
 
   if (spInput){
@@ -2067,10 +2100,10 @@ function renderWaterCare(t){
         <h2>Most recent reading</h2>
         <div class="kv">
           <b>When</b><span>${formatTS(lastTest.ts)}</span>
-          ${renderReadingRow("pH",       "ph",      ld.ph)}
-          ${renderReadingRow("Ammonia",  "ammonia", ld.ammonia, "ppm")}
-          ${renderReadingRow("Nitrite",  "nitrite", ld.nitrite, "ppm")}
-          ${renderReadingRow("Nitrate",  "nitrate", ld.nitrate, "ppm")}
+          ${renderReadingRow("pH",       "ph",      ld.ph,      undefined, getSafeRanges(t))}
+          ${renderReadingRow("Ammonia",  "ammonia", ld.ammonia, "ppm",     getSafeRanges(t))}
+          ${renderReadingRow("Nitrite",  "nitrite", ld.nitrite, "ppm",     getSafeRanges(t))}
+          ${renderReadingRow("Nitrate",  "nitrate", ld.nitrate, "ppm",     getSafeRanges(t))}
           ${ld.temp_f != null && ld.temp_f !== "" ? `<b>Temp</b><span>${escapeHTML(String(ld.temp_f))} \u00b0F</span>` : ""}
           ${ld.notes ? `<b>Notes</b><span>${escapeHTML(ld.notes)}</span>` : ""}
         </div>
@@ -2078,15 +2111,17 @@ function renderWaterCare(t){
 
     ${window.GRAPHS ? window.GRAPHS.renderGraphsSection(t) : ""}
 
+    ${(() => { const sr = getSafeRanges(t); return `
     <div class="section">
-      <h2>Safe ranges (freshwater)</h2>
+      <h2>Normal ranges for this tank</h2>
       <ul class="muted" style="line-height:1.7;margin:0;padding-left:18px">
-        <li><b style="color:var(--ink)">pH</b> \u2014 6.5\u20137.8 ideal (most species tolerate 6.0\u20138.4)</li>
-        <li><b style="color:var(--ink)">Ammonia</b> \u2014 0 ppm. Any reading means trouble.</li>
+        <li><b style="color:var(--ink)">pH</b> \u2014 ${sr.ph.good[0]}\u2013${sr.ph.good[1]} ideal (warn outside ${sr.ph.warn[0]}\u2013${sr.ph.warn[1]})</li>
+        <li><b style="color:var(--ink)">Ammonia</b> \u2014 ${sr.ammonia.good[1] === 0 ? "0 ppm. Zero tolerance — any reading means trouble." : `0\u2013${sr.ammonia.good[1]} ppm ideal; warn at ${sr.ammonia.warn[1]} ppm.`}</li>
         <li><b style="color:var(--ink)">Nitrite</b> \u2014 0 ppm. Toxic above 0.</li>
-        <li><b style="color:var(--ink)">Nitrate</b> \u2014 under 20 ppm ideal; over 40 = water change.</li>
+        <li><b style="color:var(--ink)">Nitrate</b> \u2014 ${sr.nitrate.good[0] > 0 ? `${sr.nitrate.good[0]}\u2013${sr.nitrate.good[1]} ppm ideal` : `under ${sr.nitrate.good[1]} ppm ideal`}; warn above ${sr.nitrate.warn[1]} ppm.</li>
       </ul>
     </div>
+    `; })()} 
   `;
 }
 
@@ -2839,10 +2874,10 @@ function renderTests(t){
         <h2>Most recent reading</h2>
         <div class="kv">
           <b>When</b><span>${formatTS(last.ts)}</span>
-          ${renderReadingRow("pH",       "ph",      ld.ph)}
-          ${renderReadingRow("Ammonia",  "ammonia", ld.ammonia, "ppm")}
-          ${renderReadingRow("Nitrite",  "nitrite", ld.nitrite, "ppm")}
-          ${renderReadingRow("Nitrate",  "nitrate", ld.nitrate, "ppm")}
+          ${renderReadingRow("pH",       "ph",      ld.ph,      undefined, getSafeRanges(t))}
+          ${renderReadingRow("Ammonia",  "ammonia", ld.ammonia, "ppm",     getSafeRanges(t))}
+          ${renderReadingRow("Nitrite",  "nitrite", ld.nitrite, "ppm",     getSafeRanges(t))}
+          ${renderReadingRow("Nitrate",  "nitrate", ld.nitrate, "ppm",     getSafeRanges(t))}
           ${ld.temp_f != null && ld.temp_f !== "" ? `<b>Temp</b><span>${escapeHTML(String(ld.temp_f))} °F</span>` : ""}
           ${ld.notes ? `<b>Notes</b><span>${escapeHTML(ld.notes)}</span>` : ""}
         </div>
@@ -2858,7 +2893,7 @@ function renderTests(t){
             <div class="history-row">
               <div>
                 <div class="what">${formatTSShort(e.ts)}</div>
-                <div class="when">${renderReadingsInline(e.data)}</div>
+                <div class="when">${renderReadingsInline(e.data, getSafeRanges(t))}</div>
                 ${e.data.notes ? `<div class="when">${escapeHTML(e.data.notes)}</div>` : ""}
               </div>
             </div>
@@ -2866,29 +2901,31 @@ function renderTests(t){
         </div>
       </div>` : ""}
 
+    ${(() => { const sr = getSafeRanges(t); return `
     <div class="section">
-      <h2>Safe ranges (freshwater)</h2>
+      <h2>Normal ranges for this tank</h2>
       <ul class="muted" style="line-height:1.7;margin:0;padding-left:18px">
-        <li><b style="color:var(--ink)">pH</b> — 6.5–7.8 ideal (most species tolerate 6.0–8.4)</li>
-        <li><b style="color:var(--ink)">Ammonia</b> — 0 ppm. Any reading means trouble.</li>
-        <li><b style="color:var(--ink)">Nitrite</b> — 0 ppm. Toxic above 0.</li>
-        <li><b style="color:var(--ink)">Nitrate</b> — under 20 ppm ideal; over 40 = water change.</li>
+        <li><b style="color:var(--ink)">pH</b> \u2014 ${sr.ph.good[0]}\u2013${sr.ph.good[1]} ideal (warn outside ${sr.ph.warn[0]}\u2013${sr.ph.warn[1]})</li>
+        <li><b style="color:var(--ink)">Ammonia</b> \u2014 ${sr.ammonia.good[1] === 0 ? "0 ppm. Zero tolerance \u2014 any reading means trouble." : `0\u2013${sr.ammonia.good[1]} ppm ideal; warn at ${sr.ammonia.warn[1]} ppm.`}</li>
+        <li><b style="color:var(--ink)">Nitrite</b> \u2014 0 ppm. Toxic above 0.</li>
+        <li><b style="color:var(--ink)">Nitrate</b> \u2014 ${sr.nitrate.good[0] > 0 ? `${sr.nitrate.good[0]}\u2013${sr.nitrate.good[1]} ppm ideal` : `under ${sr.nitrate.good[1]} ppm ideal`}; warn above ${sr.nitrate.warn[1]} ppm.</li>
       </ul>
     </div>
+    `; })()} 
   `;
 }
-function renderReadingRow(label, metric, value, unit){
+function renderReadingRow(label, metric, value, unit, safe){
   if (value === "" || value == null) return `<b>${label}</b><span class="muted">—</span>`;
-  const rating = rateReading(metric, value);
+  const rating = rateReading(metric, value, safe);
   const cls = rating === "good" ? "good" : rating === "warn" ? "warn" : rating === "bad" ? "bad" : "";
   return `<b>${label}</b><span><span class="reading reading-${cls}">${escapeHTML(String(value))}${unit?" "+unit:""}</span></span>`;
 }
-function renderReadingsInline(d){
+function renderReadingsInline(d, safe){
   const parts = [];
-  if (d.ph != null && d.ph !== "") parts.push(`pH <b class="reading reading-${rateReading('ph', d.ph)}">${escapeHTML(String(d.ph))}</b>`);
-  if (d.ammonia != null && d.ammonia !== "") parts.push(`NH3 <b class="reading reading-${rateReading('ammonia', d.ammonia)}">${escapeHTML(String(d.ammonia))}</b>`);
-  if (d.nitrite != null && d.nitrite !== "") parts.push(`NO2 <b class="reading reading-${rateReading('nitrite', d.nitrite)}">${escapeHTML(String(d.nitrite))}</b>`);
-  if (d.nitrate != null && d.nitrate !== "") parts.push(`NO3 <b class="reading reading-${rateReading('nitrate', d.nitrate)}">${escapeHTML(String(d.nitrate))}</b>`);
+  if (d.ph != null && d.ph !== "") parts.push(`pH <b class="reading reading-${rateReading('ph', d.ph, safe)}">${escapeHTML(String(d.ph))}</b>`);
+  if (d.ammonia != null && d.ammonia !== "") parts.push(`NH3 <b class="reading reading-${rateReading('ammonia', d.ammonia, safe)}">${escapeHTML(String(d.ammonia))}</b>`);
+  if (d.nitrite != null && d.nitrite !== "") parts.push(`NO2 <b class="reading reading-${rateReading('nitrite', d.nitrite, safe)}">${escapeHTML(String(d.nitrite))}</b>`);
+  if (d.nitrate != null && d.nitrate !== "") parts.push(`NO3 <b class="reading reading-${rateReading('nitrate', d.nitrate, safe)}">${escapeHTML(String(d.nitrate))}</b>`);
   if (d.temp_f != null && d.temp_f !== "") parts.push(`${escapeHTML(String(d.temp_f))}°F`);
   return parts.join(" · ") || `<span class="muted">no values</span>`;
 }
@@ -4348,6 +4385,12 @@ function openSettingsSheet(){
       where: "Inside a tank, under the Water Care tab.",
       how: "Enter any readings you have (you don’t need all of them) and tap Save. The app color-codes each value — green is safe, red needs attention.",
       tip: "API Master Test Kit values. Leave any field blank if you didn’t test that parameter.",
+    },
+    {
+      q: "Tracking equipment",
+      where: "Inside a tank, under the Equipment tab.",
+      how: "Tap + to add a filter, heater, light, or any other gear. The app calculates when each item is next due for service or replacement based on researched intervals. Tap an item to see its status or log a service.",
+      tip: "Use the Inspect action to check your equipment and log it \u2014 keeps your service history tidy.",
     },
     {
       q: "History",

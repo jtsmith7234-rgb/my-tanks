@@ -47,7 +47,7 @@ const FIRST_TANK_STAGES = [
     do: [
       { id:"rinse",   label:"Rinse the gravel and add it to the tank", detail:"Rinse it in plain water (no soap, ever) until the water runs clear. Then add rocks, wood, or plants while everything is still dry — it's way easier than fishing them in later." },
       { id:"fill",    label:"Add tap water and conditioner together", detail:"Pour water conditioner in as you fill. Tap water has chlorine, and chlorine kills the good bacteria you're about to grow. The conditioner takes care of that instantly." },
-      { id:"plug",    label:"Plug in the filter and heater", detail:"Set the heater to 78°F if you're not sure. Give it a few hours to warm up before checking." },
+      { id:"plug",    label:"Plug in the filter and heater", detail:"Set the heater to 78°F as a safe starting point. Let it run for 2–3 hours before checking with a thermometer — heaters often take longer than expected to stabilize." },
       { id:"basetest",label:"Do a first water test and save it", detail:"Use your liquid test kit and check ammonia, nitrite, nitrate, and pH. Everything should be near zero. Save the numbers in the Tests tab so you have a starting point." }
     ],
     expect: [
@@ -448,6 +448,9 @@ function renderFirstTankSection(tank){
         const done = isComplete(tank, st.key);
         const active = st.key === activeKey;
         const expanded = active; // only the next-up stage is open by default
+        // If user has equipment logged, show a small "Your equipment" note on the fill and cycle_start stages
+        const hasEq = window.EQ && window.EQ.getItems(tank.id).length > 0;
+        const showEqHint = hasEq && (st.key === "fill" || st.key === "cycle_start");
         return `
           <div class="ft-stage ${done ? "done" : ""} ${active ? "active" : ""}" data-stage-key="${st.key}">
             <div class="ft-stage-head" data-stage="${st.key}">
@@ -458,6 +461,12 @@ function renderFirstTankSection(tank){
               <p class="ft-stage-summary">${st.summary}</p>
               ${_renderList("What you need", st.need, "ft-need")}
               ${_renderDoChecklist(tank, st)}
+              ${showEqHint ? `
+              <div class="ft-eq-hint">
+                <span class="ft-eq-hint-label">Your equipment</span>
+                <span class="ft-eq-hint-body">You've added equipment \u2014 check the Equipment tab for service schedules.</span>
+                <button class="btn small secondary ft-eq-hint-btn" data-nav="equipment">View equipment \u203a</button>
+              </div>` : ""}
               ${_renderList("What to expect", st.expect, "ft-expect")}
               <div class="ft-tip"><b>Tip:</b> ${st.tip}</div>
               ${done
@@ -539,6 +548,14 @@ function bindFirstTank(tank, onChange){
       window._ftNavigateToTab && window._ftNavigateToTab("history");
     });
   }
+
+  // Bind equipment hint nav buttons
+  document.querySelectorAll(".ft-eq-hint-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      window._ftNavigateToTab && window._ftNavigateToTab("equipment");
+    });
+  });
 
   const disable = document.getElementById("ft-disable");
   if (disable){

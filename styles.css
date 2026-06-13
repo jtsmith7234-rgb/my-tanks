@@ -3836,3 +3836,18 @@ html[data-skin="dark"] .fish-btn-icon {
 .tc-eq-hint-warn  { color: var(--warn); }
 .tc-eq-hint-soon  { color: var(--gold); }
 .tc-eq-hint-ok    { color: var(--jade); }
+
+/* ── First Tank equipment hint ── */
+.ft-eq-hint {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--glass-stroke);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-top: 8px;
+  font-size: 12px;
+}
+.ft-eq-hint-label { font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-dim); }
+.ft-eq-hint-body { color: var(--ink-dim); line-height: 1.4; }
