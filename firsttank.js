@@ -511,21 +511,11 @@ function _ftShowCompletion(tank, onChange) {
     kind: tank.firstTank.kind || tank.kind || "freshwater"
   });
 
+  // Signal app.js to show the rich completion modal after the re-render settles
+  window._ftCompletionPending = tank.id;
+
   // Save and re-render via the special sentinel that skips duplicate logging
   onChange("__first_tank_complete__");
-
-  // Show the completion modal
-  window.openModal && window.openModal(`
-    <div style="padding:4px 0">
-      <h3 style="margin:0 0 12px;font-size:18px;font-weight:700">Your first tank is ready.</h3>
-      <p style="margin:0 0 10px;font-size:14px;line-height:1.55;color:var(--ink-dim)">You've cycled the water, added your first fish, and worked through every step. From here it's regular care \u2014 water changes, tests, and watching things grow.</p>
-      <p style="margin:0 0 18px;font-size:13px;line-height:1.5;color:var(--ink-dim)">Your setup is saved in History anytime you want to look back.</p>
-      <button class="btn block" id="ft-completion-ok">Got it</button>
-    </div>
-  `, () => {
-    const ok = document.getElementById("ft-completion-ok");
-    if (ok) ok.addEventListener("click", () => window.closeModal && window.closeModal());
-  });
 }
 
 function bindFirstTank(tank, onChange){

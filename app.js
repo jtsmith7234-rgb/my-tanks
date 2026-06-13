@@ -1063,7 +1063,7 @@ function openQuickAddSheet(speciesName){
         <h3 style="margin:0 0 4px">Add ${escapeHTML(f.name)}</h3>
         <p class="muted small" style="margin:0">Pick a tank to check the fit.</p>
       </div>
-      ${tankRows}
+      <div class="qa-tank-list">${tankRows}</div>
       <button class="action-row cancel" id="qa-cancel">Cancel</button>
     </div>
   `, () => {
@@ -1249,7 +1249,8 @@ function _friendlyShortDate(ts){
 const UPN_NAV = {
   water_change: { tab: "water-care", sel: "#wc-section",  focus: "wc-gallons", label: "Water Care" },
   water_test:   { tab: "water-care", sel: "#wt-section",  focus: "wt-ph",       label: "Water Care" },
-  daily:        { tab: "history", sel: null,          focus: null,         label: "History" }
+  daily:        { tab: "history",    sel: null,            focus: null,          label: "History"    },
+  equipment:    { tab: "equipment",  sel: null,            focus: null,          label: "Equipment"  }
 };
 
 function _tankHasConfiguredReminders(t){
@@ -1561,6 +1562,13 @@ function bindDetails(t){
           logEvent(t.id, "first_tank", { msg });
         }
         render();
+        // After render: if firsttank.js signalled completion, show the rich completion modal
+        if (window._ftCompletionPending) {
+          const completedTankId = window._ftCompletionPending;
+          window._ftCompletionPending = null;
+          const completedTank = getTank(completedTankId) || t;
+          requestAnimationFrame(() => _showFirstTankCompletionModal(completedTank));
+        }
       }
     });
   }
@@ -3688,8 +3696,21 @@ function _openEqFormModal(t, typeObj, subtypeId, existingItem) {
           notes:                   notesVal,
         });
         toast(`${nameVal} added`);
-        // BUG 4 FIX: always land on the equipment tab after adding so the new item is visible
+        // Always land on the equipment tab after adding so the new item is visible
         view.tab = "equipment";
+        // Post-add hook: for guided first-tank users, prompt them to start the setup guide
+        if (t.firstTank && t.firstTank.enabled && !t.firstTank.allDone) {
+          setTimeout(() => {
+            actionToast(
+              "Equipment saved \u2014 ready to start your setup?",
+              "Start guide \u2192",
+              () => {
+                view = { screen: "tank", tankId: t.id, tab: "details" };
+                render();
+              }
+            );
+          }, 400);
+        }
       }
       closeModal();
       render();
@@ -3969,6 +3990,43 @@ function openAddTank(opts){
   });
 }
 
+/* First Tank completion modal — slides up from the bottom, rich hero design */
+function _showFirstTankCompletionModal(tank) {
+  // Ensure we are on the tank screen (navigate there if not)
+  if (!view || view.screen !== "tank" || view.tankId !== tank.id) {
+    view = { screen: "tank", tankId: tank.id, tab: "details" };
+    render();
+  }
+  const name = (tank && tank.name) ? tank.name : "your tank";
+  openModal(`
+    <div class="modal-completion">
+      <div class="modal-completion-hero">
+        <div class="modal-completion-icon">&#127758;</div>
+        <h2 class="modal-completion-headline">Your first habitat is ready.</h2>
+        <p class="modal-completion-sub">You cycled ${escapeHTML(name)} from scratch. From here it&rsquo;s regular care &mdash; water changes, tests, and watching things grow.</p>
+        <p class="modal-completion-brand">Tank Care.</p>
+      </div>
+      <div class="modal-completion-actions">
+        <button class="btn block" id="ftc-go-tank">Go to my tank</button>
+        <button class="btn block secondary" id="ftc-go-history">View guide history</button>
+      </div>
+    </div>
+  `, () => {
+    const goTank = document.getElementById("ftc-go-tank");
+    if (goTank) goTank.addEventListener("click", () => {
+      closeModal();
+      view = { screen: "tank", tankId: tank.id, tab: "details" };
+      render();
+    });
+    const goHistory = document.getElementById("ftc-go-history");
+    if (goHistory) goHistory.addEventListener("click", () => {
+      closeModal();
+      view = { screen: "tank", tankId: tank.id, tab: "history" };
+      render();
+    });
+  });
+}
+
 function openEquipmentPromptModal(tank){
   openModal(`
     <h3 style="margin:0 0 8px">Want to add your equipment?</h3>
@@ -4017,49 +4075,47 @@ function toast(msg){
 }
 
 /* Action toast — shows a message with a tap/action button. Auto-dismisses after 5s. */
-function actionToast(msg, actionLabel, onAction){
-  // Remove any existing action toast
-  const existing = document.getElementById("ft-action-toast");
+function actionToast(msg, actionLabel, onAction, duration) {
+  duration = duration || 5000;
+  // Remove any existing action toast (both old id and new id)
+  const existing = document.getElementById('action-toast');
   if (existing) existing.remove();
+  const existingOld = document.getElementById('ft-action-toast');
+  if (existingOld) existingOld.remove();
 
-  const el = document.createElement("div");
-  el.id = "ft-action-toast";
-  el.style.cssText = "position:fixed;left:50%;bottom:72px;transform:translateX(-50%);background:#0b1e2a;border:1px solid #234a66;color:#e9f5ff;padding:10px 12px 10px 16px;border-radius:14px;z-index:101;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.45);display:flex;align-items:center;gap:12px;max-width:min(340px,90vw);";
+  const el = document.createElement('div');
+  el.id = 'action-toast';
+  el.className = 'action-toast';
+  el.innerHTML = `<span class="action-toast-msg">${escapeHTML(msg)}</span>${actionLabel ? `<button class="action-toast-btn" type="button">${escapeHTML(actionLabel)}</button>` : ''}`;
+  document.body.appendChild(el);
 
-  const msgSpan = document.createElement("span");
-  msgSpan.style.cssText = "flex:1;line-height:1.4;";
-  msgSpan.textContent = msg;
-  el.appendChild(msgSpan);
+  // Animate in
+  requestAnimationFrame(() => el.classList.add('action-toast-show'));
 
-  if (actionLabel && typeof onAction === "function") {
-    const btn = document.createElement("button");
-    btn.textContent = actionLabel;
-    btn.style.cssText = "flex-shrink:0;background:rgba(110,168,255,.18);border:1px solid rgba(110,168,255,.35);color:#6ea8ff;font:600 12px/1 inherit;padding:6px 10px;border-radius:8px;cursor:pointer;white-space:nowrap;";
-    btn.addEventListener("click", () => {
-      el.remove();
-      onAction();
+  if (actionLabel && typeof onAction === 'function') {
+    el.querySelector('.action-toast-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      clearTimeout(tid);
+      el.classList.remove('action-toast-show');
+      setTimeout(() => el.remove(), 300);
+      try { onAction(); } catch(err) { console.warn('actionToast callback error', err); }
     });
-    el.appendChild(btn);
   }
 
-  document.body.appendChild(el);
-  const timer = setTimeout(() => el.remove(), 5000);
-  // Also dismiss on click of the toast itself (not just the button)
-  el.addEventListener("click", (e) => {
-    if (e.target === el || e.target === msgSpan) {
-      clearTimeout(timer);
-      el.remove();
-    }
-  });
+  const tid = setTimeout(() => {
+    el.classList.remove('action-toast-show');
+    setTimeout(() => el.remove(), 300);
+  }, duration);
+  el.dataset.tid = String(tid);
 }
 window.actionToast = actionToast;
 
 /* Navigate to a tab within the current tank screen from firsttank.js */
 window._ftNavigateToTab = function(tab) {
-  if (window.view && window.view.screen === "tank") {
-    window.view.tab = tab;
-    window.render && window.render();
-  }
+  // Guard: only navigate if we are actually inside a tank screen
+  if (!window.view || window.view.screen !== "tank") return;
+  window.view.tab = tab;
+  window.render && window.render();
 };
 
 /* ============================================================

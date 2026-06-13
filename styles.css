@@ -3877,3 +3877,109 @@ html[data-skin="dark"] .fish-btn-icon {
 }
 .ft-eq-hint-label { font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-dim); }
 .ft-eq-hint-body { color: var(--ink-dim); line-height: 1.4; }
+
+/* ── Phase 6: Action toast (CSS-animated) ── */
+.action-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 72px;
+  transform: translateX(-50%) translateY(20px);
+  opacity: 0;
+  background: #0b1e2a;
+  border: 1px solid #234a66;
+  color: #e9f5ff;
+  padding: 10px 12px 10px 16px;
+  border-radius: 14px;
+  z-index: 101;
+  font-size: 13px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: min(340px, 90vw);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+}
+.action-toast.action-toast-show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+.action-toast-msg {
+  flex: 1;
+  line-height: 1.4;
+}
+.action-toast-btn {
+  flex-shrink: 0;
+  background: rgba(110,168,255,.18);
+  border: 1px solid rgba(110,168,255,.35);
+  color: #6ea8ff;
+  font: 600 12px/1 inherit;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+.action-toast-btn:active { background: rgba(110,168,255,.32); }
+
+/* ── Phase 6: Tank picker list scroll ── */
+.qa-tank-list {
+  overflow-y: auto;
+  max-height: 45vh;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Phase 6: First tank completion modal ── */
+.modal-completion {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+}
+.modal-completion-hero {
+  text-align: center;
+  padding: 24px 16px 16px;
+}
+.modal-completion-icon {
+  font-size: 48px;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+.modal-completion-headline {
+  margin: 0 0 10px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--ink);
+}
+.modal-completion-sub {
+  margin: 0 0 10px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-dim);
+}
+.modal-completion-brand {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  opacity: 0.6;
+}
+.modal-completion-actions {
+  padding: 8px 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Modal slide-up animation for modal-completion */
+.modal-backdrop .modal:has(.modal-completion) {
+  animation: slideUpModal 350ms ease-out both;
+}
+@keyframes slideUpModal {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
