@@ -458,12 +458,12 @@ function renderFirstTankSection(tank){
   return `
     <div class="section first-tank-active">
       <div class="ft-head">
-        <h2>🌱 First Tank — Day ${daysIn}${kindLabel && kindLabel !== "other" ? ` · <span class="muted" style="font-weight:500;font-size:14px">${kindLabel.charAt(0).toUpperCase() + kindLabel.slice(1)}</span>` : ""}</h2>
+        <h2>First Tank Guide — Day ${daysIn}${kindLabel && kindLabel !== "other" ? ` · <span class="muted" style="font-weight:500;font-size:14px">${kindLabel.charAt(0).toUpperCase() + kindLabel.slice(1)}</span>` : ""}</h2>
         <button class="btn small secondary" id="ft-disable">Hide guide</button>
       </div>
       <div class="ft-progress">
         <div class="ft-progress-bar"><div class="ft-progress-fill" style="width:${(completedCount/totalStages*100)}%"></div></div>
-        <div class="ft-progress-text">${completedCount} of ${totalStages} steps done</div>
+        <div class="ft-progress-text">${completedCount} / ${totalStages} steps · ${Math.round(completedCount/totalStages*100)}% complete</div>
       </div>
 
       ${ordered.map((st) => {
@@ -476,7 +476,7 @@ function renderFirstTankSection(tank){
         return `
           <div class="ft-stage ${done ? "done" : ""} ${active ? "active" : ""}" data-stage-key="${st.key}">
             <div class="ft-stage-head" data-stage="${st.key}">
-              <span class="ft-stage-icon">${done ? "\u2713" : active ? "\u25b6" : "\u25cb"}</span>
+              <span class="ft-stage-icon">${done ? "\u2713" : active ? "\u25cf" : "\u25cb"}</span>
               <span class="ft-stage-title">${st.title}</span>
             </div>
             <div class="ft-stage-body" ${expanded ? "" : "hidden"}>

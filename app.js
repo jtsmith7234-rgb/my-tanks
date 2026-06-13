@@ -404,7 +404,7 @@ function render(){
   // Helper: swap between brand lockup (home) and plain title (inner screens)
   function setTitleText(text, showLogo) {
     if (showLogo) {
-      titleEl.innerHTML = `<img src="logo-mark.png" class="topbar-logo-mark" alt="" aria-hidden="true" draggable="false">${escapeHTML(text)}`;
+      titleEl.innerHTML = `<img src="logo-mark.png" class="topbar-logo-mark" alt="" aria-hidden="true" draggable="false">${escapeHTML(text)}<span class="home-tagline">Care that shows.</span>`;
       titleEl.classList.add("topbar-brand");
     } else {
       titleEl.textContent = text;
@@ -4117,7 +4117,7 @@ function _showFirstTankCompletionModal(tank) {
   openModal(`
     <div class="modal-completion">
       <div class="modal-completion-hero">
-        <div class="modal-completion-icon">&#127758;</div>
+        <div class="modal-completion-icon"><svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><circle cx="28" cy="28" r="28" fill="rgba(255,255,255,0.15)"/><path d="M18 28c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10S18 33.523 18 28z" fill="rgba(255,255,255,0.25)"/><path d="M22 28a6 6 0 1 1 12 0 6 6 0 0 1-12 0z" fill="white" fill-opacity="0.9"/><circle cx="31" cy="26" r="1.2" fill="rgba(0,0,0,0.35)"/></svg></div>
         <h2 class="modal-completion-headline">Your first habitat is ready.</h2>
         <p class="modal-completion-sub">You cycled ${escapeHTML(name)} from scratch. From here it&rsquo;s regular care &mdash; water changes, tests, and watching things grow.</p>
         <p class="modal-completion-brand">Tank Care.</p>
@@ -4734,6 +4734,10 @@ function openSettingsSheet(){
         </div>
         <p class="settings-note">Tank Care Buddy — your simple aquarium companion.</p>
       </section>
+      <div class="settings-brand-footer">
+        <span class="settings-brand-name">Tank Care Buddy</span>
+        <span class="settings-brand-tag">Care that shows.</span>
+      </div>
     </div>
   `, () => {
     const refreshTheme = () => {

@@ -395,7 +395,7 @@ html[data-skin="dark"] .topbar h1{
   -webkit-backdrop-filter:blur(26px) saturate(160%);
           backdrop-filter:blur(26px) saturate(160%);
   padding:18px 18px 16px;
-  box-shadow:var(--glass-shadow);
+  box-shadow:var(--glass-shadow), 0 1px 4px rgba(0,0,0,0.06);
   cursor:pointer;
   text-align:left;
   color:var(--ink);
@@ -829,9 +829,9 @@ html[data-skin="light"] .modal-backdrop{
 /* Modal layout: title sticks, content scrolls, footer sticks */
 .modal-title {
   font-family:var(--font-display);
-  font-size:20px;
-  font-weight:800;
-  letter-spacing:-.2px;
+  font-size:17px;
+  font-weight:700;
+  letter-spacing:-0.2px;
   color:var(--ink);
   margin:6px 0 14px;
   padding-top:8px;  /* breathe below drag handle */
@@ -2126,13 +2126,14 @@ input[type=time].input{ font-family:inherit }
   font-size:12px;
 }
 .ft-tip{
-  background: rgba(255,165,80,.08);
-  border-left: 3px solid var(--warn, #ffa550);
-  padding: 8px 10px;
-  font-size:12px;
-  color:var(--ink-dim);
-  border-radius:4px;
-  line-height:1.4;
+  background: var(--glass-fill);
+  border-left: 3px solid var(--koi);
+  border-radius: 0 8px 8px 0;
+  padding: 10px 12px;
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-dim);
   margin-bottom:10px;
 }
 .ft-tip b{ color: var(--warn, #ffa550) }
@@ -2470,6 +2471,55 @@ input[type=time].input{ font-family:inherit }
   max-width:30ch;
 }
 .tut-cta{ margin-top:18px; max-width:320px; }
+
+/* ── Tutorial hero (welcome card) ── */
+.tut-card-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 12px 16px 24px;
+  gap: 0;
+}
+.tut-hero-brand {
+  padding: 20px 0 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.tut-hero-wordmark {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--ink);
+  line-height: 1.1;
+}
+.tut-hero-tagline {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--sakura, var(--koi));
+  letter-spacing: 0.04em;
+}
+.tut-hero-visual {
+  margin: 0 auto 12px;
+}
+.tut-hero-headline {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--ink);
+}
+.tut-hero-support {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink-dim);
+}
+.tut-hero-body {
+  max-width: 300px;
+}
 
 /* Footer: dots + Next */
 .tut-footer{
@@ -3954,27 +4004,29 @@ html[data-skin="dark"] .fish-btn-icon {
 .ft-eq-hint-label { font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--ink-dim); }
 .ft-eq-hint-body { color: var(--ink-dim); line-height: 1.4; }
 
-/* ── Phase 6: Action toast (CSS-animated) ── */
+/* ── Phase 8: Action toast (CSS-animated) ── */
 .action-toast {
   position: fixed;
   left: 50%;
-  bottom: 72px;
-  transform: translateX(-50%) translateY(20px);
+  bottom: 76px;
+  transform: translateX(-50%) translateY(24px);
   opacity: 0;
-  background: #0b1e2a;
-  border: 1px solid #234a66;
-  color: #e9f5ff;
-  padding: 10px 12px 10px 16px;
-  border-radius: 14px;
+  background: var(--ink);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: var(--glass-fill, #f7f6f2);
+  padding: 11px 14px 11px 18px;
+  border-radius: 16px;
   z-index: 101;
-  font-size: 13px;
-  box-shadow: 0 6px 20px rgba(0,0,0,.45);
+  font-size: 13.5px;
+  line-height: 1.4;
+  box-shadow: 0 8px 28px rgba(0,0,0,.38), 0 2px 8px rgba(0,0,0,.18);
   display: flex;
   align-items: center;
-  gap: 12px;
-  max-width: min(340px, 90vw);
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  gap: 14px;
+  max-width: min(360px, 92vw);
+  transition: opacity 0.28s cubic-bezier(.22,1,.36,1), transform 0.28s cubic-bezier(.22,1,.36,1);
   pointer-events: none;
+  will-change: transform, opacity;
 }
 .action-toast.action-toast-show {
   opacity: 1;
@@ -3983,21 +4035,30 @@ html[data-skin="dark"] .fish-btn-icon {
 }
 .action-toast-msg {
   flex: 1;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 .action-toast-btn {
   flex-shrink: 0;
-  background: rgba(110,168,255,.18);
-  border: 1px solid rgba(110,168,255,.35);
-  color: #6ea8ff;
-  font: 600 12px/1 inherit;
-  padding: 6px 10px;
-  border-radius: 8px;
+  background: var(--sakura, var(--koi));
+  border: none;
+  color: #fff;
+  font: 600 12.5px/1 inherit;
+  padding: 7px 12px;
+  border-radius: 10px;
   cursor: pointer;
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
 }
-.action-toast-btn:active { background: rgba(110,168,255,.32); }
+.action-toast-btn:active { opacity: 0.8; }
+html[data-skin="dark"] .action-toast {
+  background: #1a2a38;
+  border-color: rgba(255,255,255,0.12);
+  color: #e8f4ff;
+}
+html[data-skin="dark"] .action-toast-btn {
+  background: var(--sakura, var(--koi));
+}
 
 /* ── Phase 6: Tank picker list scroll ── */
 .qa-tank-list {
@@ -4006,56 +4067,105 @@ html[data-skin="dark"] .fish-btn-icon {
   -webkit-overflow-scrolling: touch;
 }
 
-/* ── Phase 6: First tank completion modal ── */
+/* ── Phase 8: First tank completion modal ── */
 .modal-completion {
   display: flex;
   flex-direction: column;
   gap: 0;
   padding: 0;
+  overflow: hidden;
+  border-radius: inherit;
 }
 .modal-completion-hero {
+  background: linear-gradient(160deg, var(--jade, #437a22) 0%, var(--koi, #20808d) 100%);
   text-align: center;
-  padding: 24px 16px 16px;
+  padding: 32px 20px 28px;
+  color: #fff;
 }
 .modal-completion-icon {
-  font-size: 48px;
+  font-size: 52px;
   line-height: 1;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,.18));
 }
 .modal-completion-headline {
   margin: 0 0 10px;
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.25;
-  color: var(--ink);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #fff;
+  letter-spacing: -0.3px;
 }
 .modal-completion-sub {
-  margin: 0 0 10px;
+  margin: 0 0 8px;
   font-size: 14px;
   line-height: 1.55;
-  color: var(--ink-dim);
+  color: rgba(255,255,255,0.85);
 }
 .modal-completion-brand {
-  margin: 0;
-  font-size: 12px;
+  margin: 8px 0 0;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--ink-dim);
-  opacity: 0.6;
+  color: rgba(255,255,255,0.55);
 }
 .modal-completion-actions {
-  padding: 8px 0 4px;
+  padding: 16px 16px 8px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
-/* Modal slide-up animation for modal-completion */
+/* Completion modal slide-up */
 .modal-backdrop .modal:has(.modal-completion) {
-  animation: slideUpModal 350ms ease-out both;
+  transform: translateY(0);
+  animation: completionSlideUp 400ms cubic-bezier(.22,1,.36,1) both;
 }
-@keyframes slideUpModal {
-  from { transform: translateY(100%); opacity: 0; }
+@keyframes completionSlideUp {
+  from { transform: translateY(60px); opacity: 0; }
   to   { transform: translateY(0);    opacity: 1; }
+}
+
+/* ── Phase 8: Home screen tagline ── */
+.home-tagline {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-dim);
+  letter-spacing: 0.05em;
+  margin-top: 1px;
+  opacity: 0.7;
+}
+
+/* ── Phase 8: Settings branding footer ── */
+.settings-brand-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 20px 0 8px;
+  border-top: 1px solid var(--glass-stroke);
+  margin-top: 8px;
+}
+.settings-brand-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-dim);
+  letter-spacing: 0.03em;
+}
+.settings-brand-tag {
+  font-size: 11px;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+/* ── Phase 8: Empty state utility ── */
+.empty-state {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--ink-dim);
+}
+.empty-state-title {
+  font-weight: 600;
+  margin: 0 0 6px;
 }

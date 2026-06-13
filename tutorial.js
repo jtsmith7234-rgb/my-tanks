@@ -144,35 +144,35 @@
     {
       label: "Welcome",
       snap: snapHome,
-      title: "Welcome to Tank Care Buddy",
-      body: "Your simple home base for keeping every aquarium healthy — all in one place."
+      title: "Keep every tank healthy.",
+      body: "Log care, track water, add fish, and stay on top of what\u2019s due \u2014 all in one place."
     },
     {
-      label: "Getting started",
+      label: "First steps",
       snap: snapBeginner,
       title: "New tank or experienced keeper \u2014 we\u2019ve got you",
       body: "If this is your first tank, turn on the guided setup for step-by-step help. If you\u2019re already set up, just add your tanks and log your care."
     },
     {
-      label: "Step 1",
+      label: "Your tanks",
       snap: snapAddTank,
       title: "Add your tanks",
       body: "Create a card for each aquarium with its size and type. Tap one anytime to open it."
     },
     {
-      label: "Step 2",
+      label: "Water care",
       snap: snapCareLog,
       title: "Log water changes & tests",
       body: "Track changes, tests, and dosing as you go. Tank Care Buddy keeps the history for you."
     },
     {
-      label: "Step 3",
+      label: "Livestock",
       snap: snapCompat,
       title: "Add fish, check compatibility",
       body: "Add your livestock and see at a glance which species get along before you buy."
     },
     {
-      label: "Step 4",
+      label: "Reminders",
       snap: snapReminders,
       title: "Stay on top of care",
       body: "Reminders and trends help you spot what's due and how your water is trending."
@@ -184,11 +184,11 @@
       body: "Add your filter, heater, and other equipment. Tank Care Buddy calculates when each item is due for service \u2014 so nothing gets missed."
     },
     {
-      label: "You're ready",
+      label: "Ready",
       snap: snapReady,
-      title: "You're all set",
-      body: "That's the overview. Add your first tank to get started.",
-      cta: "Add my first tank"
+      title: "You\u2019re set up for success.",
+      body: "Everything you need to care for every tank \u2014 in one app.",
+      cta: "Let\u2019s go"
     }
   ];
 
@@ -198,6 +198,20 @@
   function cardHTML(card, i, total){
     const isLast = i === total - 1;
     const ctaLabel = card.cta || (isLast ? "Get started" : "");
+    if (i === 0) {
+      return `
+        <section class="tut-card-slide tut-card-hero" role="group" aria-roledescription="slide" aria-label="1 of ${total}">
+          <div class="tut-hero-brand">
+            <div class="tut-hero-wordmark">Tank Care Buddy</div>
+            <div class="tut-hero-tagline">Care that shows.</div>
+          </div>
+          <div class="tut-hero-visual">${card.snap()}</div>
+          <div class="tut-hero-body">
+            <h2 class="tut-hero-headline">${escapeHTML(card.title)}</h2>
+            <p class="tut-hero-support">${escapeHTML(card.body)}</p>
+          </div>
+        </section>`;
+    }
     return `
       <section class="tut-card-slide" role="group" aria-roledescription="slide" aria-label="${i+1} of ${total}">
         <div class="tut-card-label">${escapeHTML(card.label)}</div>
