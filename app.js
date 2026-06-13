@@ -1325,22 +1325,28 @@ function renderUpNextSection(t){
   }
   const rows = items.map(it => {
     const nav = UPN_NAV[it.type];
-    const sub = it.status === "due-now"
-      ? `<span class="upn-sub bad">Due now — tap to go to ${nav ? nav.label : "the"} tab</span>`
-      : it.status === "snoozed"
-        ? `<span class="upn-sub warn">Snoozed — resumes ${_friendlyRelative(it.nextDueTs)}</span>`
-        : `<span class="upn-sub">Due ${_friendlyRelative(it.nextDueTs)} · ${_friendlyShortDate(it.nextDueTs)}</span>`;
-    const lastTxt = it.lastDoneTs
-      ? `Last done ${_friendlyRelative(it.lastDoneTs)}`
-      : `Never done yet`;
-    const showActions = it.status === "due-now" || it.status === "snoozed";
+    // Determine if this is a first-ever entry (never logged before)
+    const isFirstEntry = !it.lastDoneTs;
+    // Override sub-label for first-time entries to be friendly/neutral
+    const sub = isFirstEntry
+      ? `<span class="upn-sub first-entry">Let's log your first ${it.label.toLowerCase()} \u2192</span>`
+      : (it.status === "due-now"
+          ? `<span class="upn-sub bad">Due now — tap to go to ${nav ? nav.label : "the"} tab</span>`
+          : it.status === "snoozed"
+            ? `<span class="upn-sub warn">Snoozed — resumes ${_friendlyRelative(it.nextDueTs)}</span>`
+            : `<span class="upn-sub">Due ${_friendlyRelative(it.nextDueTs)} · ${_friendlyShortDate(it.nextDueTs)}</span>`);
+    const lastTxt = isFirstEntry
+      ? "Never logged \u2014 set a baseline"
+      : (it.lastDoneTs ? `Last done ${_friendlyRelative(it.lastDoneTs)}` : "Never done yet");
+    // First-entry rows: show only "Go do it" button, no Mark done / Snooze / Skip
+    const showActions = !isFirstEntry && (it.status === "due-now" || it.status === "snoozed");
     const navLabel = nav ? nav.label : "";
     // Daily check-in doesn't have a logging form to land on, so its CTA is "Open"
-    const goLabel = it.type === "daily" ? "Open" : "Go do it";
+    const goLabel = it.type === "daily" ? "Open" : (isFirstEntry ? "Go do it \u203a" : "Go do it");
     const subLabel = it.type === "daily" ? `<div class="upn-go-hint muted small" style="margin-top:3px">Tap to log today's check-in in History</div>` : "";
-    // For due/snoozed: show CTA button. For upcoming: gentle hint on the row.
+    // For first-entry or due/snoozed: show CTA button. For upcoming: gentle hint on the row.
     const goHint = nav
-      ? (it.status === "upcoming"
+      ? ((!isFirstEntry && it.status === "upcoming")
           ? `<div class="upn-go-hint muted small">Tap to go to ${navLabel} tab ›</div>`
           : `<button class="upn-go-btn" data-go="${it.type}" type="button">${goLabel} <span class="upn-go-chev">›</span></button>${subLabel}`)
       : "";
@@ -1352,9 +1358,10 @@ function renderUpNextSection(t){
         <button class="btn small secondary upn-snooze" data-type="${it.type}">Snooze 1 day</button>
         ${showSkip ? `<button class="btn small secondary upn-skip" data-type="${it.type}">Skip once</button>` : ""}
       </div>` : "";
-    // Upcoming rows: whole row is a button-like tap target
+    // Upcoming and first-entry rows: whole row is a button-like tap target
+    const effectiveStatus = isFirstEntry ? "first" : it.status;
     const rowRole = (!showActions && nav) ? ` role="button" tabindex="0" aria-label="${escapeHTML(it.label)} — tap to go to ${navLabel} tab"` : "";
-    const rowClass = `upn-row upn-${it.status}${(!showActions && nav) ? " upn-tappable" : ""}`;
+    const rowClass = `upn-row upn-${effectiveStatus}${(!showActions && nav) ? " upn-tappable" : ""}`;
     const intervalTxt = it.type === "daily" ? "every day" : `every ${it.intervalDays} days`;
     return `
       <div class="${rowClass}" data-rem="${it.type}"${rowRole}>
@@ -1694,37 +1701,64 @@ function renderFish(t){
       </div>
     </div>
 
-    <div class="section">
-      <h2>Add to tank</h2>
-      <div class="row">
-        <label class="field species-field"><span>Species</span>
-          <input class="input" id="add-species" placeholder="Type a fish name to see its profile, then add it" autocomplete="off" />
+    <div class="section fish-action-section">
+      <div class="fish-action-header">
+        <h2>Add fish</h2>
+        <span class="fish-action-sub muted">Search to add or check compatibility</span>
+      </div>
+      <div class="fish-search-card">
+        <label class="field species-field" style="margin:0">
+          <input class="input" id="add-species"
+            placeholder="Search by species name…"
+            autocomplete="off"
+            style="border-radius:12px;font-size:15px;padding:12px 16px;height:48px" />
           <div id="species-suggest" class="species-suggest" hidden></div>
         </label>
-        <label class="field"><span>Count</span><input class="input" id="add-count" type="number" min="1" value="1" /></label>
+        <div class="fish-search-meta" id="fish-search-meta">
+          <span class="muted small">Start typing to see fish profiles and compatibility</span>
+        </div>
       </div>
-      <label class="field"><span>Name (optional)</span><input class="input" id="add-name" placeholder="e.g. Boss" /></label>
       <div id="species-info"></div>
-      <button class="btn block" id="add-fish-btn">Add to tank</button>
-    </div>
 
-    <div class="section">
-      <h2>Browse species &amp; compatibility</h2>
-      <p class="muted" style="margin-top:0">Search to check if a fish is a good fit for this tank, or browse the full library. Tap any fish to see its profile — then add it right here.</p>
-      <label class="field compat-field">
-        <input class="input" id="compat-search" placeholder="Search or browse species" autocomplete="off" />
-        <div id="compat-suggest" class="species-suggest" hidden></div>
-      </label>
-      <div id="compat-result"></div>
-      <div id="browse-list" class="browse-list"></div>
+      <div class="fish-quick-row">
+        <div class="fish-quick-card" id="fish-add-card">
+          <div class="fish-quick-icon">🐠</div>
+          <div class="fish-quick-label">Add a fish</div>
+          <div class="fish-quick-sub muted small">Search above, then add it here</div>
+          <div class="fish-add-controls" id="fish-add-controls">
+            <div class="row" style="gap:8px;margin-top:8px">
+              <label class="field" style="flex:1;margin:0"><span>Count</span><input class="input" id="add-count" type="number" min="1" value="1"/></label>
+              <label class="field" style="flex:2;margin:0"><span>Name (optional)</span><input class="input" id="add-name" placeholder="e.g. Boss"/></label>
+            </div>
+            <button class="btn block" id="add-fish-btn" style="margin-top:10px">Add to tank</button>
+          </div>
+        </div>
+        <div class="fish-quick-card" id="fish-compat-card">
+          <div class="fish-quick-icon">🔍</div>
+          <div class="fish-quick-label">Check compatibility</div>
+          <div class="fish-quick-sub muted small">See if a fish fits your setup</div>
+          <div id="compat-result" style="margin-top:8px"></div>
+        </div>
+      </div>
+
+      <div class="fish-browse-section" id="fish-browse-section" style="margin-top:12px">
+        <div class="fish-browse-header">
+          <span class="muted small">Browse all species</span>
+        </div>
+        <div id="browse-list" class="browse-list"></div>
+      </div>
     </div>
   `;
 }
 function bindFish(t){
-  // ----- Autocomplete on species input -----
-  const spInput = $("#add-species");
-  const spSugg  = $("#species-suggest");
-  const spInfo  = $("#species-info");
+  // ----- Unified search: autocomplete + compat + browse -----
+  const spInput    = $("#add-species");
+  const spSugg     = $("#species-suggest");
+  const spInfo     = $("#species-info");
+  const compatResult = $("#compat-result");
+  const browseList   = $("#browse-list");
+  const fishAddCard  = $("#fish-add-card");
+  const searchMeta   = $("#fish-search-meta");
 
   function showSuggestions(q){
     if (!window.FISHDB_API) return;
@@ -1740,8 +1774,16 @@ function bindFish(t){
     $$(".species-suggest-row", spSugg).forEach(b => b.addEventListener("click", () => {
       spInput.value = b.dataset.name;
       spSugg.hidden = true;
-      renderSpeciesInfo(b.dataset.name);
+      onSpeciesSelected(b.dataset.name);
     }));
+  }
+
+  function onSpeciesSelected(name){
+    renderSpeciesInfo(name);
+    showCompatResult(name);
+    renderBrowseList(name);
+    if (fishAddCard) fishAddCard.classList.add("active-card");
+    if (searchMeta) searchMeta.innerHTML = `<span class="muted small">${escapeHTML(name)} selected — fill in count and name below, then tap Add to tank</span>`;
   }
 
   function renderSpeciesInfo(name){
@@ -1758,10 +1800,19 @@ function bindFish(t){
 
   if (spInput){
     spInput.addEventListener("input", () => {
+      const v = spInput.value.trim();
       showSuggestions(spInput.value);
-      // Clear info when user types past an exact match
-      const f = window.FISHDB_API && window.FISHDB_API.byName(spInput.value.trim());
-      if (f) renderSpeciesInfo(spInput.value.trim()); else spInfo.innerHTML = "";
+      // Update compat + browse as user types
+      const f = window.FISHDB_API && window.FISHDB_API.byName(v);
+      if (f){
+        renderSpeciesInfo(v);
+        showCompatResult(v);
+        renderBrowseList(v);
+      } else {
+        spInfo.innerHTML = "";
+        if (compatResult) compatResult.innerHTML = "";
+        renderBrowseList(v);
+      }
     });
     spInput.addEventListener("blur", () => {
       // delay to allow click on suggestion
@@ -1769,11 +1820,7 @@ function bindFish(t){
     });
   }
 
-  // ----- Browse species & compatibility (single search) -----
-  const compatSearch  = $("#compat-search");
-  const compatSuggest = $("#compat-suggest");
-  const compatResult  = $("#compat-result");
-  const browseList    = $("#browse-list");
+  // ----- Compat + browse -----
 
   function showCompatResult(name){
     if (!window.FISHDB_API){ compatResult.innerHTML = ""; return; }
@@ -1852,21 +1899,6 @@ function bindFish(t){
       drawer.hidden = !open;
       toggle.setAttribute("aria-expanded", String(open));
       toggle.classList.toggle("open", open);
-    });
-  }
-
-  // Single search input drives both compat result and browse list
-  if (compatSearch){
-    compatSearch.addEventListener("input", () => {
-      const v = compatSearch.value.trim();
-      // Filter the browse list as the user types
-      renderBrowseList(v);
-      // Show compat badge instantly when the query is an exact species match
-      const f = window.FISHDB_API && window.FISHDB_API.byName(v);
-      if (f){ showCompatResult(v); } else { compatResult.innerHTML = ""; }
-    });
-    compatSearch.addEventListener("blur", () => {
-      setTimeout(() => { compatSuggest.hidden = true; }, 150);
     });
   }
 
@@ -2551,7 +2583,7 @@ function bindWaterCare(t){
     recomputeTankAlerts(t.id);
 
     toast("Saved");
-    view.tab = "history"; render();
+    view.tab = "water-care"; render();
   });
 }
 
@@ -2921,7 +2953,7 @@ function bindClean(t){
       notes: $("#wc-notes").value.trim()
     });
     toast("Logged");
-    view.tab = "history"; render();
+    view.tab = "water-care"; render();
   });
 }
 
@@ -3395,7 +3427,7 @@ function bindHistory(t){
    EQUIPMENT & MAINTENANCE DASHBOARD
    ============================================================ */
 
-let eqFilter    = "month"; // week | month | upcoming | all
+let eqFilter    = "all"; // week | month | upcoming | all
 let eqPrevTankId = null;  // reset filter when switching tanks
 
 const EQ_GUIDANCE_BY_KIND = {
@@ -3441,7 +3473,7 @@ function renderEquipment(t) {
     return `<div class="section"><p class="muted center">Equipment module not loaded.</p></div>`;
   }
   // Reset filter when switching to a different tank
-  if (t.id !== eqPrevTankId) { eqFilter = "month"; eqPrevTankId = t.id; }
+  if (t.id !== eqPrevTankId) { eqFilter = "all"; eqPrevTankId = t.id; }
 
   const summary = EQ.tankSummary(t.id);
   const items   = EQ.dueList(t.id, eqFilter);
@@ -3466,10 +3498,10 @@ function renderEquipment(t) {
 
   /* ── Filter strip ── */
   const filters = [
+    { id: "all",      label: "All" },
     { id: "week",     label: "This week" },
     { id: "month",    label: "This month" },
     { id: "upcoming", label: "Upcoming" },
-    { id: "all",      label: "All" },
   ];
   const filterStrip = `
     <div class="eq-filters" role="tablist" aria-label="Equipment filter">
@@ -3560,8 +3592,13 @@ function renderEquipment(t) {
       </div>
       ${_optional.length ? `<div class="eq-guidance-optional"><div class="eq-guidance-label muted">Optional</div>${_optional.map(e => `<div class="eq-guidance-item muted">◦ ${escapeHTML(e)}</div>`).join('')}</div>` : ''}
     </div>`;
+  const _kindLabel = tankKindById(t.kind).label;
   const compactGuidanceNote = allActive.length > 0 ? `
-    <div class="eq-guidance-compact muted small">ℹ️ Your setup: ${_kindGuidance.required.length} essential, ${_kindGuidance.recommended.length} recommended, ${_optional.length} optional — <span style="color:var(--teal)">${_kindGuidance.required.join(', ')}</span></div>` : '';
+    <div class="eq-setup-note">
+      <span class="eq-setup-note-label">For a ${escapeHTML(_kindLabel)} tank:</span>
+      <span class="eq-setup-note-items">${_kindGuidance.required.map(e => escapeHTML(e)).join(' · ')}</span>
+      <span class="eq-setup-note-hint">These are the basics. Add them below if you haven't yet.</span>
+    </div>` : '';
 
   /* ── Empty state ── */
   const emptyState = `
@@ -4182,6 +4219,14 @@ function _showFirstTankCompletionModal(tank) {
       closeModal();
       view = { screen: "tank", tankId: tank.id, tab: "details" };
       render();
+      // Scroll to top of tank content after render
+      requestAnimationFrame(() => {
+        const content = document.querySelector('.tank-content')
+          || document.querySelector('.screen')
+          || document.querySelector('main');
+        if (content) content.scrollTop = 0;
+        else window.scrollTo(0, 0);
+      });
     });
     const goHistory = document.getElementById("ftc-go-history");
     if (goHistory) goHistory.addEventListener("click", () => {
