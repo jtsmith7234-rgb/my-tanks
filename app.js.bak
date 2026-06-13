@@ -102,7 +102,7 @@ function downloadBackup(){
   const url = URL.createObjectURL(blob);
   const ts = new Date().toISOString().slice(0,16).replace(/[T:]/g,"-");
   const a = document.createElement("a");
-  a.href = url; a.download = `tank-care-buddy-backup-${ts}.json`;
+  a.href = url; a.download = `my-tanks-backup-${ts}.json`;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1500);
 }
@@ -358,7 +358,7 @@ function render(){
   // Helper: swap between brand lockup (home) and plain title (inner screens)
   function setTitleText(text, showLogo) {
     if (showLogo) {
-      titleEl.innerHTML = `<img src="logo-mark.png" class="topbar-logo-mark" alt="" aria-hidden="true" draggable="false">${escapeHTML(text)}`;
+      titleEl.innerHTML = `<img src="apple-touch-icon.png" class="topbar-logo-img" width="30" height="30" alt="" aria-hidden="true" draggable="false">${escapeHTML(text)}`;
       titleEl.classList.add("topbar-brand");
     } else {
       titleEl.textContent = text;
@@ -428,16 +428,9 @@ function openTankActions(tankId){
       window.scrollTo({top:0});
     };
     $("#act-open").addEventListener("click",  () => go("details"));
-    $("#act-edit").addEventListener("click",  () => {
-      go("details");
-      // Scroll to the edit form after render settles
-      requestAnimationFrame(() => {
-        const editEl = document.getElementById("details-edit-section") || document.getElementById("details-name");
-        if (editEl) editEl.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
-    });
-    $("#act-clean").addEventListener("click", () => go("water-care"));
-    $("#act-test").addEventListener("click",  () => go("water-care"));
+    $("#act-edit").addEventListener("click",  () => go("details"));
+    $("#act-clean").addEventListener("click", () => go("clean"));
+    $("#act-test").addEventListener("click",  () => go("tests"));
     $("#act-cancel").addEventListener("click",() => closeModal());
     $("#act-delete").addEventListener("click", () => {
       if(!confirm(`Delete "${t.name}"? This can't be undone.`)) return;
@@ -456,11 +449,7 @@ function openTankActions(tankId){
 function _tankStatus(t){
   // Returns { tone: "ok"|"fyi"|"soon"|"urgent", label, hint }
   try {
-    // Use list API when available so we always reflect the true top severity
-    const list = window.ADVISOR && window.ADVISOR.computeAdviceList
-      ? window.ADVISOR.computeAdviceList(t)
-      : (window.ADVISOR && window.ADVISOR.computeAdvice ? [window.ADVISOR.computeAdvice(t)].filter(Boolean) : []);
-    const adv = list[0] || null;
+    const adv = window.ADVISOR && window.ADVISOR.computeAdvice ? window.ADVISOR.computeAdvice(t) : null;
     if (adv && adv.sev){
       if (adv.sev === "urgent") return { tone:"urgent", label:"Needs attention", hint: adv.title || "" };
       if (adv.sev === "soon")   return { tone:"soon",   label:"Check soon",      hint: adv.title || "" };
@@ -468,25 +457,6 @@ function _tankStatus(t){
     }
   } catch(e){}
   return { tone:"ok", label:"Looking good", hint:"" };
-}
-
-function _renderEqHint(t) {
-  if (typeof EQ === "undefined") return "";
-  const s = EQ.tankSummary(t.id);
-  if (s.total === 0) return "";
-  if (s.overdue > 0) {
-    return `<div class="tc-eq-hint tc-eq-hint-bad">${s.overdue} equipment item${s.overdue === 1 ? "" : "s"} overdue</div>`;
-  }
-  if (s.dueThisWeek > 0) {
-    return `<div class="tc-eq-hint tc-eq-hint-warn">${s.dueThisWeek} due this week</div>`;
-  }
-  if (s.expiringSoon > 0) {
-    return `<div class="tc-eq-hint tc-eq-hint-warn">${s.expiringSoon} expiring soon</div>`;
-  }
-  if (s.dueThisMonth > 0) {
-    return `<div class="tc-eq-hint tc-eq-hint-soon">${s.dueThisMonth} due this month</div>`;
-  }
-  return `<div class="tc-eq-hint tc-eq-hint-ok">Equipment all caught up</div>`;
 }
 
 function _renderTankCard(t){
@@ -502,7 +472,6 @@ function _renderTankCard(t){
         </span>
       </div>
       <div class="tc-meta">${t.gallons} gal &middot; ${escapeHTML(t.type||"Freshwater")} &middot; ${animals} ${animals === 1 ? "animal" : "animals"}${species ? ` &middot; ${species} ${species === 1 ? "species" : "species"}` : ""}</div>
-      ${_renderEqHint(t)}
     </button>
   `;
 }
@@ -737,31 +706,24 @@ function renderHome(){
 }
 
 function renderAdvisorBanner(t){
+  // Get top recommendation and log if new (history persistence)
   if (!window.ADVISOR) return "";
-  let advList = [];
   let adv = null;
   try {
-    // Use list API when available (upgraded advisor), fall back to single
-    advList = window.ADVISOR.computeAdviceList
-      ? window.ADVISOR.computeAdviceList(t)
-      : (window.ADVISOR.computeAdvice(t) ? [window.ADVISOR.computeAdvice(t)] : []);
-    adv = advList[0] || null;
+    adv = window.ADVISOR.computeAdvice(t);
     if (adv) {
-      // Log all active items to history (with per-rule dedup / cooldown inside advisor)
-      advList.forEach(item => { try { window.ADVISOR.logAdviceIfNew(t, item); } catch(e){} });
-      // Fire OS notification for urgent issues (if user opted in) — top item only
+      window.ADVISOR.logAdviceIfNew(t, adv);
+      // Fire OS notification for urgent issues (if user opted in)
       if (window.REMINDERS) {
         try { window.REMINDERS.fireUrgentAdvisorNotif(t, adv); } catch(e){}
       }
     }
   } catch (err) { console.warn("advisor error", err); return ""; }
   if (!adv) return "";
-  // Signature uses ruleId when available (new advisor), falls back to title+rule
-  const sig = adv.ruleId ? (adv.ruleId + " | " + adv.rule) : (adv.title + " | " + adv.rule);
-  // Check persistent dismiss store — survives tab switches and re-renders
-  if (_isAdvisorDismissed(t.id, sig)) return "";
-  // Tag label (Risk / Insight / Reminder / Tip) — only shown when present
-  const tagLabel = adv.tag ? `<span class="adv-tag adv-tag-${adv.sev}">${escapeHTML(adv.tag)}</span>` : "";
+  // Suppress if user dismissed this exact signature this session
+  const sig = (adv.title + " | " + adv.rule);
+  if (window._advisorDismissed && window._advisorDismissed[t.id] === sig) return "";
+  // Where this reminder can be acted on \u2014 makes the banner tappable
   const target = (window.ADVISOR.adviceTarget && window.ADVISOR.adviceTarget(adv)) || null;
   const clickable = !!target;
   const targetAttrs = clickable
@@ -770,19 +732,13 @@ function renderAdvisorBanner(t){
   const hint = clickable
     ? `<div class="adv-hint">Tap to fix <span class="adv-chev">\u203a</span></div>`
     : "";
-  // Secondary items indicator (when more than 1 item, show a quiet count)
-  const moreCount = advList.length - 1;
-  const moreHint = (moreCount > 0)
-    ? `<div class="adv-more">${moreCount} more insight${moreCount > 1 ? 's' : ''} this tank</div>`
-    : "";
   return `
     <div class="advisor-banner ${adv.sev}${clickable ? " adv-clickable" : ""}" data-sig="${escapeHTML(sig)}"${targetAttrs}>
       <div class="adv-icon">${adv.sev === "urgent" ? "\u26a0\ufe0f" : adv.sev === "soon" ? "\ud83d\udd14" : "\ud83c\udf38"}</div>
       <div class="adv-body">
-        <div class="adv-title-row">${tagLabel}<span class="adv-title">${escapeHTML(adv.title)}</span></div>
+        <div class="adv-title">${escapeHTML(adv.title)}</div>
         <div class="adv-text">${escapeHTML(adv.body)}</div>
         ${hint}
-        ${moreHint}
       </div>
       <button class="adv-dismiss" id="adv-dismiss" aria-label="Dismiss">\u2715</button>
     </div>
@@ -798,9 +754,9 @@ function renderTank(){
     ${renderAdvisorBanner(t)}
     <div class="tabs" role="tablist">
       <button class="tab ${view.tab==='details'?'active':''}" data-tab="details">Details</button>
-      <button class="tab ${view.tab==='fish'?'active':''}" data-tab="fish">Livestock</button>
-      <button class="tab ${view.tab==='water-care'?'active':''}" data-tab="water-care">Water Care</button>
-      <button class="tab ${view.tab==='equipment'?'active':''}" data-tab="equipment">Equipment</button>
+      <button class="tab ${view.tab==='fish'?'active':''}" data-tab="fish">Fish</button>
+      <button class="tab ${view.tab==='clean'?'active':''}" data-tab="clean">Care</button>
+      <button class="tab ${view.tab==='tests'?'active':''}" data-tab="tests">Tests</button>
       <button class="tab ${view.tab==='history'?'active':''}" data-tab="history">History</button>
     </div>
     <div id="tab-body"></div>
@@ -810,17 +766,17 @@ function renderTank(){
   }));
 
   const body = $("#tab-body");
-  if(view.tab === "details")   body.innerHTML = renderDetails(t);
-  if(view.tab === "fish")       body.innerHTML = renderFish(t);
-  if(view.tab === "water-care") body.innerHTML = renderWaterCare(t);
-  if(view.tab === "history")    body.innerHTML = renderHistory(t);
-  if(view.tab === "equipment") { body.innerHTML = renderEquipment(t); }
+  if(view.tab === "details") body.innerHTML = renderDetails(t);
+  if(view.tab === "fish")    body.innerHTML = renderFish(t);
+  if(view.tab === "clean")   body.innerHTML = renderClean(t);
+  if(view.tab === "tests")   body.innerHTML = renderTests(t);
+  if(view.tab === "history") body.innerHTML = renderHistory(t);
 
-  if(view.tab === "details")   bindDetails(t);
-  if(view.tab === "fish")       bindFish(t);
-  if(view.tab === "water-care") bindWaterCare(t);
-  if(view.tab === "history")    bindHistory(t);
-  if(view.tab === "equipment")  bindEquipment(t);
+  if(view.tab === "details") bindDetails(t);
+  if(view.tab === "fish")    bindFish(t);
+  if(view.tab === "clean")   bindClean(t);
+  if(view.tab === "tests")   bindTests(t);
+  if(view.tab === "history") bindHistory(t);
 
   // Wire up advisor dismiss button
   const dismiss = $("#adv-dismiss");
@@ -830,7 +786,8 @@ function renderTank(){
       const banner = dismiss.closest(".advisor-banner");
       if (!banner) return;
       const sig = banner.getAttribute("data-sig") || "";
-      _dismissAdvisor(t.id, sig);  // persisted — survives navigation
+      window._advisorDismissed = window._advisorDismissed || {};
+      window._advisorDismissed[t.id] = sig;
       banner.remove();
     });
   }
@@ -1131,8 +1088,8 @@ function openReminderTarget(t, tab, remType){
   if (!t) return;
   const goTab = tab || "details";
   // Stash what to highlight; consumed by _consumeReminderHighlight() post-render
-  window._reminderHighlight = goTab === "water-care"
-    ? { sel: "#wt-section", focusId: "wt-ph" }
+  window._reminderHighlight = goTab === "tests"
+    ? { sel: "#tests-log" }
     : remType
       ? { sel: `.upn-row[data-rem="${remType}"]` }
       : { sel: ".upn-list" };
@@ -1214,8 +1171,8 @@ function _friendlyShortDate(ts){
    focus:  input ID to auto-focus and select after the tab is rendered (optional)
    label:  short tab label used in row aria/hint text */
 const UPN_NAV = {
-  water_change: { tab: "water-care", sel: "#wc-section",  focus: "wc-gallons", label: "Water Care" },
-  water_test:   { tab: "water-care", sel: "#wt-section",  focus: "wt-ph",       label: "Water Care" },
+  water_change: { tab: "clean",   sel: "#wc-section", focus: "wc-gallons", label: "Care"    },
+  water_test:   { tab: "tests",   sel: "#tests-log",  focus: "wt-ph",      label: "Tests"   },
   daily:        { tab: "history", sel: null,          focus: null,         label: "History" }
 };
 
@@ -1385,7 +1342,7 @@ function renderDetails(t){
 
     ${renderRemindersSection(t)}
 
-    <div class="section" id="details-edit-section">
+    <div class="section">
       <h2>Edit tank info</h2>
       <label class="field"><span>Name</span><input class="input" id="d-name" value="${escapeHTML(t.name)}" /></label>
       <div class="row">
@@ -1501,12 +1458,8 @@ function bindDetails(t){
   if (window.FIRSTTANK){
     window.FIRSTTANK.bind(t, (msg) => {
       saveTanks(tanks);
-      // BUG 6 FIX: when msg is null it means only save state (optimistic update
-      // already applied to DOM). Skip the full re-render to avoid the jump/bounce.
-      if (msg !== null) {
-        logEvent(t.id, "first_tank", { msg });
-        render();
-      }
+      logEvent(t.id, "first_tank", { msg });
+      render();
     });
   }
   $("#save-details").addEventListener("click", () => {
@@ -1795,624 +1748,6 @@ function openFishEditor(t, f){
       closeModal(); render();
     });
     $("#e-cancel").addEventListener("click", closeModal);
-  });
-}
-
-/* ============================================================
-   ADVISOR DISMISS — persistent per-(tank, sig) store
-   Called after logging water_care to auto-resolve stale banners.
-   Survives tab switches and re-renders within the same session.
-   Persisted to localStorage so X stays gone across page reloads.
-   Auto-expiry: entries older than 7 days are pruned on read.
-   ============================================================ */
-const ADV_DISMISS_KEY = "tm.advisorDismiss.v1";
-const ADV_DISMISS_TTL = 7 * 86400000; // 7 days
-
-function _loadAdvisorDismiss(){
-  try { return JSON.parse(localStorage.getItem(ADV_DISMISS_KEY) || "{}"); }
-  catch { return {}; }
-}
-function _saveAdvisorDismiss(d){
-  try { localStorage.setItem(ADV_DISMISS_KEY, JSON.stringify(d)); } catch {}
-}
-function _isAdvisorDismissed(tankId, sig){
-  const d = _loadAdvisorDismiss();
-  const entries = d[tankId];
-  if (!entries) return false;
-  const now = Date.now();
-  // Each entry: { sig, ts }
-  return entries.some(e => e.sig === sig && (now - e.ts) < ADV_DISMISS_TTL);
-}
-function _dismissAdvisor(tankId, sig){
-  const d = _loadAdvisorDismiss();
-  const now = Date.now();
-  // Prune expired entries for this tank, then add new one
-  const existing = (d[tankId] || []).filter(e => (now - e.ts) < ADV_DISMISS_TTL && e.sig !== sig);
-  existing.push({ sig, ts: now });
-  d[tankId] = existing;
-  _saveAdvisorDismiss(d);
-}
-function _clearAdvisorDismissals(tankId, filterFn){
-  // filterFn(entry) -> true = keep (do NOT clear), false = clear
-  // If filterFn is omitted, clears all entries for the tank
-  const d = _loadAdvisorDismiss();
-  if (!d[tankId]) return;
-  if (typeof filterFn === 'function') {
-    d[tankId] = d[tankId].filter(filterFn);
-  } else {
-    delete d[tankId];
-  }
-  _saveAdvisorDismiss(d);
-}
-
-function recomputeTankAlerts(tankId){
-  // When new data is saved, clear ONLY dismissals for rules whose trigger
-  // condition may now be resolved. Preserve dismissals the user explicitly set
-  // for unrelated insights (so manually dismissed fyi insights stay gone).
-  //
-  // Rules cleared automatically after data save:
-  //   - water_change_cadence  (a new water change resolves it)
-  //   - nitrate_current       (new test data may have changed it)
-  //   - nitrite_current
-  //   - ammonia_current
-  //   - ph_current
-  //   - temp_current
-  //   - test_staleness        (a new test resolves it)
-  //   - combined_overdue_nitrate_stocking
-  //   - stability_shift
-  const AUTO_CLEAR_RULES = new Set([
-    "water_change_cadence",
-    "nitrate_current",
-    "nitrite_current",
-    "ammonia_current",
-    "ph_current",
-    "temp_current",
-    "test_staleness",
-    "combined_overdue_nitrate_stocking",
-    "stability_shift",
-  ]);
-  // Clear only entries whose ruleId is in the auto-clear set
-  _clearAdvisorDismissals(tankId, entry => {
-    const ruleId = entry.sig.split(" | ")[0];
-    return !AUTO_CLEAR_RULES.has(ruleId);  // keep = true means NOT auto-cleared
-  });
-  // Re-expose events so advisor.js picks up the new reading immediately
-  window.events = events;
-}
-
-/* ============================================================
-   WATER CARE — PREFILL HELPERS
-   Each returns a plain object with the subset of fields it knows
-   about, or null if no prior data exists for that tank.
-   Backward-compat: reads water_care, water_change, water_test.
-   ============================================================ */
-function _lastCarePrefill(tankId){
-  // Most recent event that has BOTH a gallons value AND at least one test reading
-  const evs = tankEvents(tankId);
-  const combined = evs.find(e =>
-    (e.type === "water_care") &&
-    e.data && e.data.gallons > 0 &&
-    (e.data.ph !== "" && e.data.ph != null ||
-     e.data.ammonia !== "" && e.data.ammonia != null ||
-     e.data.nitrite !== "" && e.data.nitrite != null ||
-     e.data.nitrate !== "" && e.data.nitrate != null)
-  );
-  if (!combined) return null;
-  const d = combined.data;
-  return {
-    gallons: d.gallons,
-    ph:      d.ph,
-    ammonia: d.ammonia,
-    nitrite: d.nitrite,
-    nitrate: d.nitrate,
-    temp_f:  d.temp_f,
-    notes:   ""   // intentionally blank — notes are session-specific
-  };
-}
-
-function _lastChangePrefill(tankId){
-  // Most recent event that has a gallons value (water_care or water_change)
-  const evs = tankEvents(tankId);
-  const ev = evs.find(e =>
-    (e.type === "water_care" || e.type === "water_change") &&
-    e.data && e.data.gallons > 0
-  );
-  if (!ev) return null;
-  return { gallons: ev.data.gallons };
-}
-
-function _lastTestPrefill(tankId){
-  // Most recent event that has any test reading
-  const evs = tankEvents(tankId);
-  const ev = evs.find(e =>
-    (e.type === "water_care" || e.type === "water_test") &&
-    e.data &&
-    (e.data.ph !== "" && e.data.ph != null ||
-     e.data.ammonia !== "" && e.data.ammonia != null ||
-     e.data.nitrite !== "" && e.data.nitrite != null ||
-     e.data.nitrate !== "" && e.data.nitrate != null)
-  );
-  if (!ev) return null;
-  const d = ev.data;
-  return {
-    ph:      d.ph,
-    ammonia: d.ammonia,
-    nitrite: d.nitrite,
-    nitrate: d.nitrate,
-    temp_f:  d.temp_f
-  };
-}
-
-/* ============================================================
-   WATER CARE TAB — merged Water Change + Tests
-   Saves as water_care event (gallons + test readings + doses).
-   Backward-compat: old water_change and water_test records are
-   preserved and still render correctly in history.
-   ============================================================ */
-function renderWaterCare(t){
-  // BUG 3 FIX: t.gallons may be stored as a string. Coerce to Number before math.
-  const gals = Number(t.gallons) || 10;
-  const suggested = Math.round(gals * 0.5);
-  if (!t.chemicals) t.chemicals = [];
-
-  // Prefill data for Quick Log buttons
-  const prefillCare   = _lastCarePrefill(t.id);
-  const prefillChange = _lastChangePrefill(t.id);
-  const prefillTest   = _lastTestPrefill(t.id);
-
-  // Pull last readings for most-recent display
-  const lastTest   = lastEventOfType(t.id, "water_test")   || lastEventOfType(t.id, "water_care");
-  const lastChange = lastEventOfType(t.id, "water_change") || lastEventOfType(t.id, "water_care");
-  const ld = lastTest ? lastTest.data : null;
-
-  // Quick Log — repeat last care button (disabled + hint if no combined history)
-  const repeatBtn = prefillCare
-    ? `<button class="btn small ql-btn" id="ql-repeat" type="button">Repeat last care</button>`
-    : `<button class="btn small ql-btn" disabled title="No combined care session found yet">Repeat last care</button>`;
-
-  return `
-    <!-- QUICK LOG SECTION -->
-    <div class="section ql-section" id="ql-section">
-      <h2>Quick log</h2>
-      <p class="muted small" style="margin:-2px 0 10px">Prefills the form below — review and tap Save when ready.</p>
-      <div class="ql-row">
-        ${repeatBtn}
-        <button class="btn small ql-btn" id="ql-change" type="button"
-          ${prefillChange ? "" : ""}
-        >Water change only</button>
-        <button class="btn small ql-btn" id="ql-test" type="button"
-          ${prefillTest ? "" : ""}
-        >Test only</button>
-      </div>
-      ${!prefillCare && !prefillChange && !prefillTest ? `<p class="muted small" style="margin:8px 0 0">No history yet for this tank — fill in the form below to get started.</p>` : ""}
-    </div>
-
-    <!-- WATER CHANGE SECTION -->
-    <div class="section" id="wc-section">
-      <h2>Water change</h2>
-      <p class="muted" style="margin-top:0">${suggested} gal would be a ~50% change on this tank. Leave gallons at 0 if you're only logging a test.</p>
-      <div class="row">
-        <label class="field"><span>Gallons changed</span>
-          <input class="input" id="wc-gallons" type="number" min="0" step="0.5" value="${suggested}" />
-        </label>
-        <label class="field"><span>Date</span>
-          <input class="input" id="wc-date" type="date" value="${new Date().toISOString().slice(0,10)}" />
-        </label>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="chem-section-head">
-        <h2>Your chemicals</h2>
-        <button class="btn small" id="add-chem-btn">+ Add</button>
-      </div>
-      <div id="dose-out"></div>
-    </div>
-
-    <!-- WATER TEST SECTION -->
-    <div class="section" id="wt-section">
-      <div class="wt-section-head">
-        <h2 style="margin:0">Water test</h2>
-        <div class="wt-helpers">
-          ${prefillTest ? `<button class="btn small ghost wt-helper" id="wth-same" type="button">Same as last</button>` : ""}
-          <button class="btn small ghost wt-helper" id="wth-normal" type="button">Normal</button>
-          <button class="btn small ghost wt-helper" id="wth-clear" type="button">Clear</button>
-        </div>
-      </div>
-      <p class="muted" style="margin-top:6px">Leave any field blank if you didn't test it.</p>
-      <div class="row">
-        <label class="field"><span>pH</span><input class="input" id="wt-ph" type="number" step="0.1" inputmode="decimal" placeholder="e.g. 7.2" /></label>
-        <label class="field"><span>Ammonia (ppm)</span><input class="input" id="wt-ammonia" type="number" step="0.25" inputmode="decimal" placeholder="e.g. 0" /></label>
-      </div>
-      <div class="row">
-        <label class="field"><span>Nitrite (ppm)</span><input class="input" id="wt-nitrite" type="number" step="0.25" inputmode="decimal" placeholder="e.g. 0" /></label>
-        <label class="field"><span>Nitrate (ppm)</span><input class="input" id="wt-nitrate" type="number" step="5" inputmode="decimal" placeholder="e.g. 10" /></label>
-      </div>
-      <div class="row">
-        <label class="field"><span>Temp °F (optional)</span><input class="input" id="wt-temp" type="number" step="0.1" inputmode="decimal" placeholder="e.g. 78" /></label>
-      </div>
-    </div>
-
-    <!-- NOTES + SAVE -->
-    <div class="section">
-      <label class="field"><span>Session notes (optional)</span>
-        <input class="input" id="wc-notes" placeholder="e.g. trimmed moss, vacuumed substrate" /></label>
-      <button class="btn block" id="log-wc-btn" style="margin-top:10px">Save to history</button>
-    </div>
-
-    <!-- LAST READING SUMMARY -->
-    ${ld ? `
-      <div class="section">
-        <h2>Most recent reading</h2>
-        <div class="kv">
-          <b>When</b><span>${formatTS(lastTest.ts)}</span>
-          ${renderReadingRow("pH",       "ph",      ld.ph)}
-          ${renderReadingRow("Ammonia",  "ammonia", ld.ammonia, "ppm")}
-          ${renderReadingRow("Nitrite",  "nitrite", ld.nitrite, "ppm")}
-          ${renderReadingRow("Nitrate",  "nitrate", ld.nitrate, "ppm")}
-          ${ld.temp_f != null && ld.temp_f !== "" ? `<b>Temp</b><span>${escapeHTML(String(ld.temp_f))} \u00b0F</span>` : ""}
-          ${ld.notes ? `<b>Notes</b><span>${escapeHTML(ld.notes)}</span>` : ""}
-        </div>
-      </div>` : ""}
-
-    ${window.GRAPHS ? window.GRAPHS.renderGraphsSection(t) : ""}
-
-    <div class="section">
-      <h2>Safe ranges (freshwater)</h2>
-      <ul class="muted" style="line-height:1.7;margin:0;padding-left:18px">
-        <li><b style="color:var(--ink)">pH</b> \u2014 6.5\u20137.8 ideal (most species tolerate 6.0\u20138.4)</li>
-        <li><b style="color:var(--ink)">Ammonia</b> \u2014 0 ppm. Any reading means trouble.</li>
-        <li><b style="color:var(--ink)">Nitrite</b> \u2014 0 ppm. Toxic above 0.</li>
-        <li><b style="color:var(--ink)">Nitrate</b> \u2014 under 20 ppm ideal; over 40 = water change.</li>
-      </ul>
-    </div>
-  `;
-}
-
-function bindWaterCare(t){
-  const inp = $("#wc-gallons");
-  const out = $("#dose-out");
-
-  // --- Dose calculator (identical to bindClean) ---
-  function doseCard(c, gallons){
-    const spec = chemResolve(c);
-    if (!spec) return "";
-    const verified = !!c.verified;
-    const amount = (spec.mlPerGallon || 0) * gallons;
-    const caps = spec.capSize ? amount / spec.capSize : 0;
-    const unit = spec.unit || "mL";
-    const inline = (spec.capSize && spec.capSize > 1)
-      ? `<span class="sub-inline">(${fmt(caps)} cap${caps===1?"":"s"})</span>`
-      : "";
-    const valueHTML = `${fmt(amount)}<span class="unit">${unit}</span> ${inline}`;
-    const action = verified
-      ? `<span class="verify-badge verified">\u2713 Verified</span>`
-      : `<button class="btn small ghost" data-verify-now="${c.instanceId}">Verify dose</button>`;
-    return `
-      <div class="dose-card ${verified ? "verified" : ""}">
-        <div class="dose-card-head">
-          <div class="label">${escapeHTML(spec.brand || "")} ${escapeHTML(spec.name || "")}</div>
-          ${action}
-        </div>
-        <div class="dose-heading">Dose</div>
-        <div class="big">${valueHTML}</div>
-        <div class="sub">${escapeHTML(spec.rule || "")}</div>
-        <button class="chem-remove" data-remove="${c.instanceId}" title="Remove from tank">\u00d7</button>
-      </div>
-    `;
-  }
-
-  function paint(){
-    const g = parseFloat(inp.value);
-    const list = t.chemicals || [];
-    if (!list.length){
-      out.innerHTML = `<p class="muted center" style="margin:10px 0 0">No chemicals added. Tap <b>+ Add</b> to pick what you use.</p>`;
-      return;
-    }
-    if(!g || g <= 0){
-      out.innerHTML = `<p class="muted center" style="margin:10px 0 0">Enter a gallon amount above to see your doses.</p>`;
-      return;
-    }
-    out.innerHTML = `<div class="dose-grid">${list.map(c => doseCard(c, g)).join("")}</div>`;
-    $$("button[data-verify-now]", out).forEach(b => b.addEventListener("click", () => {
-      const id = b.dataset.verifyNow;
-      const entry = (t.chemicals || []).find(c => c.instanceId === id);
-      if (entry) openVerifyPrompt(entry);
-    }));
-    $$("button[data-remove]", out).forEach(b => b.addEventListener("click", () => {
-      const id = b.dataset.remove;
-      t.chemicals = (t.chemicals || []).filter(c => c.instanceId !== id);
-      saveTanks(tanks);
-      paint();
-    }));
-  }
-  inp.addEventListener("input", paint);
-  paint();
-
-  // ----------------------------------------------------------------
-  // QUICK LOG — prefill helpers
-  // Sets form fields from a data object; never saves.
-  // Only keys present in `fields` are written; missing keys untouched.
-  // ----------------------------------------------------------------
-  function setField(id, val){
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.value = (val != null && val !== "") ? String(val) : "";
-    // Trigger input event so dose calculator repaints if gallons changed
-    el.dispatchEvent(new Event("input", { bubbles: true }));
-  }
-
-  function prefillForm(fields){
-    if (fields.gallons != null) setField("wc-gallons", fields.gallons);
-    if ("ph"      in fields)   setField("wt-ph",      fields.ph);
-    if ("ammonia" in fields)   setField("wt-ammonia", fields.ammonia);
-    if ("nitrite" in fields)   setField("wt-nitrite", fields.nitrite);
-    if ("nitrate" in fields)   setField("wt-nitrate", fields.nitrate);
-    if ("temp_f"  in fields)   setField("wt-temp",    fields.temp_f);
-    if ("notes"   in fields)   setField("wc-notes",   fields.notes);
-    // Scroll smoothly to the form so the user sees what was filled
-    const sec = document.getElementById("wc-section");
-    if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
-  // Quick Log buttons
-  const qlRepeat = document.getElementById("ql-repeat");
-  const qlChange = document.getElementById("ql-change");
-  const qlTest   = document.getElementById("ql-test");
-
-  if (qlRepeat){
-    const data = _lastCarePrefill(t.id);
-    if (data){
-      qlRepeat.addEventListener("click", () => {
-        prefillForm(data);
-        toast("Prefilled from last care session");
-      });
-    }
-  }
-
-  if (qlChange){
-    qlChange.addEventListener("click", () => {
-      const data = _lastChangePrefill(t.id);
-      // Prefill gallons from last change; clear test fields so it reads as change-only
-      prefillForm({
-        gallons: data ? data.gallons : Math.round(t.gallons * 0.5),
-        ph: "", ammonia: "", nitrite: "", nitrate: "", temp_f: ""
-      });
-      toast("Water change prefilled — test fields cleared");
-      // Scroll to wc-section
-      const sec = document.getElementById("wc-section");
-      if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  }
-
-  if (qlTest){
-    qlTest.addEventListener("click", () => {
-      const data = _lastTestPrefill(t.id);
-      // Set gallons to 0 / blank (test-only session), prefill test readings
-      prefillForm(Object.assign(
-        { gallons: 0 },
-        data || { ph: "", ammonia: "", nitrite: "", nitrate: "", temp_f: "" }
-      ));
-      toast(data ? "Test prefilled from last reading" : "Test fields ready");
-      // Scroll to test section
-      const sec = document.getElementById("wt-section");
-      if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  }
-
-  // Field helpers — Same as last / Normal / Clear (test fields only)
-  const wthSame   = document.getElementById("wth-same");
-  const wthNormal = document.getElementById("wth-normal");
-  const wthClear  = document.getElementById("wth-clear");
-
-  if (wthSame){
-    wthSame.addEventListener("click", () => {
-      const data = _lastTestPrefill(t.id);
-      if (!data){ toast("No previous test found"); return; }
-      setField("wt-ph",      data.ph);
-      setField("wt-ammonia", data.ammonia);
-      setField("wt-nitrite", data.nitrite);
-      setField("wt-nitrate", data.nitrate);
-      setField("wt-temp",    data.temp_f);
-      toast("Test fields filled from last reading");
-    });
-  }
-
-  if (wthNormal){
-    // Normal = freshwater "all-clear" ideal midpoints from SAFE ranges
-    wthNormal.addEventListener("click", () => {
-      setField("wt-ph",      7.2);   // midpoint of 6.5–7.8 ideal
-      setField("wt-ammonia", 0);
-      setField("wt-nitrite", 0);
-      setField("wt-nitrate", 10);    // low end of acceptable (under 20 ideal)
-      // Leave temp untouched — it's tank-specific
-      toast("Normal freshwater values filled in");
-    });
-  }
-
-  if (wthClear){
-    wthClear.addEventListener("click", () => {
-      ["wt-ph","wt-ammonia","wt-nitrite","wt-nitrate","wt-temp"].forEach(id => setField(id, ""));
-      toast("Test fields cleared");
-    });
-  }
-
-  // Verify / manual dose prompts (reuse same helpers from bindClean closure)
-  function openVerifyPrompt(entry){
-    const spec = chemResolve(entry);
-    if (!spec) return;
-    const title = `${escapeHTML(spec.brand || "")} ${escapeHTML(spec.name || "")}`.trim();
-    const srcLink = spec.source
-      ? `<a class="chem-source" href="${spec.source}" target="_blank" rel="noopener">Source</a>`
-      : "";
-    openModal(`
-      <h3 style="margin:0 0 6px">${title}</h3>
-      <p class="muted small" style="margin:0 0 10px">Check this against your bottle label before confirming.</p>
-      <div class="verify-prompt-rule">${escapeHTML(spec.rule || "")} ${srcLink}</div>
-      <button class="btn block" id="vp-confirm" style="margin-top:14px">Confirm \u2014 matches my bottle</button>
-      <button class="btn block link-btn" id="vp-manual" style="margin-top:8px">Not the correct dosage</button>
-    `, () => {
-      $("#vp-confirm").addEventListener("click", () => {
-        entry.verified = true;
-        entry.doseSource = entry.doseSource === "manual" ? "manual" : "researched";
-        entry.savedDose = { mlPerGallon: spec.mlPerGallon, unit: spec.unit, rule: spec.rule, capSize: spec.capSize };
-        entry.verifiedAt = new Date().toISOString();
-        saveTanks(tanks);
-        logEvent(t.id, "chem_verify", { name: title, source: entry.doseSource });
-        closeModal(); paint();
-      });
-      $("#vp-manual").addEventListener("click", () => { closeModal(); openManualDose(entry); });
-    });
-  }
-
-  function openManualDose(entry){
-    const spec = chemResolve(entry);
-    if (!spec) return;
-    const title = `${escapeHTML(spec.brand || "")} ${escapeHTML(spec.name || "")}`.trim();
-    const units = ["mL","pumps","drops","g","tsp","oz"];
-    if (spec.unit && !units.includes(spec.unit)) units.unshift(spec.unit);
-    openModal(`
-      <h3 style="margin:0 0 6px">${title} \u2014 manual dose</h3>
-      <p class="muted small" style="margin:0 0 10px">Enter the dose exactly as your bottle states.</p>
-      <div class="row">
-        <label class="field"><span>Amount per gallon</span>
-          <input class="input" id="md-amount" type="number" step="0.01" placeholder="e.g. 0.1" /></label>
-        <label class="field"><span>Unit</span>
-          <select class="input" id="md-unit">
-            ${units.map(u => `<option ${u===spec.unit?"selected":""}>${u}</option>`).join("")}
-          </select>
-        </label>
-      </div>
-      <label class="field"><span>Bottle directions (optional)</span>
-        <input class="input" id="md-rule" placeholder="e.g. 1 mL per 10 gal" /></label>
-      <div class="row" style="margin-top:6px">
-        <button class="btn" id="md-save">Save &amp; mark verified</button>
-        <button class="btn secondary" id="md-cancel">Cancel</button>
-      </div>
-    `, () => {
-      $("#md-save").addEventListener("click", () => {
-        const amt = parseFloat($("#md-amount").value);
-        const unit = $("#md-unit").value;
-        const rule = $("#md-rule").value.trim();
-        if (!amt || amt <= 0){ alert("Enter the amount per gallon"); return; }
-        entry.savedDose = { mlPerGallon: amt, unit, rule: rule || `${amt} ${unit} per gallon`, capSize: 0 };
-        entry.doseSource = "manual";
-        entry.verified = true;
-        entry.verifiedAt = new Date().toISOString();
-        saveTanks(tanks);
-        logEvent(t.id, "chem_verify", { name: title, source: "manual" });
-        closeModal(); paint();
-      });
-      $("#md-cancel").addEventListener("click", closeModal);
-    });
-  }
-
-  // Chemical picker (reuse same modal builders)
-  function openChemPicker(){
-    openModal(renderChemPickerModal(), () => {
-      const search = $("#chem-search");
-      const list   = $("#chem-picker-list");
-      function filter(q){
-        const norm = (q || "").toLowerCase().trim();
-        $$(".chem-picker-item", list).forEach(item => {
-          const txt = item.textContent.toLowerCase();
-          item.style.display = (!norm || txt.includes(norm)) ? "" : "none";
-        });
-        $$(".chem-picker-section", list).forEach(sec => {
-          const visible = $$(".chem-picker-item", sec).some(i => i.style.display !== "none");
-          sec.style.display = visible ? "" : "none";
-        });
-      }
-      if (search) search.addEventListener("input", e => filter(e.target.value));
-      $$(".chem-picker-item").forEach(b => b.addEventListener("click", () => {
-        const libId = b.dataset.lib;
-        const entry = { instanceId: uid(), libraryId: libId, custom: null };
-        t.chemicals = t.chemicals || [];
-        if (t.chemicals.some(c => c.libraryId === libId)){ toast("Already added"); closeModal(); return; }
-        t.chemicals.push(entry);
-        saveTanks(tanks);
-        const spec = window.CHEMICALS && window.CHEMICALS.byId(libId);
-        logEvent(t.id, "chem_add", { name: spec ? `${spec.brand} ${spec.name}` : libId });
-        closeModal(); paint(); openVerifyPrompt(entry);
-      }));
-      $("#chem-custom-btn").addEventListener("click", () => { closeModal(); openCustom(); });
-      $("#chem-cancel-btn").addEventListener("click", closeModal);
-    });
-  }
-
-  function openCustom(){
-    openModal(renderChemCustomModal(), () => {
-      $("#cc-save").addEventListener("click", () => {
-        const brand = $("#cc-brand").value.trim();
-        const name  = $("#cc-name").value.trim();
-        const type  = $("#cc-type").value;
-        const amt   = parseFloat($("#cc-amount").value);
-        const unit  = $("#cc-unit").value;
-        const rule  = $("#cc-rule").value.trim();
-        if (!brand || !name){ alert("Brand and name are required"); return; }
-        if (!amt || amt <= 0){ alert("Enter the amount per gallon"); return; }
-        const custom = { brand, name, type, unit, mlPerGallon: amt, capSize: 0,
-          rule: rule || `${amt} ${unit} per gallon`, when: "", source: "" };
-        const entry = { instanceId: uid(), libraryId: null, custom };
-        t.chemicals = t.chemicals || [];
-        t.chemicals.push(entry);
-        saveTanks(tanks);
-        logEvent(t.id, "chem_add", { name: `${brand} ${name}`, custom: true });
-        closeModal(); paint(); openVerifyPrompt(entry);
-      });
-      $("#cc-cancel").addEventListener("click", closeModal);
-    });
-  }
-
-  $("#add-chem-btn").addEventListener("click", openChemPicker);
-
-  // --- Save handler ---
-  $("#log-wc-btn").addEventListener("click", () => {
-    const g       = parseFloat($("#wc-gallons").value);
-    const ph      = $("#wt-ph").value;
-    const ammonia = $("#wt-ammonia").value;
-    const nitrite = $("#wt-nitrite").value;
-    const nitrate = $("#wt-nitrate").value;
-    const temp_f  = $("#wt-temp").value;
-    const notes   = $("#wc-notes").value.trim();
-    const date    = $("#wc-date").value || new Date().toISOString().slice(0,10);
-
-    const hasTest = ph || ammonia || nitrite || nitrate || temp_f;
-    if (!g && !hasTest) {
-      alert("Enter gallons changed, at least one test reading, or both.");
-      return;
-    }
-
-    const list = t.chemicals || [];
-    const dosesLogged = (g > 0) ? list.map(c => {
-      const spec = chemResolve(c);
-      if (!spec) return null;
-      return {
-        name: `${spec.brand || ""} ${spec.name || ""}`.trim(),
-        amount: +((spec.mlPerGallon || 0) * g).toFixed(2),
-        unit: spec.unit || "mL",
-        verified: !!c.verified,
-        dose_source: c.doseSource || ""
-      };
-    }).filter(Boolean) : [];
-
-    logEvent(t.id, "water_care", {
-      date,
-      gallons:  g > 0 ? g : null,
-      ph:       ph      === "" ? "" : (ph      ? Number(ph)      : ""),
-      ammonia:  ammonia === "" ? "" : (ammonia ? Number(ammonia) : ""),
-      nitrite:  nitrite === "" ? "" : (nitrite ? Number(nitrite) : ""),
-      nitrate:  nitrate === "" ? "" : (nitrate ? Number(nitrate) : ""),
-      temp_f:   temp_f  === "" ? "" : (temp_f  ? Number(temp_f)  : ""),
-      doses: dosesLogged,
-      notes
-    });
-
-    // Clear stale advisor alert so it re-evaluates from new data
-    recomputeTankAlerts(t.id);
-
-    toast("Saved");
-    view.tab = "history"; render();
   });
 }
 
@@ -2901,7 +2236,6 @@ function bindTests(t){
    ============================================================ */
 const HISTORY_FILTERS = [
   { id: "all",          label: "All"           },
-  { id: "water_care",   label: "Water care"    },
   { id: "water_change", label: "Water changes" },
   { id: "water_test",   label: "Water tests"   },
   { id: "fish",         label: "Fish"          },
@@ -2913,12 +2247,9 @@ const HISTORY_FILTERS = [
   { id: "daily_checkin", label: "Daily check-ins" }
 ];
 let historyFilter = "all";
-let historyPrevTankId = null; // reset filter when switching tanks
 let expandedEventId = null;
 
 function renderHistory(t){
-  // Reset filter state when user navigates to a different tank
-  if (t.id !== historyPrevTankId) { historyFilter = "all"; historyPrevTankId = t.id; }
   const all = tankEvents(t.id);
   if(!all.length){
     return `
@@ -2969,9 +2300,8 @@ function renderEventRow(e){
         <div class="event-expand-inner">
           ${full || `<div class="event-field"><span class="event-fval muted">No additional details saved.</span></div>`}
           <div class="event-actions">
-            ${e.type === "water_change" ? `<button class="btn small secondary event-repeat-btn" data-repeat-tab="water-care" type="button">Log another change</button>` : ""}
-            ${e.type === "water_test"   ? `<button class="btn small secondary event-repeat-btn" data-repeat-tab="water-care" type="button">Log another test</button>` : ""}
-            ${e.type === "water_care"   ? `<button class="btn small secondary event-repeat-btn" data-repeat-tab="water-care" type="button">Log another</button>` : ""}
+            ${e.type === "water_change" ? `<button class="btn small secondary event-repeat-btn" data-repeat-tab="clean" type="button">Log another change</button>` : ""}
+            ${e.type === "water_test"   ? `<button class="btn small secondary event-repeat-btn" data-repeat-tab="tests" type="button">Log another test</button>` : ""}
             <button class="btn small danger event-del-btn" data-del="${e.id}">Remove entry</button>
           </div>
         </div>
@@ -2987,22 +2317,7 @@ function eventDetailFull(e){
   const rows = [];
   const add = (label, val) => { if (val != null && val !== "") rows.push({ label, val }); };
 
-  if (e.type === "water_care") {
-    if (d.gallons) add("Amount changed", `${fmt(d.gallons)} gal`);
-    add("Change date", d.date);
-    add("pH", d.ph);
-    add("Ammonia (NH₃)", d.ammonia);
-    add("Nitrite (NO₂)", d.nitrite);
-    add("Nitrate (NO₃)", d.nitrate);
-    add("Temperature", d.temp_f != null && d.temp_f !== "" ? `${d.temp_f}°F` : "");
-    if (Array.isArray(d.doses) && d.doses.length){
-      const lines = d.doses.map(dose =>
-        `${escapeHTML(dose.name)} — ${fmt(dose.amount)} ${escapeHTML(dose.unit || "")}${dose.verified ? " ✓" : ""}`
-      );
-      rows.push({ label: "Doses", val: lines.join("<br>") });
-    }
-    add("Notes", d.notes ? escapeHTML(d.notes) : "");
-  } else if (e.type === "water_test") {
+  if (e.type === "water_test") {
     add("pH", d.ph);
     add("Ammonia (NH₃)", d.ammonia);
     add("Nitrite (NO₂)", d.nitrite);
@@ -3058,7 +2373,6 @@ function eventDetailFull(e){
 }
 
 const EVT_ICONS = {
-  water_care:     `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/><line x1="12" y1="22" x2="12" y2="14"/></svg>`,
   water_change:   `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>`,
   water_test:     `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v11m0 0H5m4 0h10m-6 4v4m-4-4v4m8-4v4"/></svg>`,
   fish_add:       `<svg class="evt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
@@ -3076,7 +2390,6 @@ function eventIcon(type){
 }
 function eventTitle(e){
   const d = e.data || {};
-  if (e.type === "water_care")   return `Water care — ${d.gallons ? d.gallons + " gal" : "test"}${(d.ph !== "" && d.ph != null) ? " · pH " + d.ph : ""}`;
   if (e.type === "water_change") return `Water change — ${d.gallons} gal`;
   if (e.type === "water_test")   return `Water test`;
   if (e.type === "fish_add")     return `Added ${d.count}× ${escapeHTML(d.species)}${d.name?` (“${escapeHTML(d.name)}”)`:""}`;
@@ -3092,15 +2405,6 @@ function eventTitle(e){
 }
 function eventDetail(e){
   const d = e.data || {};
-  if (e.type === "water_care") {
-    const bits = [];
-    if (e.data.gallons) bits.push(`${fmt(e.data.gallons)} gal changed`);
-    const rd = { ph: e.data.ph, ammonia: e.data.ammonia, nitrite: e.data.nitrite, nitrate: e.data.nitrate, temp_f: e.data.temp_f };
-    const inline = renderReadingsInline(rd);
-    if (inline && inline !== '<span class="muted">no values</span>') bits.push(inline);
-    if (e.data.notes) bits.push(escapeHTML(e.data.notes));
-    return bits.join(" · ");
-  }
   if (e.type === "water_change") {
     const bits = [];
     if (Array.isArray(d.doses) && d.doses.length){
@@ -3171,520 +2475,6 @@ function bindHistory(t){
     m.addEventListener("keydown", (ev) => {
       if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); toggle(m.dataset.expand); }
     });
-  });
-}
-
-/* ============================================================
-   EQUIPMENT & MAINTENANCE DASHBOARD
-   ============================================================ */
-
-let eqFilter    = "month"; // week | month | upcoming | all
-let eqPrevTankId = null;  // reset filter when switching tanks
-
-function renderEquipment(t) {
-  if (typeof EQ === "undefined") {
-    return `<div class="section"><p class="muted center">Equipment module not loaded.</p></div>`;
-  }
-  // Reset filter when switching to a different tank
-  if (t.id !== eqPrevTankId) { eqFilter = "month"; eqPrevTankId = t.id; }
-
-  const summary = EQ.tankSummary(t.id);
-  const items   = EQ.dueList(t.id, eqFilter);
-  // For "all" show everything active; for other windows dueList already filters
-  const allActive = EQ.getItems(t.id);
-  const archived  = EQ.getAllItems().filter(i => i.tankId === t.id && !i.isActive);
-
-  // Display list: if filter is "all" use allActive; else use dueList result
-  const displayItems = eqFilter === "all" ? allActive : items;
-
-  /* ── Summary chips ── */
-  const chips = [];
-  if (summary.overdue)      chips.push(`<span class="eq-chip eq-chip-bad">${summary.overdue} overdue</span>`);
-  if (summary.dueThisWeek)  chips.push(`<span class="eq-chip eq-chip-warn">${summary.dueThisWeek} due this week</span>`);
-  if (summary.dueThisMonth) chips.push(`<span class="eq-chip eq-chip-soon">${summary.dueThisMonth} due this month</span>`);
-  if (summary.expiringSoon) chips.push(`<span class="eq-chip eq-chip-expiry">${summary.expiringSoon} expiring soon</span>`);
-  if (!chips.length && summary.total > 0) chips.push(`<span class="eq-chip eq-chip-ok">All caught up</span>`);
-
-  const summaryBar = chips.length
-    ? `<div class="eq-summary-bar">${chips.join("")}</div>`
-    : "";
-
-  /* ── Filter strip ── */
-  const filters = [
-    { id: "week",     label: "This week" },
-    { id: "month",    label: "This month" },
-    { id: "upcoming", label: "Upcoming" },
-    { id: "all",      label: "All" },
-  ];
-  const filterStrip = `
-    <div class="eq-filters" role="tablist" aria-label="Equipment filter">
-      ${filters.map(f => `
-        <button class="eq-filter-btn${eqFilter === f.id ? " active" : ""}" data-eq-filter="${f.id}" role="tab" aria-selected="${eqFilter === f.id}">${f.label}</button>
-      `).join("")}
-    </div>`;
-
-  /* ── Equipment cards ── */
-  function _renderCard(item) {
-    const st   = EQ.itemStatus(item);
-    const type = EQ.TYPES.find(ty => ty.id === item.type) || { label: "Other", icon: "📦" };
-    const subtypeLabel = item.subtype
-      ? (type.subtypes || []).find(s => s.id === item.subtype)?.label || ""
-      : "";
-    const typeChip = subtypeLabel
-      ? `${type.icon} ${escapeHTML(subtypeLabel)}`
-      : `${type.icon} ${escapeHTML(type.label)}`;
-
-    // Status chip class
-    const chipClass = {
-      ok:           "eq-status-ok",
-      due_week:     "eq-status-warn",
-      due_month:    "eq-status-soon",
-      overdue:      "eq-status-bad",
-      expiring_soon:"eq-status-expiry",
-      expired:      "eq-status-bad",
-      no_schedule:  "eq-status-neutral",
-      archived:     "eq-status-neutral",
-    }[st.code] || "eq-status-neutral";
-
-    // Human-readable due line
-    let dueLine = "";
-    if (st.code === "overdue" || st.code === "expired") {
-      const n = Math.abs(st.daysUntil);
-      dueLine = `${n === 0 ? "Due today" : `${n} day${n === 1 ? "" : "s"} overdue`}`;
-    } else if (st.code === "due_week") {
-      const n = st.daysUntil;
-      dueLine = n === 0 ? "Due today" : `Due in ${n} day${n === 1 ? "" : "s"}`;
-    } else if (st.code === "due_month" || st.code === "expiring_soon") {
-      dueLine = `In ${st.daysUntil} days`;
-    } else if (st.code === "ok" && st.daysUntil !== null) {
-      dueLine = `In ${st.daysUntil} days`;
-    } else if (st.code === "no_schedule") {
-      dueLine = "No schedule set";
-    }
-
-    // Action label
-    const actionLabel = (st.kind === "replace") ? escapeHTML(item.replacementLabel || "Replace")
-                      : (st.kind === "expiry")  ? "Check / swap"
-                      :                            escapeHTML(item.serviceLabel || "Mark done");
-    const actionFn    = (st.kind === "replace") ? "markReplaced" : "markServiced";
-
-    const brandModel = [item.brand, item.model].filter(Boolean).join(" ");
-
-    return `
-      <div class="eq-card eq-card-${st.code}" data-eq-id="${item.id}">
-        <div class="eq-card-top">
-          <div class="eq-card-left">
-            <span class="eq-type-chip">${typeChip}</span>
-            <div class="eq-card-name">${escapeHTML(item.name)}</div>
-            ${brandModel ? `<div class="eq-card-brand muted small">${escapeHTML(brandModel)}</div>` : ""}
-          </div>
-          <span class="eq-status-chip ${chipClass}">${escapeHTML(st.label)}</span>
-        </div>
-        ${dueLine ? `<div class="eq-due-line">${escapeHTML(dueLine)}</div>` : ""}
-        <div class="eq-card-actions">
-          ${st.code !== "no_schedule" && st.code !== "archived"
-            ? `<button class="btn small eq-mark-btn" data-eq-mark="${item.id}" data-eq-action="${actionFn}">${actionLabel}</button>`
-            : ""}
-          <button class="btn small secondary eq-edit-btn" data-eq-edit="${item.id}">Edit</button>
-          <button class="btn small ghost eq-more-btn" data-eq-more="${item.id}" aria-label="More options" title="More">···</button>
-        </div>
-      </div>`;
-  }
-
-  /* ── Empty state ── */
-  const emptyState = `
-    <div class="eq-empty">
-      <div class="eq-empty-icon">🔧</div>
-      <p class="eq-empty-title">No equipment tracked yet</p>
-      <p class="muted small">Add your filter, heater, or any piece of gear and Tank Care Buddy will remind you when it needs attention.</p>
-    </div>`;
-
-  /* ── Items or empty ── */
-  const listHTML = displayItems.length
-    ? displayItems.map(_renderCard).join("")
-    : (allActive.length > 0
-      ? `<p class="muted center" style="padding:24px 0">Nothing due in this window. Tap <b>All</b> to see every item.</p>`
-      : emptyState);
-
-  /* ── Archived section ── */
-  const archivedHTML = archived.length
-    ? `<div class="eq-archived-toggle">
-        <button class="btn small ghost" id="eq-show-archived">Show ${archived.length} archived item${archived.length === 1 ? "" : "s"}</button>
-       </div>
-       <div id="eq-archived-list" hidden>
-         ${archived.map(_renderCard).join("")}
-       </div>`
-    : "";
-
-  return `
-    <div class="section eq-section">
-      ${summaryBar}
-      ${filterStrip}
-      <div class="eq-list" id="eq-list">${listHTML}</div>
-      ${archivedHTML}
-      <div class="eq-add-row">
-        <button class="btn eq-add-btn" id="eq-add-btn">+ Add Equipment</button>
-      </div>
-    </div>`;
-}
-
-function bindEquipment(t) {
-  if (typeof EQ === "undefined") return;
-
-  /* ── Filter strip ── */
-  $$("[data-eq-filter]").forEach(b => b.addEventListener("click", () => {
-    eqFilter = b.dataset.eqFilter;
-    render();
-  }));
-
-  /* ── Mark serviced / replaced ── */
-  $$("[data-eq-mark]").forEach(btn => btn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const id  = btn.dataset.eqMark;
-    const fn  = btn.dataset.eqAction;
-    if (fn === "markReplaced") EQ.markReplaced(id);
-    else                        EQ.markServiced(id);
-    const item = EQ.getItem(id);
-    if (item) {
-      const label = fn === "markReplaced" ? (item.replacementLabel || "Replace") : (item.serviceLabel || "Service");
-      toast(`${escapeHTML(item.name)} — ${label} logged`);
-    }
-    render();
-  }));
-
-  /* ── Edit ── */
-  $$("[data-eq-edit]").forEach(btn => btn.addEventListener("click", () => {
-    const item = EQ.getItem(btn.dataset.eqEdit);
-    if (!item) return;
-    _openEqEditModal(t, item);
-  }));
-
-  /* ── More (archive / delete / note) ── */
-  $$("[data-eq-more]").forEach(btn => btn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const id   = btn.dataset.eqMore;
-    const item = EQ.getItem(id);
-    if (!item) return;
-    _openEqMoreModal(t, item);
-  }));
-
-  /* ── Add button ── */
-  const addBtn = $("#eq-add-btn");
-  if (addBtn) addBtn.addEventListener("click", () => _openEqAddModal(t));
-
-  /* ── Archived toggle ── */
-  const archBtn = $("#eq-show-archived");
-  if (archBtn) archBtn.addEventListener("click", () => {
-    const list = $("#eq-archived-list");
-    if (!list) return;
-    const hidden = list.hasAttribute("hidden");
-    if (hidden) {
-      list.removeAttribute("hidden");
-      archBtn.textContent = "Hide archived";
-    } else {
-      list.setAttribute("hidden", "");
-      const n = EQ.getAllItems().filter(i => i.tankId === t.id && !i.isActive).length;
-      archBtn.textContent = `Show ${n} archived item${n === 1 ? "" : "s"}`;
-    }
-  });
-}
-
-/* ── Add Equipment modal (type → subtype → form) ──────────────── */
-function _openEqAddModal(t) {
-  // Step 1: type picker
-  const typeHTML = EQ.TYPES.map(ty => `
-    <button class="eq-type-pick-btn" data-eq-type="${ty.id}">
-      <span class="eq-type-pick-icon">${ty.icon}</span>
-      <span class="eq-type-pick-label">${escapeHTML(ty.label)}</span>
-    </button>`).join("");
-
-  openModal(`
-    <div class="modal-inner">
-    <h2 class="modal-title">Add Equipment</h2>
-    <div class="modal-scroll-body">
-    <p class="muted small" style="margin:0 0 16px">What type of equipment is this?</p>
-    <div class="eq-type-grid">${typeHTML}</div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn secondary" id="eq-add-cancel">Cancel</button>
-    </div>
-    </div>`, () => {
-      $$("[data-eq-type]").forEach(b => b.addEventListener("click", () => {
-        const typeId = b.dataset.eqType;
-        const typeObj = EQ.TYPES.find(ty => ty.id === typeId);
-        if (!typeObj) return;
-        if (typeObj.subtypes && typeObj.subtypes.length > 0) {
-          _openEqSubtypeModal(t, typeObj);
-        } else {
-          _openEqFormModal(t, typeObj, null);
-        }
-      }));
-      const cancelBtn = $("#eq-add-cancel");
-      if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
-    });
-}
-
-function _openEqSubtypeModal(t, typeObj) {
-  const subtypeHTML = typeObj.subtypes.map(s => `
-    <button class="eq-type-pick-btn" data-eq-sub="${s.id}">
-      <span class="eq-type-pick-label">${escapeHTML(s.label)}</span>
-    </button>`).join("");
-
-  openModal(`
-    <div class="modal-inner">
-    <h2 class="modal-title">${typeObj.icon} ${escapeHTML(typeObj.label)}</h2>
-    <div class="modal-scroll-body">
-    <p class="muted small" style="margin:0 0 16px">Pick the subtype that matches yours.</p>
-    <div class="eq-type-grid">${subtypeHTML}</div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn secondary" id="eq-sub-back">← Back</button>
-    </div>
-    </div>`, () => {
-      $$("[data-eq-sub]").forEach(b => b.addEventListener("click", () => {
-        const sub = typeObj.subtypes.find(s => s.id === b.dataset.eqSub);
-        if (sub) _openEqFormModal(t, typeObj, sub.id);
-      }));
-      const backBtn = $("#eq-sub-back");
-      if (backBtn) backBtn.addEventListener("click", () => _openEqAddModal(t));
-    });
-}
-
-function _openEqFormModal(t, typeObj, subtypeId, existingItem) {
-  const isEdit = !!existingItem;
-  const defs   = typeObj.defaults ? typeObj.defaults(subtypeId) : {};
-  const item   = existingItem || {};
-  const subtypeLabel = subtypeId
-    ? (typeObj.subtypes || []).find(s => s.id === subtypeId)?.label || ""
-    : "";
-
-  const today = new Date().toISOString().slice(0, 10);
-  const guidance = defs.guidance || item.guidance || "";
-
-  // Pre-fill values
-  const name       = item.name   || (subtypeLabel ? `${subtypeLabel} ${typeObj.label}` : typeObj.label);
-  const brand      = item.brand  || "";
-  const installDt  = item.installDate || today;
-  const servInt    = item.serviceIntervalDays     != null ? item.serviceIntervalDays     : (defs.serviceIntervalDays     || "");
-  const replInt    = item.replacementIntervalDays != null ? item.replacementIntervalDays : (defs.replacementIntervalDays || "");
-  const expiryDt   = item.expiryDate || "";
-  const notes      = item.notes || "";
-  const isExpiry   = defs.expiryBased || item.expiryBased;
-
-  // Only show expiry field if the type uses expiry (test_kit) or if editing an item that has one
-  const showExpiry = isExpiry || !!item.expiryDate;
-  // Show replacement interval only if type has one in defaults or existing item has one
-  const showReplace = !!(replInt || defs.replacementIntervalDays);
-
-  openModal(`
-    <div class="modal-inner">
-    <h2 class="modal-title">${isEdit ? "Edit" : "Add"} ${typeObj.icon} ${escapeHTML(subtypeLabel || typeObj.label)}</h2>
-    <div class="modal-scroll-body">
-    ${guidance ? `<div class="eq-form-guidance">${escapeHTML(guidance)}</div>` : ""}
-    <div class="eq-form">
-      <label class="field-label">Name <span class="muted small">(what you call it)</span></label>
-      <input id="eq-f-name" class="field" type="text" value="${escapeHTML(name)}" placeholder="e.g. Main sponge filter" maxlength="60" />
-
-      <label class="field-label">Brand / model <span class="muted small">(optional)</span></label>
-      <input id="eq-f-brand" class="field" type="text" value="${escapeHTML(brand)}" placeholder="e.g. Aquarium Co-Op, Fluval" maxlength="60" />
-
-      <label class="field-label">Install / purchase date</label>
-      <input id="eq-f-install" class="field" type="date" value="${escapeHTML(installDt)}" />
-
-      ${!isExpiry && servInt !== "" ? `
-      <label class="field-label">${escapeHTML(defs.serviceLabel || item.serviceLabel || "Service")} every <span class="muted small">(days)</span></label>
-      <input id="eq-f-serv" class="field" type="number" min="1" max="9999" value="${servInt}" placeholder="e.g. 30" />
-      ` : ""}
-
-      ${showReplace ? `
-      <label class="field-label">${escapeHTML(defs.replacementLabel || item.replacementLabel || "Replace")} every <span class="muted small">(days)</span></label>
-      <input id="eq-f-repl" class="field" type="number" min="1" max="9999" value="${replInt}" placeholder="e.g. 90" />
-      ` : ""}
-
-      ${showExpiry ? `
-      <label class="field-label">Expiry / best-by date</label>
-      <input id="eq-f-expiry" class="field" type="date" value="${escapeHTML(expiryDt)}" />
-      ` : ""}
-
-      <label class="field-label">Notes <span class="muted small">(optional)</span></label>
-      <textarea id="eq-f-notes" class="field" rows="2" placeholder="Any notes..." maxlength="300">${escapeHTML(notes)}</textarea>
-    </div>
-    </div><!-- /eq-form -->
-    </div><!-- /modal-scroll-body -->
-    <div class="modal-footer">
-      ${!isEdit ? `<button class="btn secondary" id="eq-form-back">← Back</button>` : `<button class="btn secondary" id="eq-form-cancel">Cancel</button>`}
-      <button class="btn" id="eq-form-save">${isEdit ? "Save changes" : "Add equipment"}</button>
-    </div>
-    </div><!-- /modal-inner -->`, () => {
-
-    const saveBtn = $("#eq-form-save");
-    if (saveBtn) saveBtn.addEventListener("click", () => {
-      const nameVal    = ($("#eq-f-name")?.value || "").trim();
-      if (!nameVal) { toast("Please enter a name."); return; }
-      const brandVal   = ($("#eq-f-brand")?.value  || "").trim();
-      const installVal = ($("#eq-f-install")?.value || today);
-      const servVal    = $("#eq-f-serv")   ? Number($("#eq-f-serv").value)   || null : (existingItem?.serviceIntervalDays     ?? (isExpiry ? null : (defs.serviceIntervalDays || null)));
-      const replVal    = $("#eq-f-repl")   ? Number($("#eq-f-repl").value)   || null : (existingItem?.replacementIntervalDays ?? (defs.replacementIntervalDays || null));
-      const expiryVal  = $("#eq-f-expiry") ? ($("#eq-f-expiry").value || null) : (existingItem?.expiryDate || null);
-      const notesVal   = ($("#eq-f-notes")?.value || "").trim();
-
-      if (isEdit) {
-        EQ.updateItem(existingItem.id, {
-          name:                    nameVal,
-          brand:                   brandVal,
-          installDate:             installVal,
-          serviceIntervalDays:     servVal,
-          replacementIntervalDays: replVal,
-          expiryDate:              expiryVal,
-          notes:                   notesVal,
-        });
-        toast(`${nameVal} updated`);
-      } else {
-        EQ.addItem({
-          tankId:                  t.id,
-          type:                    typeObj.id,
-          subtype:                 subtypeId,
-          name:                    nameVal,
-          brand:                   brandVal,
-          installDate:             installVal,
-          serviceIntervalDays:     servVal,
-          replacementIntervalDays: replVal,
-          expiryDate:              expiryVal,
-          notes:                   notesVal,
-        });
-        toast(`${nameVal} added`);
-        // BUG 4 FIX: always land on the equipment tab after adding so the new item is visible
-        view.tab = "equipment";
-      }
-      closeModal();
-      render();
-    });
-
-    const backBtn = $("#eq-form-back");
-    if (backBtn) backBtn.addEventListener("click", () => {
-      if (subtypeId && typeObj.subtypes?.length) {
-        _openEqSubtypeModal(t, typeObj);
-      } else {
-        _openEqAddModal(t);
-      }
-    });
-    const cancelBtn = $("#eq-form-cancel");
-    if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
-  });
-}
-
-function _openEqEditModal(t, item) {
-  const typeObj = EQ.TYPES.find(ty => ty.id === item.type) || EQ.TYPES[EQ.TYPES.length - 1];
-  _openEqFormModal(t, typeObj, item.subtype, item);
-}
-
-function _openEqMoreModal(t, item) {
-  // BUG 5 FIX: Add Inspect button that shows guidance and logs an inspection.
-  const typeObj = EQ.TYPES.find(ty => ty.id === item.type) || EQ.TYPES[EQ.TYPES.length - 1];
-  const defs = typeObj.defaults ? typeObj.defaults(item.subtype) : {};
-  const guidanceText = defs.guidance || item.guidance || "";
-  const serviceLabel = defs.serviceLabel || item.serviceLabel || "Inspect";
-
-  openModal(`
-    <div class="modal-inner">
-    <h2 class="modal-title">${escapeHTML(item.name)}</h2>
-    <div class="modal-scroll-body">
-    <div class="eq-more-list">
-      <button class="eq-more-row" id="eq-more-inspect">🔍 ${escapeHTML(serviceLabel)}</button>
-      <button class="eq-more-row" id="eq-more-note">📝 Add a note</button>
-      <button class="eq-more-row" id="eq-more-archive">${item.isActive ? "📦 Archive" : "♻️ Restore"}</button>
-      <button class="eq-more-row eq-more-delete" id="eq-more-delete">🗑️ Delete</button>
-    </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn secondary" id="eq-more-cancel">Cancel</button>
-    </div>
-    </div>`, () => {
-
-    // BUG 5 FIX: Inspect button handler — shows guidance and Mark inspected button
-    const inspBtn = $("#eq-more-inspect");
-    if (inspBtn) inspBtn.addEventListener("click", () => {
-      closeModal();
-      const checkList = guidanceText
-        ? `<div class="eq-form-guidance" style="margin-bottom:14px">${escapeHTML(guidanceText)}</div>`
-        : `<p class="muted" style="margin-bottom:14px">No specific guidance for this item. Check it over visually and note anything unusual.</p>`;
-      openModal(`
-        <div class="modal-inner">
-        <h2 class="modal-title">🔍 ${escapeHTML(serviceLabel)}: ${escapeHTML(item.name)}</h2>
-        <div class="modal-scroll-body">
-        ${checkList}
-        <p class="muted small" style="margin:0 0 10px">Once you've completed the inspection, tap the button below to log it and reset the service timer.</p>
-        </div>
-        <div class="modal-footer">
-          <button class="btn secondary" id="eq-inspect-cancel">Cancel</button>
-          <button class="btn" id="eq-inspect-done">Mark inspected</button>
-        </div>
-        </div>`, () => {
-          const doneBtn = $("#eq-inspect-done");
-          if (doneBtn) doneBtn.addEventListener("click", () => {
-            EQ.markServiced(item.id);
-            toast("Inspection logged");
-            closeModal();
-            render();
-          });
-          const cancelBtn = $("#eq-inspect-cancel");
-          if (cancelBtn) cancelBtn.addEventListener("click", () => {
-            closeModal();
-          });
-      });
-    });
-
-    const noteBtn = $("#eq-more-note");
-    if (noteBtn) noteBtn.addEventListener("click", () => {
-      closeModal();
-      openModal(`
-        <div class="modal-inner">
-        <h2 class="modal-title">Add a note</h2>
-        <div class="modal-scroll-body">
-        <textarea id="eq-note-text" class="field" rows="4" placeholder="What happened or what you noticed..." maxlength="400"></textarea>
-        </div>
-        <div class="modal-footer">
-          <button class="btn secondary" id="eq-note-cancel">Cancel</button>
-          <button class="btn" id="eq-note-save">Save note</button>
-        </div>
-        </div>`, () => {
-          const saveNote = $("#eq-note-save");
-          if (saveNote) saveNote.addEventListener("click", () => {
-            const txt = ($("#eq-note-text")?.value || "").trim();
-            if (!txt) { toast("Note is empty."); return; }
-            EQ.addNote(item.id, txt);
-            toast("Note saved");
-            closeModal();
-          });
-          const nc = $("#eq-note-cancel");
-          if (nc) nc.addEventListener("click", closeModal);
-      });
-    });
-
-    const archBtn = $("#eq-more-archive");
-    if (archBtn) archBtn.addEventListener("click", () => {
-      if (item.isActive) {
-        EQ.archiveItem(item.id);
-        toast(`${item.name} archived`);
-      } else {
-        EQ.updateItem(item.id, { isActive: true });
-        toast(`${item.name} restored`);
-      }
-      closeModal();
-      render();
-    });
-
-    const delBtn = $("#eq-more-delete");
-    if (delBtn) delBtn.addEventListener("click", () => {
-      if (!confirm(`Delete "${item.name}" and all its history? This cannot be undone.`)) return;
-      EQ.deleteItem(item.id);
-      toast(`${item.name} deleted`);
-      closeModal();
-      render();
-    });
-
-    const cancelBtn = $("#eq-more-cancel");
-    if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
   });
 }
 
@@ -3819,8 +2609,6 @@ function openAddTank(opts){
    MODAL + TOAST
    ============================================================ */
 function openModal(html, onMount){
-  // Always close any existing modal before opening a new one — prevents backdrop stacking
-  closeModal();
   const wrap = document.createElement("div");
   wrap.className = "modal-backdrop";
   wrap.innerHTML = `<div class="modal">${html}</div>`;
@@ -3829,8 +2617,8 @@ function openModal(html, onMount){
   if(typeof onMount === "function") onMount();
 }
 function closeModal(){
-  // Remove ALL backdrops in case any leaked through (defensive)
-  $$("."+"modal-backdrop").forEach(m => m.remove());
+  const m = $(".modal-backdrop");
+  if(m) m.remove();
 }
 function toast(msg){
   const el = document.createElement("div");
@@ -4003,7 +2791,7 @@ function handleImportFile(ev){
 }
 
 function openShareModal(){
-  const url = "https://jtsmith7234-rgb.github.io/tank-care-buddy/";
+  const url = "https://jtsmith7234-rgb.github.io/my-tanks/";
   const msg = `Hey — check out the aquarium app I'm beta testing. Track your tanks, water tests, dosing, and a guided cycle walkthrough for new tanks. Open in Safari then Share → Add to Home Screen.\n\n${url}`;
 
   const html = `
@@ -4220,18 +3008,18 @@ function openSettingsSheet(){
     {
       q: "Water change reminders",
       where: "“Up next” at the top of each tank’s Details tab.",
-      how: "When a reminder is due, tap “Go do it” to jump straight to the Water Care tab. Log your water change there and the reminder resets automatically.",
+      how: "When a reminder is due, tap “Go do it” to jump straight to the Care tab. Log your water change there and the reminder resets automatically.",
       tip: "Tap “Snooze 1 day” if you need a little more time. “Skip once” pushes it a full cycle without logging.",
     },
     {
       q: "Logging a water change",
-      where: "Inside a tank, under the Water Care tab.",
+      where: "Inside a tank, under the Care tab.",
       how: "Enter the gallons being changed, pick your chemicals, add any notes, then tap “Save to history.” The water-change reminder resets from that moment.",
       tip: "Dosing auto-calculates from the gallons you enter — you don’t have to do the math.",
     },
     {
       q: "Logging a water test",
-      where: "Inside a tank, under the Water Care tab.",
+      where: "Inside a tank, under the Tests tab.",
       how: "Enter any readings you have (you don’t need all of them) and tap Save. The app color-codes each value — green is safe, red needs attention.",
       tip: "API Master Test Kit values. Leave any field blank if you didn’t test that parameter.",
     },
@@ -4390,8 +3178,8 @@ function openSettingsSheet(){
           case "addtank":      closeModal(); handleAddTankTap(); break;
           case "home":         closeModal(); view = { screen:"home", tankId:null, tab:"details" }; render(); break;
           case "tank-details": goToTank("details"); break;
-          case "tank-care":    goToTank("water-care"); break;
-          case "tank-tests":   goToTank("water-care"); break;
+          case "tank-care":    goToTank("clean"); break;
+          case "tank-tests":   goToTank("tests"); break;
           case "tank-history": goToTank("history"); break;
           case "tank-fish":    goToTank("fish"); break;
           case "home-species": closeModal(); view = { screen:"species", tankId:null, tab:"details" }; render(); break;

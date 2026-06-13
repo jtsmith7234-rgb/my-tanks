@@ -498,6 +498,9 @@ function bindFirstTank(tank, onChange){
   }));
 
   // Per-item checkboxes inside each day card
+  // BUG 6 FIX: Optimistic DOM update — toggle the .on class and bubble text
+  // immediately before saving state, so the checkbox feels instant and smooth.
+  // Only do a full re-render when the stage auto-completes (all items checked).
   document.querySelectorAll(".ft-check").forEach(b => b.addEventListener("click", (e) => {
     e.stopPropagation();
     const stageKey = b.dataset.stage;
@@ -505,6 +508,17 @@ function bindFirstTank(tank, onChange){
     tank.firstTank.checked = tank.firstTank.checked || {};
     tank.firstTank.checked[stageKey] = tank.firstTank.checked[stageKey] || {};
     const isOn = !!tank.firstTank.checked[stageKey][itemId];
+    const willBeOn = !isOn;
+
+    // --- Optimistic DOM update (instant, no layout jump) ---
+    const checkItem = b.closest(".ft-check-item");
+    if (checkItem) checkItem.classList.toggle("on", willBeOn);
+    const bubble = b.querySelector(".ft-check-bubble");
+    if (bubble) bubble.textContent = willBeOn ? "✓" : "";
+    b.setAttribute("aria-pressed", String(willBeOn));
+    b.setAttribute("aria-label", (willBeOn ? "Uncheck" : "Check") + ": " + (b.querySelector(".ft-check-label")?.textContent || ""));
+
+    // --- Persist state ---
     if (isOn) {
       delete tank.firstTank.checked[stageKey][itemId];
     } else {
@@ -514,6 +528,7 @@ function bindFirstTank(tank, onChange){
     // Auto-mark the whole stage done when every "do" item is checked.
     const stages = stagesForTank(tank);
     const stage = stages.find(s => s.key === stageKey);
+    let stageAutoCompleted = false;
     if (stage) {
       const items = stage.do || [];
       const allOn = items.length > 0 && items.every(it => {
@@ -521,15 +536,22 @@ function bindFirstTank(tank, onChange){
         return !!(tank.firstTank.checked[stageKey] && tank.firstTank.checked[stageKey][id]);
       });
       tank.firstTank.completed = tank.firstTank.completed || {};
-      if (allOn) {
+      if (allOn && !tank.firstTank.completed[stageKey]) {
         tank.firstTank.completed[stageKey] = true;
-      } else if (tank.firstTank.completed[stageKey]) {
+        stageAutoCompleted = true;
+      } else if (!allOn && tank.firstTank.completed[stageKey]) {
         // If user unchecks an item, don't keep the stage marked done
         delete tank.firstTank.completed[stageKey];
       }
     }
 
-    onChange(isOn ? "Unchecked" : "Checked");
+    // Only do a full re-render if the stage auto-completed (progress bar + card state changes)
+    if (stageAutoCompleted) {
+      onChange("Stage completed: " + stageKey);
+    } else {
+      // Just save without re-render (optimistic update already applied above)
+      onChange(null); // null = save state only, skip full re-render if onChange supports it
+    }
   }));
 }
 

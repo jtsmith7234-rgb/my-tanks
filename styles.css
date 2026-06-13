@@ -520,12 +520,17 @@ html[data-skin="dark"] .topbar h1{
   flex:1 1 0;                /* flex-grow so all 5 share the row equally */
   min-width:0;               /* allow shrink below content width */
   appearance:none;background:transparent;border:0;color:var(--ink-dim);
-  padding:8px 6px;font-weight:600;border-radius:12px;cursor:pointer;font-size:12px;
+  padding:8px 4px;font-weight:600;border-radius:12px;cursor:pointer;font-size:12px;
   transition:.2s cubic-bezier(.2,.8,.2,1);
   white-space:nowrap;
   font-family:inherit;
   text-align:center;
   scroll-snap-align:start;
+  /* BUG 8 FIX: ensure the active indicator bubble is always centered for any text length */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-sizing:border-box;
 }
 /* last-child margin removed — tabs use flex:1 1 0 to fill the row */
 .tab.active{
@@ -885,6 +890,23 @@ html[data-skin="light"] .field:focus {
 /* ============================================================
    SETTINGS SHEET
    ============================================================ */
+/* BUG 1 FIX: Settings modal must scroll on mobile. The modal has overflow:hidden
+   so the settings-sheet content would overflow without scrolling. We make the
+   .modal that contains a .settings-sheet behave like a flex column, with the
+   sheet itself scrolling. */
+.modal:has(.settings-sheet) {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  max-height: 88vh;
+}
+.modal:has(.settings-sheet) .settings-sheet {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 24px 18px env(safe-area-inset-bottom, 16px);
+  min-height: 0;
+}
 .settings-sheet{display:flex;flex-direction:column;gap:18px}
 .settings-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .settings-head h3{margin:6px 0}
@@ -1399,10 +1421,12 @@ html[data-skin="light"] .upn-snoozed{ background:linear-gradient(160deg, rgba(25
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:10px;
+  gap:8px;
   padding:8px 0;
   border-bottom:1px solid rgba(255,255,255,.06);
   flex-wrap:wrap;
+  /* BUG 7 FIX: ensure time field is never cut off by allowing wrapping and correct alignment */
+  row-gap:6px;
 }
 .rem-row:last-of-type{ border-bottom:none }
 .rem-row .toggle{
@@ -1425,6 +1449,9 @@ html[data-skin="light"] .upn-snoozed{ background:linear-gradient(160deg, rgba(25
   gap:6px;
   font-size:13px;
   color:var(--ink-dim);
+  /* BUG 7 FIX: prevent rem-interval from shrinking so time is never truncated */
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 .input.tiny{
   width:70px;
@@ -1887,6 +1914,14 @@ input[type=time].input{ font-family:inherit }
   text-decoration:underline;
 }
 
+/* BUG 2 FIX: Chemical picker list must scroll when content overflows.
+   The modal has overflow:hidden; #chem-picker-list needs its own scroll area. */
+#chem-picker-list {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  max-height: 45vh;
+  margin-bottom: 8px;
+}
 .chem-picker-section{ margin-bottom:10px }
 .chem-picker-type{
   font-size:11px;
